@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore } from "../context/StoreContext";
-import { Globe, User, Shield, Menu, X, ArrowUpRight } from "lucide-react";
+import { Globe, Menu, X } from "lucide-react";
 
 export const Navbar: React.FC = () => {
-  const { language, setLanguage, isAdmin, logoutAdmin } = useStore();
+  const { language, setLanguage } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
@@ -61,35 +61,6 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Elements */}
           <div className="hidden md:flex items-center gap-4">
-            {/* Admin Link/Logout */}
-            {isAdmin ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-1.5 rounded-lg border border-neon-lime/30 bg-neon-lime/10 px-3.5 py-1.5 text-xs font-bold text-neon-lime hover:bg-neon-lime hover:text-obsidian transition-all duration-300"
-                >
-                  <Shield size={14} />
-                  <span className={isAr ? 'font-cairo' : 'font-outfit'}>
-                    {isAr ? "لوحة التحكم" : "DASHBOARD"}
-                  </span>
-                </Link>
-                <button
-                  onClick={logoutAdmin}
-                  className={`rounded-lg border border-neutral-800 bg-neutral-900/60 px-3.5 py-1.5 text-xs font-medium text-neutral-400 hover:border-red-500/50 hover:text-red-500 transition-all duration-300 ${isAr ? 'font-cairo' : 'font-outfit'}`}
-                >
-                  {isAr ? "خروج" : "DECONNEXION"}
-                </button>
-              </div>
-            ) : (
-              <Link
-                href="/admin"
-                className={`flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-900/50 px-3.5 py-1.5 text-xs font-semibold text-neutral-400 hover:border-neutral-700 hover:text-white transition-all duration-300 ${isAr ? 'font-cairo' : 'font-outfit'}`}
-              >
-                <User size={14} />
-                <span>{isAr ? "حساب المسؤول" : "ADMIN"}</span>
-              </Link>
-            )}
-
             {/* Language Switcher Widget */}
             <button
               onClick={toggleLanguage}
@@ -97,7 +68,7 @@ export const Navbar: React.FC = () => {
             >
               <Globe size={14} className="text-neon-lime group-hover:rotate-45 transition-transform duration-300" />
               <span className="font-outfit uppercase">
-                {language === "fr" ? "العربية (AR)" : "Fançais (FR)"}
+                {language === "fr" ? "العربية (AR)" : "Français (FR)"}
               </span>
             </button>
           </div>
@@ -134,41 +105,7 @@ export const Navbar: React.FC = () => {
               {isAr ? item.nameAr : item.nameFr}
             </a>
           ))}
-          <div className="border-t border-neutral-900 pt-3 flex flex-col gap-2">
-            {isAdmin ? (
-              <>
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between rounded-lg border border-neon-lime/30 bg-neon-lime/10 px-4 py-2.5 text-sm font-bold text-neon-lime"
-                >
-                  <span className={isAr ? 'font-cairo' : 'font-outfit'}>
-                    {isAr ? "لوحة الإدارة" : "TABLEAU DE BORD"}
-                  </span>
-                  <Shield size={16} />
-                </Link>
-                <button
-                  onClick={() => {
-                    logoutAdmin();
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900/60 px-4 py-2.5 text-sm font-bold text-red-400 hover:text-red-500 ${isAr ? 'font-cairo' : 'font-outfit'}`}
-                >
-                  <span>{isAr ? "تسجيل الخروج" : "SE DECONNECTER"}</span>
-                  <ArrowUpRight size={16} />
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/admin"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900/50 px-4 py-2.5 text-sm font-semibold text-neutral-400 ${isAr ? 'font-cairo' : 'font-outfit'}`}
-              >
-                <span>{isAr ? "تسجيل دخول المشرف" : "Espace Admin"}</span>
-                <User size={16} />
-              </Link>
-            )}
-          </div>
+          {/* Admin link removed */}
         </div>
       )}
     </nav>

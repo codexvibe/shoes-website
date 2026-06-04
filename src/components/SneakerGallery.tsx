@@ -55,6 +55,21 @@ export const SneakerGallery: React.FC = () => {
     ? sneakers
     : sneakers.filter((s) => s.categorySlug === selectedCategory);
 
+  // Sort: Hot Drop > New Arrival > Featured > Normal
+  const sortedSneakers = [...filteredSneakers].sort((a, b) => {
+    const aHot = a.isHotDrop ? 1 : 0;
+    const bHot = b.isHotDrop ? 1 : 0;
+    if (bHot !== aHot) return bHot - aHot;
+
+    const aNew = a.isNewArrival ? 1 : 0;
+    const bNew = b.isNewArrival ? 1 : 0;
+    if (bNew !== aNew) return bNew - aNew;
+
+    const aFeat = a.featured ? 1 : 0;
+    const bFeat = b.featured ? 1 : 0;
+    return bFeat - aFeat;
+  });
+
   return (
     <section id="collection" className="py-24 bg-obsidian relative">
       {/* Visual background grid effect */}
@@ -105,9 +120,9 @@ export const SneakerGallery: React.FC = () => {
         </div>
 
         {/* Sneaker Grid Matrix */}
-        {filteredSneakers.length > 0 ? (
+        {sortedSneakers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredSneakers.map((shoe) => {
+            {sortedSneakers.map((shoe) => {
               const hasSelectedSize = selectedSizes[shoe.id] !== undefined;
               const activeSize = selectedSizes[shoe.id];
               const isFav = favorites.includes(shoe.id);
@@ -119,10 +134,20 @@ export const SneakerGallery: React.FC = () => {
                 >
                   
                   {/* Card Badge Top */}
-                  <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5">
-                    {shoe.featured && (
-                      <span className="rounded-md bg-neon-orange px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white font-outfit">
-                        HOT
+                  <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5 font-outfit">
+                    {shoe.isHotDrop && (
+                      <span className="rounded bg-neon-orange px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-md">
+                        {isAr ? "دوب حار" : "HOT DROP"}
+                      </span>
+                    )}
+                    {shoe.isNewArrival && (
+                      <span className="rounded bg-cyan-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-md">
+                        {isAr ? "وصل حديثاً" : "NEW ARRIVAL"}
+                      </span>
+                    )}
+                    {shoe.featured && !shoe.isHotDrop && !shoe.isNewArrival && (
+                      <span className="rounded bg-yellow-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-black shadow-md">
+                        {isAr ? "مميز" : "FEATURED"}
                       </span>
                     )}
                   </div>
@@ -156,7 +181,7 @@ export const SneakerGallery: React.FC = () => {
                           {shoe.categorySlug.replace("-", " ")}
                         </span>
                         <span className="text-neon-orange font-black text-sm font-outfit">
-                          {shoe.price}
+                          {isAr ? `${shoe.price.toLocaleString("en-US")} د.ج` : `${shoe.price.toLocaleString("en-US")} DA`}
                         </span>
                       </div>
                       

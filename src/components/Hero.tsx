@@ -6,7 +6,7 @@ import { ArrowRight, ArrowLeft, Flame, Sparkles } from "lucide-react";
 import Image from "next/image";
 
 export const Hero: React.FC = () => {
-  const { language } = useStore();
+  const { language, heroBanner } = useStore();
   const isAr = language === "ar";
 
   const handleScroll = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -19,6 +19,19 @@ export const Hero: React.FC = () => {
 
   return (
     <section className="relative overflow-hidden min-h-[calc(100vh-80px)] flex items-center justify-center bg-obsidian py-12 md:py-20">
+      {/* Custom Hero Banner Background Overlay */}
+      {heroBanner && (
+        <div className="absolute inset-0 z-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={heroBanner}
+            alt="Custom Showcase Banner"
+            className="w-full h-full object-cover opacity-25"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/70 to-obsidian"></div>
+        </div>
+      )}
+
       {/* Background Neon Glowing Orbs */}
       <div className="absolute top-1/4 left-1/10 w-72 h-72 md:w-96 md:h-96 rounded-full bg-neon-lime/10 blur-[100px] pointer-events-none animate-pulse"></div>
       <div className="absolute bottom-1/4 right-1/10 w-72 h-72 md:w-96 md:h-96 rounded-full bg-neon-orange/15 blur-[120px] pointer-events-none"></div>

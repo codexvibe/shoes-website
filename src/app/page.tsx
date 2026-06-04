@@ -150,11 +150,6 @@ export default function Storefront() {
                     {isAr ? "فئات المنتجات" : "Categories"}
                   </a>
                 </li>
-                <li>
-                  <a href="/admin" className={`text-xs hover:text-white transition-colors ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-                    {isAr ? "إدارة المتجر (مغلق)" : "Admin Console"}
-                  </a>
-                </li>
               </ul>
             </div>
 
