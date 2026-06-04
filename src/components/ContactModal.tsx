@@ -29,8 +29,9 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
   const grandTotal = sneakerTotal + deliveryFee;
 
   const formatPrice = (price: number) => {
-    if (isNaN(price)) return isAr ? "0 د.ج" : "0 DA";
-    return isAr ? `${price.toLocaleString("en-US")} د.ج` : `${price.toLocaleString("en-US")} DA`;
+    const safe = Math.round(Number(price) || 0);
+    const formatted = safe.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return isAr ? `${formatted} د.ج` : `${formatted} DA`;
   };
 
   const handleSizeSelect = (sz: number) => {

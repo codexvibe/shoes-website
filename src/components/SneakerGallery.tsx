@@ -181,7 +181,7 @@ export const SneakerGallery: React.FC = () => {
                           {shoe.categorySlug.replace("-", " ")}
                         </span>
                         <span className="text-neon-orange font-black text-sm font-outfit">
-                          {isAr ? `${shoe.price.toLocaleString("en-US")} د.ج` : `${shoe.price.toLocaleString("en-US")} DA`}
+                          {isAr ? `${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج` : `${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA`}
                         </span>
                       </div>
                       

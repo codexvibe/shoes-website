@@ -73,7 +73,9 @@ export const AdminDashboard: React.FC = () => {
 
   // Helper for pricing currency display
   const formatPrice = (price: number) => {
-    return isAr ? `${price.toLocaleString("en-US")} د.ج` : `${price.toLocaleString("en-US")} DA`;
+    const safe = Math.round(Number(price) || 0);
+    const formatted = safe.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return isAr ? `${formatted} د.ج` : `${formatted} DA`;
   };
 
   // --- TAB 1: SNEAKER CATALOG & UPLOADER STATES ---
