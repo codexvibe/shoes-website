@@ -43,6 +43,7 @@ export const AdminDashboard: React.FC = () => {
     leads,
     addLead,
     updateLeadStatus,
+    updateLeadTracking,
     deleteLead,
     wilayaFees,
     updateWilayaFee,
@@ -57,7 +58,7 @@ export const AdminDashboard: React.FC = () => {
   const isAr = language === "ar";
 
   // Dashboard Active Tab
-  const [activeTab, setActiveTab] = useState<"catalog" | "inventory" | "crm" | "categories" | "shipping" | "marketing">("catalog");
+  const [activeTab, setActiveTab] = useState<"quicksale" | "catalog" | "inventory" | "crm" | "categories" | "shipping" | "marketing">("catalog");
 
   // Preset Image Gallery
   const presetImages = [
@@ -77,6 +78,13 @@ export const AdminDashboard: React.FC = () => {
     const formatted = safe.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return isAr ? `${formatted} د.ج` : `${formatted} DA`;
   };
+
+  // --- TAB 0: QUICK SALE STATES ---
+  const [qsSearch, setQsSearch] = useState("");
+  const [qsSelectedShoeId, setQsSelectedShoeId] = useState<string | null>(null);
+  const [qsSelectedSize, setQsSelectedSize] = useState<number | null>(null);
+  const [qsSuccess, setQsSuccess] = useState(false);
+  const qsSearchInputRef = useRef<HTMLInputElement>(null);
 
   // --- TAB 1: SNEAKER CATALOG & UPLOADER STATES ---
   const [shoeNameFr, setShoeNameFr] = useState("");
@@ -438,6 +446,47 @@ export const AdminDashboard: React.FC = () => {
     setEditingShoe(null);
   };
 
+  // Quick Sale Terminal Handlers
+  const filteredQsShoes = qsSearch.trim() === "" 
+    ? [] 
+    : sneakers.filter(s => 
+        s.nameFr.toLowerCase().includes(qsSearch.toLowerCase()) || 
+        s.nameAr.includes(qsSearch)
+      ).slice(0, 5);
+
+  const qsSelectedShoe = sneakers.find(s => s.id === qsSelectedShoeId);
+
+  const processQsSale = () => {
+    if (!qsSelectedShoeId || qsSelectedSize === null || !qsSelectedShoe) return;
+    const currentStock = qsSelectedShoe.sizesStock[qsSelectedSize] || 0;
+    if (currentStock <= 0) return;
+    updateStock(qsSelectedShoeId, qsSelectedSize, currentStock - 1);
+    setQsSuccess(true);
+    setQsSelectedShoeId(null);
+    setQsSelectedSize(null);
+    setQsSearch("");
+    setTimeout(() => {
+      setQsSuccess(false);
+      qsSearchInputRef.current?.focus();
+    }, 1500);
+  };
+
+  const handleQsKeyDown = (e: React.KeyboardEvent) => {
+    // If we're typing search and hit enter
+    if (e.key === "Enter" && document.activeElement === qsSearchInputRef.current) {
+      if (filteredQsShoes.length > 0) {
+        setQsSelectedShoeId(filteredQsShoes[0].id);
+        setQsSearch("");
+      }
+      return;
+    }
+
+    // If a shoe is selected and size is selected, hit enter to sell
+    if (e.key === "Enter" && qsSelectedShoeId && qsSelectedSize !== null) {
+      processQsSale();
+    }
+  };
+
   // Leads submission
   const handleLeadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -664,6 +713,7 @@ export const AdminDashboard: React.FC = () => {
       {/* 2. Premium Tabbed Selector */}
       <div className="flex border-b border-neutral-800 mb-8 gap-1 overflow-x-auto pb-1 scrollbar-none">
         {[
+          { id: "quicksale", nameFr: "Quick Sale POS", nameAr: "نقطة البيع السريعة", icon: Activity },
           { id: "catalog", nameFr: "Uploader & Catalog", nameAr: "إضافة وعرض الموديلات", icon: Package },
           { id: "inventory", nameFr: "Keyboard Stock Manager", nameAr: "مخزن المقاسات السريع", icon: ArrowRightLeft },
           { id: "crm", nameFr: "CRM Lead Board", nameAr: "تتبع الطلبات (CRM)", icon: ListTodo },
@@ -693,6 +743,202 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* 3. Tab Contents */}
+
+      {/* TAB 0: QUICK SALE POS TERMINAL */}
+      {activeTab === "quicksale" && (
+        <div className="animate-fadeIn" onKeyDown={handleQsKeyDown}>
+          <div className="rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-900 pb-5 mb-6 gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <Activity size={18} className="text-neon-lime" />
+                  {isAr ? "نقطة بيع سريعة بلوحة المفاتيح" : "Keyboard-Only Quick Sale Terminal"}
+                </h2>
+                <p className="text-[10px] text-neutral-500 mt-1 font-mono">
+                  {isAr 
+                    ? "[تعليمات] ابحث عن الحذاء → اضغط Enter للاختيار → حدد المقاس → اضغط Enter لتأكيد البيع" 
+                    : "[INSTRUCTIONS] Search shoe → ENTER to select → Pick size → ENTER to confirm sale. Stock deducts instantly."}
+                </p>
+              </div>
+              <span className="rounded-md bg-neon-lime/10 border border-neon-lime/20 px-2.5 py-1 text-[9px] font-mono text-neon-lime tracking-widest">
+                POS_TERMINAL_V1
+              </span>
+            </div>
+
+            {/* Success Flash */}
+            {qsSuccess && (
+              <div className="mb-6 p-4 rounded-2xl bg-neon-lime/10 border border-neon-lime/30 flex items-center gap-3 animate-fadeIn">
+                <div className="p-2 bg-neon-lime/20 rounded-xl">
+                  <Check size={20} className="text-neon-lime" />
+                </div>
+                <div>
+                  <span className="text-sm font-black text-neon-lime font-outfit uppercase">
+                    {isAr ? "تم بنجاح! تم خصم وحدة من المخزون." : "SALE RECORDED! Stock deducted successfully."}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Step 1: Search */}
+            <div className="mb-6">
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
+                {isAr ? "الخطوة 1: ابحث عن الحذاء" : "Step 1: Search Sneaker Model"}
+              </label>
+              <input
+                ref={qsSearchInputRef}
+                type="text"
+                autoFocus
+                value={qsSearch}
+                onChange={(e) => {
+                  setQsSearch(e.target.value);
+                  setQsSelectedShoeId(null);
+                  setQsSelectedSize(null);
+                }}
+                placeholder={isAr ? "اكتب اسم الحذاء..." : "Type sneaker name to search..."}
+                className="w-full bg-neutral-950 border-2 border-neutral-800 focus:border-neon-lime/60 rounded-2xl px-5 py-4 text-sm text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-neon-lime/20 transition-all font-outfit"
+              />
+
+              {/* Search Results Dropdown */}
+              {filteredQsShoes.length > 0 && !qsSelectedShoeId && (
+                <div className="mt-2 rounded-2xl border border-neutral-800 bg-neutral-950 divide-y divide-neutral-900 overflow-hidden">
+                  {filteredQsShoes.map((shoe, idx) => (
+                    <button
+                      key={shoe.id}
+                      onClick={() => {
+                        setQsSelectedShoeId(shoe.id);
+                        setQsSearch("");
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-neutral-900/60 transition-all cursor-pointer ${idx === 0 ? "bg-neutral-900/30" : ""}`}
+                    >
+                      <div className="h-10 w-10 rounded-xl overflow-hidden bg-neutral-900 border border-neutral-800 flex-shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={shoe.image} alt={shoe.nameFr} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-white text-sm truncate font-outfit">{isAr ? shoe.nameAr : shoe.nameFr}</div>
+                        <div className="text-[10px] text-neutral-500 font-mono">{formatPrice(shoe.price)} · {shoe.categorySlug}</div>
+                      </div>
+                      {idx === 0 && (
+                        <span className="text-[8px] font-mono text-neutral-500 border border-neutral-800 rounded px-1.5 py-0.5">ENTER</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Step 2: Selected Shoe + Size Picker */}
+            {qsSelectedShoe && (
+              <div className="mb-6 animate-fadeIn">
+                <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-3 font-outfit">
+                  {isAr ? "الخطوة 2: اختر المقاس" : "Step 2: Select Size & Confirm"}
+                </label>
+                <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-5">
+                  <div className="flex items-center gap-4 mb-5 pb-4 border-b border-neutral-900">
+                    <div className="h-16 w-16 rounded-xl overflow-hidden bg-neutral-900 border border-neutral-800 flex-shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={qsSelectedShoe.image} alt={qsSelectedShoe.nameFr} className="h-full w-full object-cover" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-white text-lg font-outfit">{isAr ? qsSelectedShoe.nameAr : qsSelectedShoe.nameFr}</h3>
+                      <span className="text-xs text-neon-lime font-mono font-bold">{formatPrice(qsSelectedShoe.price)}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setQsSelectedShoeId(null);
+                        setQsSelectedSize(null);
+                        qsSearchInputRef.current?.focus();
+                      }}
+                      className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-red-500/40 hover:text-red-400 text-neutral-500 transition-all cursor-pointer"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+
+                  {/* Size Grid */}
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-11 gap-2">
+                    {qsSelectedShoe.sizes.map((sz) => {
+                      const stock = qsSelectedShoe.sizesStock[sz] || 0;
+                      const isActive = qsSelectedSize === sz;
+                      const isEmpty = stock === 0;
+
+                      return (
+                        <button
+                          key={sz}
+                          onClick={() => !isEmpty && setQsSelectedSize(sz)}
+                          disabled={isEmpty}
+                          className={`rounded-xl p-3 text-center transition-all border cursor-pointer ${
+                            isEmpty
+                              ? "opacity-30 border-neutral-900 bg-neutral-950 cursor-not-allowed"
+                              : isActive
+                              ? "border-neon-lime bg-neon-lime/10 ring-2 ring-neon-lime/30"
+                              : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
+                          }`}
+                        >
+                          <span className={`block text-sm font-black ${isActive ? "text-neon-lime" : isEmpty ? "text-neutral-700" : "text-white"} font-mono`}>
+                            {sz}
+                          </span>
+                          <span className={`block text-[9px] mt-0.5 font-mono ${stock <= 2 && stock > 0 ? "text-neon-orange" : isEmpty ? "text-neutral-700" : "text-neutral-500"}`}>
+                            {stock} {isAr ? "قطعة" : "pcs"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Confirm Sale Button */}
+                  {qsSelectedSize !== null && (
+                    <div className="mt-5 pt-4 border-t border-neutral-900 animate-fadeIn">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs text-neutral-400 font-outfit">
+                          {isAr ? "الحذاء" : "Model"}: <span className="text-white font-bold">{isAr ? qsSelectedShoe.nameAr : qsSelectedShoe.nameFr}</span>
+                        </span>
+                        <span className="text-xs text-neutral-400 font-mono">
+                          Size <span className="text-white font-bold">{qsSelectedSize}</span> · Stock: <span className="text-neon-orange font-bold">{qsSelectedShoe.sizesStock[qsSelectedSize] || 0}</span>
+                        </span>
+                      </div>
+                      <button
+                        onClick={processQsSale}
+                        className="w-full py-4 rounded-2xl bg-neon-lime hover:bg-white text-obsidian font-black text-sm uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        <Check size={18} />
+                        {isAr ? "تأكيد البيع وخصم من المخزون" : "CONFIRM SALE — DEDUCT 1 FROM STOCK"}
+                        <span className="text-[9px] font-mono opacity-60 ml-2">[ENTER]</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-neutral-900">
+              <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-3 text-center">
+                <span className="text-[9px] text-neutral-500 font-mono block uppercase">{isAr ? "إجمالي الموديلات" : "Total Models"}</span>
+                <span className="text-lg font-black text-white font-outfit">{sneakers.length}</span>
+              </div>
+              <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-3 text-center">
+                <span className="text-[9px] text-neutral-500 font-mono block uppercase">{isAr ? "إجمالي المخزون" : "Total Stock"}</span>
+                <span className="text-lg font-black text-white font-outfit">
+                  {sneakers.reduce((sum, s) => sum + Object.values(s.sizesStock).reduce((a, b) => a + b, 0), 0)}
+                </span>
+              </div>
+              <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-3 text-center">
+                <span className="text-[9px] text-neutral-500 font-mono block uppercase">{isAr ? "نفاد المخزون" : "Out of Stock"}</span>
+                <span className="text-lg font-black text-neon-orange font-outfit">
+                  {sneakers.filter(s => Object.values(s.sizesStock).every(v => v === 0)).length}
+                </span>
+              </div>
+              <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-3 text-center">
+                <span className="text-[9px] text-neutral-500 font-mono block uppercase">{isAr ? "مخزون منخفض" : "Low Stock"}</span>
+                <span className="text-lg font-black text-yellow-400 font-outfit">
+                  {sneakers.filter(s => Object.values(s.sizesStock).some(v => v > 0 && v <= 3)).length}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TAB 1: SNEAKER CATALOG & UPLOADER */}
       {activeTab === "catalog" && (
@@ -1394,13 +1640,30 @@ export const AdminDashboard: React.FC = () => {
                       </p>
                     )}
 
-                    <button
-                      onClick={() => updateLeadStatus(lead.id, "progress")}
-                      className="w-full py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-[10px] font-bold text-white uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1 group-hover:border-neutral-700 border border-transparent"
-                    >
-                      Process Delivery
-                      <ChevronRight size={12} />
-                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <a
+                        href={(() => {
+                          const phone = lead.phoneNumber.replace(/\+/g, "");
+                          const msg = isAr
+                            ? `مرحبا ${lead.customerName}، نود تأكيد طلبك لـ ${getShoeTitle(lead.shoeId)} (المقاس ${lead.size}) إلى ${getWilayaName(lead.wilayaId)}. المبلغ الإجمالي: ${formatPrice(getShoePriceVal(lead.shoeId) + getWilayaFeeVal(lead.wilayaId))}.`
+                            : `Bonjour ${lead.customerName}, nous confirmons votre commande: ${getShoeTitle(lead.shoeId)} (Taille ${lead.size}) vers ${getWilayaName(lead.wilayaId)}. Total: ${formatPrice(getShoePriceVal(lead.shoeId) + getWilayaFeeVal(lead.wilayaId))}.`;
+                          return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+                        })()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-[9px] font-bold text-emerald-400 uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1"
+                      >
+                        <Phone size={10} />
+                        WhatsApp
+                      </a>
+                      <button
+                        onClick={() => updateLeadStatus(lead.id, "progress")}
+                        className="py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-[10px] font-bold text-white uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1 group-hover:border-neutral-700 border border-transparent"
+                      >
+                        Process
+                        <ChevronRight size={12} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1459,7 +1722,26 @@ export const AdminDashboard: React.FC = () => {
                       </p>
                     )}
 
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2 pt-2 border-t border-neutral-800/50">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Tracking # (e.g. Yalidine)"
+                          defaultValue={lead.trackingNumber || ""}
+                          onBlur={(e) => updateLeadTracking(lead.id, { trackingNumber: e.target.value })}
+                          className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-cyan-400/60 font-mono"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Provider"
+                          defaultValue={lead.shippingProvider || ""}
+                          onBlur={(e) => updateLeadTracking(lead.id, { shippingProvider: e.target.value })}
+                          className="w-20 bg-neutral-950 border border-neutral-800 rounded px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-cyan-400/60 font-outfit"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 mt-2">
                       <button
                         onClick={() => updateLeadStatus(lead.id, "todo")}
                         className="py-1.5 rounded-lg border border-neutral-850 hover:bg-neutral-900 text-[9px] font-bold text-neutral-400 hover:text-white uppercase transition-all cursor-pointer"
@@ -1467,7 +1749,10 @@ export const AdminDashboard: React.FC = () => {
                         Revert Back
                       </button>
                       <button
-                        onClick={() => updateLeadStatus(lead.id, "delivered")}
+                        onClick={() => {
+                          updateLeadTracking(lead.id, { shippedAt: new Date().toISOString() });
+                          updateLeadStatus(lead.id, "delivered");
+                        }}
                         className="py-1.5 rounded-lg bg-neon-lime hover:bg-white text-obsidian text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
                       >
                         Delivered
@@ -1524,6 +1809,13 @@ export const AdminDashboard: React.FC = () => {
                       <span>Dest: {getWilayaName(lead.wilayaId)}</span>
                       <span className="font-bold text-neon-lime">{formatPrice(getShoePriceVal(lead.shoeId) + getWilayaFeeVal(lead.wilayaId))}</span>
                     </div>
+
+                    {(lead.trackingNumber || lead.shippingProvider) && (
+                      <div className="text-[9px] font-mono text-neutral-400 bg-neutral-900/50 p-2 rounded border border-neutral-800">
+                        <div>Tracking: <span className="text-white">{lead.trackingNumber || "N/A"}</span></div>
+                        <div>Provider: <span className="text-white">{lead.shippingProvider || "N/A"}</span></div>
+                      </div>
+                    )}
 
                     <div className="flex items-center gap-1 text-[9px] text-neon-lime bg-neon-lime/5 border border-neon-lime/10 rounded-lg p-2.5">
                       <Check size={12} />

@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { useStore } from "../context/StoreContext";
-import { Navbar } from "../components/Navbar";
-import { Hero } from "../components/Hero";
-import { CategoryGrid } from "../components/CategoryGrid";
-import { SneakerGallery } from "../components/SneakerGallery";
+import { useStore } from "@/context/StoreContext";
+import { Navbar } from "@/components/Navbar";
+import { Hero } from "@/components/Hero";
+import { CategoryGrid } from "@/components/CategoryGrid";
+import { SneakerGallery } from "@/components/SneakerGallery";
 import { Phone, Mail, Clock, ShieldCheck, RefreshCw, Truck } from "lucide-react";
 
 export default function Storefront() {

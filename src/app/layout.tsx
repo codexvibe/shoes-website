@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Cairo } from "next/font/google";
-import { StoreProvider } from "../context/StoreContext";
-import "./globals.css";
+import { StoreProvider } from "@/context/StoreContext";
+import "@/app/globals.css";
 
 // Load Google Fonts for premium athletic typographic hierarchy
 const outfit = Outfit({
@@ -24,10 +24,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // We manage dir dynamically inside components or simply keep it default since we use state.
   return (
     <html
       lang="fr"

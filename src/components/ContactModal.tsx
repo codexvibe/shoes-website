@@ -15,13 +15,21 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
   const { language, contactConfig, wilayaFees } = useStore();
   const [size, setSize] = useState<number | null>(selectedSize);
   const [quantity, setQuantity] = useState<number>(1);
-  const [selectedWilayaId, setSelectedWilayaId] = useState<string>(wilayaFees[0]?.id || "alger");
+  const [selectedWilayaId, setSelectedWilayaId] = useState<string>(wilayaFees[0]?.id || "16");
   const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [wilayaSearch, setWilayaSearch] = useState<string>("");
 
   const isAr = language === "ar";
   const shoeName = isAr ? sneaker.nameAr : sneaker.nameFr;
 
   // Selected Wilaya calculations
+  const filteredWilayas = wilayaFees.filter(w => 
+    w.nameFr.toLowerCase().includes(wilayaSearch.toLowerCase()) || 
+    w.nameAr.includes(wilayaSearch) ||
+    w.id.includes(wilayaSearch)
+  );
+
   const selectedWilaya = wilayaFees.find(w => w.id === selectedWilayaId) || wilayaFees[0];
   const deliveryFee = selectedWilaya ? selectedWilaya.fee : 0;
   const safePrice = Number(sneaker.price) || 0;
@@ -80,9 +88,9 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian/90 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian/90 backdrop-blur-md animate-fadeIn overflow-y-auto">
       {/* Container Card */}
-      <div className="relative w-full max-w-xl rounded-3xl border border-neutral-800 bg-[#0d0d11] p-6 sm:p-8 overflow-hidden shadow-2xl">
+      <div className="relative w-full max-w-xl max-h-[95vh] rounded-3xl border border-neutral-800 bg-[#0d0d11] p-5 sm:p-6 overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent my-auto">
         
         {/* Glow Accent Border */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-neon-lime via-neon-orange to-cyan-400"></div>
@@ -154,28 +162,57 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
         </div>
 
         {/* Delivery Wilaya Selection */}
-        <div className="mb-6">
+        <div className="mb-6 relative">
           <label className={`block text-xs font-bold text-neutral-400 mb-2 uppercase tracking-wider ${isAr ? 'font-cairo' : 'font-outfit'}`}>
             {isAr ? "ولاية التوصيل:" : "DELIVERY DESTINATION:"}
           </label>
           <div className="relative group">
-            <div className={`absolute inset-y-0 ${isAr ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none`}>
-              <Truck size={16} className="text-neon-lime/70 group-hover:text-neon-lime transition-colors" />
-            </div>
-            <select
-              value={selectedWilayaId}
-              onChange={(e) => setSelectedWilayaId(e.target.value)}
-              className={`appearance-none bg-neutral-950/80 border border-neutral-800 hover:border-neutral-700 text-sm font-semibold text-white focus:outline-none focus:ring-1 focus:ring-neon-lime focus:border-neon-lime w-full rounded-2xl py-3.5 cursor-pointer shadow-inner transition-all ${isAr ? 'font-cairo text-right pr-11 pl-10' : 'font-outfit pl-11 pr-10'}`}
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`w-full flex items-center justify-between bg-neutral-950/80 border border-neutral-800 hover:border-neutral-700 text-sm font-semibold text-white rounded-2xl py-3.5 px-4 cursor-pointer shadow-inner transition-all ${isAr ? 'font-cairo flex-row-reverse' : 'font-outfit'}`}
             >
-              {wilayaFees.map((w) => (
-                <option key={w.id} value={w.id} className="bg-neutral-900 text-white text-sm py-2">
-                  {isAr ? w.nameAr : w.nameFr} (+{formatPrice(w.fee)})
-                </option>
-              ))}
-            </select>
-            <div className={`absolute inset-y-0 ${isAr ? 'left-0 pl-4' : 'right-0 pr-4'} flex items-center pointer-events-none`}>
-              <ChevronDown size={16} className="text-neutral-500 group-hover:text-white transition-colors" />
-            </div>
+              <div className={`flex items-center gap-3 ${isAr ? 'flex-row-reverse' : ''}`}>
+                <Truck size={16} className="text-neon-lime/70" />
+                <span>
+                  {selectedWilaya ? (isAr ? selectedWilaya.nameAr : selectedWilaya.nameFr) : "Select Wilaya"} 
+                  <span className="text-neutral-500 ml-1">(+{formatPrice(deliveryFee)})</span>
+                </span>
+              </div>
+              <ChevronDown size={16} className={`text-neutral-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-2xl">
+                <div className="p-2 border-b border-neutral-800">
+                  <input 
+                    type="text" 
+                    placeholder={isAr ? "ابحث عن ولاية..." : "Search wilaya..."}
+                    value={wilayaSearch}
+                    onChange={(e) => setWilayaSearch(e.target.value)}
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-neon-lime/50"
+                  />
+                </div>
+                <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
+                  {filteredWilayas.map((w) => (
+                    <button
+                      key={w.id}
+                      onClick={() => {
+                        setSelectedWilayaId(w.id);
+                        setIsDropdownOpen(false);
+                        setWilayaSearch("");
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-neutral-800 transition-colors flex items-center justify-between ${selectedWilayaId === w.id ? 'bg-neon-lime/10 text-neon-lime' : 'text-white'}`}
+                    >
+                      <span className={isAr ? 'font-cairo' : 'font-outfit'}>{isAr ? w.nameAr : w.nameFr}</span>
+                      <span className="text-neutral-500 text-xs font-mono">+{formatPrice(w.fee)}</span>
+                    </button>
+                  ))}
+                  {filteredWilayas.length === 0 && (
+                    <div className="p-4 text-center text-sm text-neutral-500">No results found</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -187,31 +224,31 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
           <div className="flex items-center gap-3">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-7 h-7 rounded-lg bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 font-bold flex items-center justify-center cursor-pointer"
+              className="w-7 h-7 rounded-lg bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 font-bold flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-colors"
             >
               -
             </button>
-            <span className="font-outfit text-white font-bold text-xs w-6 text-center">{quantity}</span>
+            <span className="font-outfit text-white font-black text-sm w-6 text-center">{quantity}</span>
             <button
               onClick={() => setQuantity(quantity + 1)}
-              className="w-7 h-7 rounded-lg bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 font-bold flex items-center justify-center cursor-pointer"
+              className="w-7 h-7 rounded-lg bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 font-bold flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-colors"
             >
               +
             </button>
           </div>
         </div>
 
-        {/* Detailed Price Summary */}
-        <div className="mb-5 border-t border-neutral-900 pt-4 space-y-2">
-          <div className="flex justify-between items-center text-xs text-neutral-400 font-outfit">
+        {/* Detailed Price Summary - Bigger Design */}
+        <div className="mb-6 rounded-2xl bg-neutral-900/40 border border-neutral-800 p-5 space-y-3">
+          <div className="flex justify-between items-center text-sm text-neutral-400 font-outfit">
             <span>Subtotal:</span>
-            <span className="font-mono">{formatPrice(sneakerTotal)}</span>
+            <span className="font-mono text-white">{formatPrice(sneakerTotal)}</span>
           </div>
-          <div className="flex justify-between items-center text-xs text-neutral-400 font-outfit">
-            <span>Delivery Fee ({getWilayaName(selectedWilayaId)}):</span>
-            <span className="font-mono text-neon-orange">+{formatPrice(deliveryFee)}</span>
+          <div className="flex justify-between items-center text-sm text-neutral-400 font-outfit">
+            <span>Delivery Fee <span className="text-[10px]">({getWilayaName(selectedWilayaId)})</span>:</span>
+            <span className="font-mono text-neon-orange font-bold">+{formatPrice(deliveryFee)}</span>
           </div>
-          <div className="flex justify-between items-center text-sm text-white font-extrabold border-t border-neutral-900 pt-2 font-outfit">
+          <div className="flex justify-between items-center text-xl text-white font-black border-t border-neutral-800 pt-3 mt-1 font-outfit">
             <span>Grand Total:</span>
             <span className="font-mono text-neon-lime">{formatPrice(grandTotal)}</span>
           </div>

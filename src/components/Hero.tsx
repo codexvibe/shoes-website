@@ -6,8 +6,19 @@ import { ArrowRight, ArrowLeft, Flame, Sparkles } from "lucide-react";
 import Image from "next/image";
 
 export const Hero: React.FC = () => {
-  const { language, heroBanner } = useStore();
+  const { heroBanner, language } = useStore();
   const isAr = language === "ar";
+  
+  const t = (key: string) => {
+    const translations: Record<string, { fr: string, ar: string }> = {
+      subtitle: { 
+        fr: "La plateforme ultime pour explorer les meilleurs modèles en édition limitée. Livraison sécurisée dans tout le pays avec paiement à la réception.", 
+        ar: "المنصة المطلقة لاستكشاف أفضل الموديلات بإصدارات محدودة. توصيل آمن لجميع الولايات والدفع عند الاستلام." 
+      },
+      cta: { fr: "VOIR LA COLLECTION", ar: "تصفح المجموعة" }
+    };
+    return translations[key]?.[isAr ? "ar" : "fr"] || key;
+  };
 
   const handleScroll = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -68,10 +79,7 @@ export const Hero: React.FC = () => {
 
             {/* Description */}
             <p className={`text-base sm:text-lg text-neutral-400 max-w-lg mx-auto lg:mx-0 mb-8 leading-relaxed ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-              {isAr 
-                ? "اكتشف تشكيلة حصرية من الأحذية الرياضية الفاخرة المصممة خصيصًا للأداء العالي والمظهر العصري. اطلب مقاسك الآن بالتواصل المباشر."
-                : "Explore our curated catalog of elite sneakers engineered for high performance and streetwear dominance. Direct orders with the owner."
-              }
+              {t("subtitle")}
             </p>
 
             {/* CTA Button */}
@@ -79,7 +87,7 @@ export const Hero: React.FC = () => {
               onClick={handleScroll}
               className={`group self-center lg:self-start flex items-center gap-3 rounded-full bg-neon-lime hover:bg-white text-obsidian px-8 py-4 font-black transition-all duration-300 transform hover:scale-105 neon-glow-lime hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] cursor-pointer ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-wider'}`}
             >
-              <span>{isAr ? "تسوق المجموعة" : "Shop Collection"}</span>
+              <span>{t("cta")}</span>
               {isAr ? (
                 <ArrowLeft size={18} className="group-hover:-translate-x-1.5 transition-transform duration-300" />
               ) : (

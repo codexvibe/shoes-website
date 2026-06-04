@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { useStore } from "../../context/StoreContext";
-import { Navbar } from "../../components/Navbar";
-import { AdminLogin } from "../../components/AdminLogin";
-import { AdminDashboard } from "../../components/AdminDashboard";
+import { useStore } from "@/context/StoreContext";
+import { Navbar } from "@/components/Navbar";
+import { AdminLogin } from "@/components/AdminLogin";
+import { AdminDashboard } from "@/components/AdminDashboard";
 
 export default function AdminPage() {
   const { isAdmin } = useStore();

@@ -1,27 +1,37 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useStore } from "../context/StoreContext";
+import { useStore } from "@/context/StoreContext";
 import { Globe, Menu, X } from "lucide-react";
+import Link from "next/link";
 
 export const Navbar: React.FC = () => {
   const { language, setLanguage } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const pathname = usePathname();
-
+  
   const isAr = language === "ar";
-  const isAdminPage = pathname?.includes("/admin");
+  // Determine if we are on the admin page by checking window.location on client side, 
+  // since we don't have next/router easily giving us the pathname synchronously in app router without usePathname
+  const isAdminPage = typeof window !== 'undefined' && window.location.pathname.includes("/admin");
 
   const toggleLanguage = () => {
-    setLanguage(language === "fr" ? "ar" : "fr");
+    setLanguage(isAr ? "fr" : "ar");
+  };
+
+  const t = (key: string) => {
+    const translations: Record<string, { fr: string, ar: string }> = {
+      collection: { fr: "Collection", ar: "المجموعة" },
+      categories: { fr: "Catégories", ar: "الفئات" },
+      contact: { fr: "Contact", ar: "اتصل بنا" },
+      language: { fr: "Français", ar: "العربية" }
+    };
+    return translations[key]?.[isAr ? "ar" : "fr"] || key;
   };
 
   const navItems = [
-    { nameFr: "Collection", nameAr: "المجموعة", href: "#collection" },
-    { nameFr: "Féguments", nameAr: "الفئات", href: "#categories" },
-    { nameFr: "Nous contacter", nameAr: "تواصل معنا", href: "#contact" }
+    { name: t("collection"), href: "#collection" },
+    { name: t("categories"), href: "#categories" },
+    { name: t("contact"), href: "#contact" }
   ];
 
   return (
@@ -53,7 +63,7 @@ export const Navbar: React.FC = () => {
                   href={item.href}
                   className={`text-sm font-semibold tracking-wide text-neutral-400 hover:text-white transition-colors duration-200 ${isAr ? 'font-cairo' : 'font-outfit uppercase'}`}
                 >
-                  {isAr ? item.nameAr : item.nameFr}
+                  {item.name}
                 </a>
               ))}
             </div>
@@ -68,7 +78,7 @@ export const Navbar: React.FC = () => {
             >
               <Globe size={14} className="text-neon-lime group-hover:rotate-45 transition-transform duration-300" />
               <span className="font-outfit uppercase">
-                {language === "fr" ? "العربية (AR)" : "Français (FR)"}
+                {t("language")}
               </span>
             </button>
           </div>
@@ -102,12 +112,12 @@ export const Navbar: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
               className={`block rounded-lg px-4 py-2.5 text-base font-semibold text-neutral-400 hover:bg-neutral-900 hover:text-white transition-all ${isAr ? 'font-cairo text-right' : 'font-outfit uppercase'}`}
             >
-              {isAr ? item.nameAr : item.nameFr}
+              {item.name}
             </a>
           ))}
-          {/* Admin link removed */}
         </div>
       )}
     </nav>
   );
 };
+

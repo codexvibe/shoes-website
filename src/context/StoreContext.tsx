@@ -24,6 +24,7 @@ interface StoreContextType {
   leads: Lead[];
   addLead: (lead: Omit<Lead, "id" | "createdAt">) => void;
   updateLeadStatus: (id: string, status: Lead["status"]) => void;
+  updateLeadTracking: (id: string, updates: Partial<Pick<Lead, "trackingNumber" | "shippingProvider" | "shippedAt">>) => void;
   deleteLead: (id: string) => void;
   wilayaFees: WilayaFee[];
   updateWilayaFee: (id: string, fee: number) => void;
@@ -260,6 +261,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem("shoes_leads", JSON.stringify(updated));
   };
 
+  const updateLeadTracking = (id: string, updates: Partial<Pick<Lead, "trackingNumber" | "shippingProvider" | "shippedAt">>) => {
+    const updated = leads.map((lead) => {
+      if (lead.id === id) {
+        return { ...lead, ...updates };
+      }
+      return lead;
+    });
+    setLeads(updated);
+    localStorage.setItem("shoes_leads", JSON.stringify(updated));
+  };
+
   const deleteLead = (id: string) => {
     const updated = leads.filter((lead) => lead.id !== id);
     setLeads(updated);
@@ -325,6 +337,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         leads,
         addLead,
         updateLeadStatus,
+        updateLeadTracking,
         deleteLead,
         wilayaFees,
         updateWilayaFee,

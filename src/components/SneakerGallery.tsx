@@ -4,10 +4,10 @@ import React, { useState, useEffect } from "react";
 import { useStore } from "../context/StoreContext";
 import { Sneaker } from "../data/mockData";
 import { ContactModal } from "./ContactModal";
-import { ShoppingCart, Heart, ShieldAlert, Sparkles, Filter } from "lucide-react";
+import { ShoppingCart, Heart, ShieldAlert, Sparkles, Filter, MessageCircle } from "lucide-react";
 
 export const SneakerGallery: React.FC = () => {
-  const { sneakers, categories, language } = useStore();
+  const { sneakers, categories, language, contactConfig } = useStore();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [activeContactShoe, setActiveContactShoe] = useState<Sneaker | null>(null);
@@ -217,7 +217,28 @@ export const SneakerGallery: React.FC = () => {
                     </div>
 
                     {/* Order Action Button CTA */}
-                    <div className="mt-6 pt-5 border-t border-neutral-900">
+                    <div className="mt-6 pt-5 border-t border-neutral-900 space-y-2">
+                      {/* WhatsApp One-Click */}
+                      <a
+                        href={(() => {
+                          const phone = contactConfig.whatsapp.replace(/\+/g, "");
+                          const sizePart = hasSelectedSize ? (isAr ? `، المقاس ${activeSize}` : `, Taille ${activeSize}`) : "";
+                          const msg = isAr
+                            ? `مرحباً، أنا مهتم بـ ${shoe.nameAr}${sizePart}، السعر ${Math.round(Number(shoe.price) || 0)} د.ج`
+                            : `Bonjour, je suis intéressé par la ${shoe.nameFr}${sizePart}, Prix ${Math.round(Number(shoe.price) || 0)} DA`;
+                          return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+                        })()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex items-center justify-center gap-2.5 w-full rounded-xl bg-emerald-600/10 border border-emerald-500/30 hover:border-emerald-400/60 text-emerald-400 hover:text-emerald-300 py-3.5 text-xs font-bold transition-all duration-300 hover:bg-emerald-500/15 cursor-pointer ${
+                          isAr ? 'font-cairo' : 'font-outfit uppercase tracking-widest'
+                        }`}
+                      >
+                        <MessageCircle size={14} />
+                        <span>{isAr ? "اطلب عبر واتساب" : "Order via WhatsApp"}</span>
+                      </a>
+
+                      {/* Fallback Contact Owner */}
                       <button
                         onClick={() => handleOrderClick(shoe)}
                         className={`flex items-center justify-center gap-2.5 w-full rounded-xl bg-neutral-900 border border-neutral-800/80 hover:border-neon-lime/40 text-white hover:text-neon-lime py-3.5 text-xs font-bold transition-all duration-300 hover:bg-neon-lime/5 cursor-pointer ${
@@ -225,7 +246,7 @@ export const SneakerGallery: React.FC = () => {
                         } ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-widest'}`}
                       >
                         <ShoppingCart size={14} />
-                        <span>{isAr ? "اطلب الآن بالتواصل" : "Contact Owner to Order"}</span>
+                        <span>{isAr ? "تواصل مع صاحب المتجر" : "Contact Owner to Order"}</span>
                       </button>
                     </div>
 
