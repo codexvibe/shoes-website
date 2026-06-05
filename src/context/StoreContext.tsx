@@ -191,10 +191,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Fetch wilaya fees
       const { data: wilayaData } = await supabase
         .from("wilaya_fees")
-        .select("*")
-        .order("id", { ascending: true });
+        .select("*");
       if (wilayaData && wilayaData.length > 0) {
-        setWilayaFees(wilayaData.map(dbWilayaToFrontend));
+        const sortedWilayas = wilayaData
+          .map(dbWilayaToFrontend)
+          .sort((a, b) => {
+            const numA = parseInt(a.id);
+            const numB = parseInt(b.id);
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            if (!isNaN(numA)) return -1;
+            if (!isNaN(numB)) return 1;
+            return a.id.localeCompare(b.id);
+          });
+        setWilayaFees(sortedWilayas);
       }
 
       // Fetch contact config
