@@ -583,6 +583,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     if (error) {
       console.error("Failed to update contact config:", error);
+      alert("Database error: Failed to save Contact Settings.\nDetails: " + error.message);
+    } else {
+      console.log("Successfully updated contact_config in Supabase!");
     }
   };
 

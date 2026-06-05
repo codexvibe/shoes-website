@@ -207,3 +207,12 @@ CREATE TRIGGER update_sneakers_modtime
 BEFORE UPDATE ON sneakers
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- ==========================================
+-- 8. Enable Realtime
+-- ==========================================
+-- Add tables to the realtime publication
+ALTER PUBLICATION supabase_realtime ADD TABLE categories;
+ALTER PUBLICATION supabase_realtime ADD TABLE sneakers;
+ALTER PUBLICATION supabase_realtime ADD TABLE leads;
+ALTER PUBLICATION supabase_realtime ADD TABLE contact_config;
