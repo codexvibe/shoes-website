@@ -32,8 +32,8 @@ interface StoreContextType {
   heroBanner: string | null;
   setHeroBanner: (image: string | null) => void;
   isAdmin: boolean;
-  loginAdmin: (password: string) => boolean;
-  logoutAdmin: () => void;
+  loginAdmin: (email: string, password: string) => Promise<boolean>;
+  logoutAdmin: () => Promise<void>;
   contactConfig: ContactConfig;
   setContactConfig: (config: ContactConfig) => void;
   loading: boolean;
@@ -221,10 +221,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (typeof window !== "undefined") {
       loadFromSupabase();
 
-      // Check admin session
-      const adminSession = sessionStorage.getItem("shoes_admin");
-      if (adminSession === "true") {
-        setIsAdmin(true);
+      let authListener: any = null;
+      // Check admin session using Supabase Auth
+      if (supabase) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          setIsAdmin(!!session);
+        });
+
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+          setIsAdmin(!!session);
+        });
+        
+        authListener = subscription;
       }
 
       // Initialize HTML attributes on mount
@@ -259,6 +269,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         return () => {
           supabase.removeChannel(channel);
+          if (authListener) authListener.unsubscribe();
         };
       }
     }
@@ -577,18 +588,26 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // ── Auth ──
 
-  const loginAdmin = (password: string): boolean => {
-    if (password === "AdminShoes2026") {
-      setIsAdmin(true);
-      sessionStorage.setItem("shoes_admin", "true");
-      return true;
+  const loginAdmin = async (email: string, password: string): Promise<boolean> => {
+    if (!supabase) return false;
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    if (error) {
+      console.error("Login failed:", error.message);
+      return false;
     }
-    return false;
+    
+    setIsAdmin(true);
+    return true;
   };
 
-  const logoutAdmin = () => {
+  const logoutAdmin = async () => {
+    if (!supabase) return;
+    await supabase.auth.signOut();
     setIsAdmin(false);
-    sessionStorage.removeItem("shoes_admin");
   };
 
   return (

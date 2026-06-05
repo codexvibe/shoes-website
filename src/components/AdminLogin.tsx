@@ -2,29 +2,34 @@
 
 import React, { useState } from "react";
 import { useStore } from "../context/StoreContext";
-import { Key, Eye, EyeOff, ShieldAlert, ArrowLeft } from "lucide-react";
+import { Key, Eye, EyeOff, ShieldAlert, ArrowLeft, Mail } from "lucide-react";
 import Link from "next/link";
 
 export const AdminLogin: React.FC = () => {
   const { loginAdmin, language } = useStore();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isAr = language === "ar";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
     
-    const success = loginAdmin(password);
+    const success = await loginAdmin(email, password);
     if (!success) {
       setError(
         isAr 
-          ? "مفتاح الأمان غير صحيح. يرجى المحاولة مرة أخرى." 
-          : "Clé de sécurité incorrecte. Veuillez réessayer."
+          ? "البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى." 
+          : "Email ou mot de passe incorrect. Veuillez réessayer."
       );
     }
+    
+    setIsLoading(false);
   };
 
   return (
@@ -55,32 +60,57 @@ export const AdminLogin: React.FC = () => {
           </h2>
           <p className={`text-xs text-neutral-400 mt-1.5 leading-relaxed max-w-[280px] ${isAr ? 'font-cairo' : 'font-outfit'}`}>
             {isAr 
-              ? "يرجى إدخال مفتاح أمان المشرف للوصول إلى لوحة التحكم." 
-              : "Please input the developer security credentials to unlock dashboard variables."}
+              ? "يرجى تسجيل الدخول بحساب المشرف للوصول إلى لوحة التحكم." 
+              : "Please login with your admin account to unlock dashboard variables."}
           </p>
         </div>
 
         {/* Form panel */}
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email field */}
           <div>
             <label className={`block text-[10px] font-black uppercase text-neutral-400 tracking-wider mb-2 ${isAr ? 'font-cairo text-right' : 'font-outfit'}`}>
-              {isAr ? "مفتاح أمان الإدارة" : "ADMIN SECURITY KEY"}
+              {isAr ? "البريد الإلكتروني" : "EMAIL ADDRESS"}
+            </label>
+            <div className="relative">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={isAr ? "أدخل البريد الإلكتروني..." : "admin@domain.com"}
+                className={`w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-3.5 pl-10 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neon-orange/70 focus:ring-1 focus:ring-neon-orange/30 transition-all ${
+                  isAr ? 'text-right pr-10 pl-4 font-cairo' : 'font-mono'
+                }`}
+                required
+                disabled={isLoading}
+              />
+              <div className={`absolute inset-y-0 ${isAr ? 'right-3' : 'left-3'} flex items-center pointer-events-none text-neutral-500`}>
+                <Mail size={16} />
+              </div>
+            </div>
+          </div>
+
+          {/* Password field */}
+          <div>
+            <label className={`block text-[10px] font-black uppercase text-neutral-400 tracking-wider mb-2 ${isAr ? 'font-cairo text-right' : 'font-outfit'}`}>
+              {isAr ? "كلمة المرور" : "PASSWORD"}
             </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={isAr ? "أدخل المفتاح هنا..." : "Input security key..."}
+                placeholder={isAr ? "أدخل كلمة المرور..." : "Input password..."}
                 className={`w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neon-orange/70 focus:ring-1 focus:ring-neon-orange/30 transition-all ${
                   isAr ? 'text-right font-cairo' : 'font-mono'
                 }`}
                 required
+                disabled={isLoading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-3 flex items-center text-neutral-500 hover:text-white"
+                className={`absolute inset-y-0 ${isAr ? 'left-3' : 'right-3'} flex items-center text-neutral-500 hover:text-white`}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -98,18 +128,14 @@ export const AdminLogin: React.FC = () => {
           {/* Submit Trigger */}
           <button
             type="submit"
-            className={`w-full py-4 rounded-xl bg-neon-orange hover:bg-white text-white hover:text-obsidian font-extrabold text-sm transition-all hover:scale-[1.02] shadow-lg shadow-neon-orange/10 cursor-pointer ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-wider'}`}
+            disabled={isLoading}
+            className={`w-full py-4 rounded-xl ${isLoading ? 'bg-neutral-800 text-neutral-500' : 'bg-neon-orange hover:bg-white text-white hover:text-obsidian'} font-extrabold text-sm transition-all hover:scale-[1.02] shadow-lg shadow-neon-orange/10 cursor-pointer ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-wider'}`}
           >
-            {isAr ? "تأكيد مفتاح الولوج" : "Validate Entry Key"}
+            {isLoading 
+              ? (isAr ? "جاري التحقق..." : "AUTHENTICATING...") 
+              : (isAr ? "تأكيد مفتاح الولوج" : "Validate Entry Key")}
           </button>
         </form>
-
-        {/* Demo Hint */}
-        <div className="mt-8 text-center border-t border-neutral-900 pt-5">
-          <p className="text-[10px] font-mono text-neutral-600">
-            Key Hint: AdminShoes2026
-          </p>
-        </div>
 
       </div>
     </div>
