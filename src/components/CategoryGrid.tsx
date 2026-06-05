@@ -75,7 +75,7 @@ export const CategoryGrid: React.FC = () => {
                 <div className="absolute inset-0 z-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={meta.image}
+                    src={category.image || meta.image}
                     alt={category.nameFr}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 filter brightness-40 group-hover:brightness-50"
                   />

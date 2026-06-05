@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { CategoryGrid } from "@/components/CategoryGrid";
 import { SneakerGallery } from "@/components/SneakerGallery";
+import { CartDrawer } from "@/components/CartDrawer";
 import { Phone, Mail, Clock, ShieldCheck, RefreshCw, Truck } from "lucide-react";
 
 export default function Storefront() {
@@ -70,8 +71,8 @@ export default function Storefront() {
                 </h4>
                 <p className={`text-xs text-neutral-400 leading-relaxed ${isAr ? 'font-cairo' : 'font-outfit'}`}>
                   {isAr 
-                    ? "لا توجد حاجة لبطاقة ائتمان. اضغط على المنتج وتحدث مباشرة مع صاحب المتجر للطلب." 
-                    : "Skip the checkout hassle. Chat directly with the owner to arrange instant order pickup."}
+                    ? "لا توجد حاجة لبطاقة ائتمان. اضغط على المنتج واطلب مباشرة لتوصيله لباب منزلك." 
+                    : "Order directly on the site. Payments are handled locally upon pickup or delivery."}
                 </p>
               </div>
 
@@ -161,13 +162,13 @@ export default function Storefront() {
               <div className={`text-xs text-neutral-500 leading-relaxed text-center md:text-left md:rtl:text-right ${isAr ? 'font-cairo' : 'font-outfit'}`}>
                 <p className="mb-2">
                   {isAr 
-                    ? "ملاحظة: هذا الموقع عبارة عن واجهة عرض إلكترونية فقط." 
-                    : "NOTICE: This platform is a catalog showcase only."}
+                    ? "ملاحظة: هذا الموقع يتيح لك الطلب المباشر للمنتجات." 
+                    : "NOTICE: This platform allows you to place direct orders."}
                 </p>
                 <p>
                   {isAr
-                    ? "لا يتم الدفع عبر الإنترنت. يتم الدفع عند الاستلام بعد التنسيق المباشر مع صاحب المعرض."
-                    : "No online checkout. Payments are handled locally upon pickup or delivery setup."}
+                    ? "الدفع يتم عند الاستلام بعد التنسيق المباشر للطلب."
+                    : "Order directly online or via WhatsApp. Payments are handled locally upon pickup or delivery setup."}
                 </p>
               </div>
             </div>
@@ -185,6 +186,9 @@ export default function Storefront() {
           </div>
         </div>
       </footer>
+
+      {/* Slide-over Cart */}
+      <CartDrawer />
 
     </div>
   );

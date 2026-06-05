@@ -98,6 +98,10 @@ export const AdminDashboard: React.FC = () => {
   const [shoeHotDrop, setShoeHotDrop] = useState(false);
   const [shoeNewArrival, setShoeNewArrival] = useState(false);
   
+  // Quick Add Category
+  const [isQuickAddingCat, setIsQuickAddingCat] = useState(false);
+  const [quickCatName, setQuickCatName] = useState("");
+  
   // Size picker
   const allSizesList = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46];
   const [shoeSizes, setShoeSizes] = useState<number[]>([39, 40, 41, 42, 43, 44, 45]);
@@ -154,8 +158,10 @@ export const AdminDashboard: React.FC = () => {
   const [catDescFr, setCatDescFr] = useState("");
   const [catDescAr, setCatDescAr] = useState("");
   const [catSlug, setCatSlug] = useState("");
+  const [catImage, setCatImage] = useState("");
   const [catFormError, setCatFormError] = useState<string | null>(null);
   const [catFormSuccess, setCatFormSuccess] = useState(false);
+  const [showAdvancedCatOptions, setShowAdvancedCatOptions] = useState(false);
 
   // --- TAB 5: WILAYA FEES STATES ---
   const [wilayaEditId, setWilayaEditId] = useState<string | null>(null);
@@ -223,13 +229,38 @@ export const AdminDashboard: React.FC = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
-        if (isEdit) {
-          setEditImage(event.target.result as string);
-          setEditImageError(false);
-        } else {
-          setShoeImage(event.target.result as string);
-          setShoeImageError(false);
-        }
+        // Compress image using canvas
+        const img = document.createElement("img");
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 800;
+          
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+            if (isEdit) {
+              setEditImage(compressedBase64);
+              setEditImageError(false);
+            } else {
+              setShoeImage(compressedBase64);
+              setShoeImageError(false);
+            }
+          }
+        };
+        img.src = event.target.result as string;
       }
     };
     reader.readAsDataURL(file);
@@ -501,8 +532,12 @@ export const AdminDashboard: React.FC = () => {
     addLead({
       customerName: crmName,
       phoneNumber: crmPhone,
-      shoeId: crmShoeId,
-      size: crmSize,
+      items: [{
+        id: `manual_${Date.now()}`,
+        sneakerId: crmShoeId,
+        size: crmSize,
+        quantity: 1
+      }],
       wilayaId: crmWilayaId,
       status: "todo",
       notes: crmNotes
@@ -521,8 +556,8 @@ export const AdminDashboard: React.FC = () => {
     setCatFormError(null);
     setCatFormSuccess(false);
 
-    if (!catNameFr || !catNameAr || !catDescFr || !catDescAr || !catSlug) {
-      setCatFormError(isAr ? "يرجى ملء جميع الحقول للفئة." : "Veuillez remplir tous les champs de la catégorie.");
+    if (!catNameFr || !catSlug) {
+      setCatFormError(isAr ? "يرجى إدخال اسم الفئة بالفرنسية على الأقل." : "Veuillez entrer au moins le nom de la catégorie (FR).");
       return;
     }
 
@@ -534,9 +569,10 @@ export const AdminDashboard: React.FC = () => {
     addCategory({
       slug: catSlug,
       nameFr: catNameFr,
-      nameAr: catNameAr,
-      descFr: catDescFr,
-      descAr: catDescAr
+      nameAr: catNameAr || catNameFr,
+      descFr: catDescFr || catNameFr,
+      descAr: catDescAr || catNameAr || catNameFr,
+      image: catImage
     });
 
     setCatNameFr("");
@@ -544,6 +580,7 @@ export const AdminDashboard: React.FC = () => {
     setCatDescFr("");
     setCatDescAr("");
     setCatSlug("");
+    setCatImage("");
     setCatFormSuccess(true);
     setTimeout(() => setCatFormSuccess(false), 3000);
   };
@@ -599,9 +636,33 @@ export const AdminDashboard: React.FC = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
-        setHeroBanner(event.target.result as string);
-        setBannerSuccess(true);
-        setTimeout(() => setBannerSuccess(false), 3000);
+        const img = document.createElement("img");
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1920; // Banner can be wider
+          
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+            setHeroBanner(compressedBase64);
+            setBannerSuccess(true);
+            setTimeout(() => setBannerSuccess(false), 3000);
+          }
+        };
+        img.src = event.target.result as string;
       }
     };
     reader.readAsDataURL(file);
@@ -1084,19 +1145,67 @@ export const AdminDashboard: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className={`block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 ${isAr ? 'text-right font-cairo' : 'font-outfit'}`}>{isAr ? "فئة المجموعة *" : "Category Selection *"}</label>
-                    <select
-                      value={shoeCategory}
-                      onChange={(e) => setShoeCategory(e.target.value)}
-                      className={`w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-3 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all cursor-pointer ${isAr ? 'font-cairo text-right' : 'font-outfit'}`}
-                      required
-                    >
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.slug} className="bg-obsidian text-white">
-                          {isAr ? c.nameAr : c.nameFr}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className={`block text-[10px] font-bold text-neutral-400 uppercase tracking-widest ${isAr ? 'text-right font-cairo' : 'font-outfit'}`}>
+                        {isAr ? "فئة المجموعة *" : "Category Selection *"}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsQuickAddingCat(!isQuickAddingCat)}
+                        className="text-[9px] font-bold text-neon-lime hover:text-white uppercase tracking-widest font-outfit transition-colors cursor-pointer"
+                      >
+                        {isQuickAddingCat ? (isAr ? "إلغاء" : "Cancel") : (isAr ? "+ فئة جديدة" : "+ Quick Add")}
+                      </button>
+                    </div>
+
+                    {isQuickAddingCat ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={quickCatName}
+                          onChange={(e) => setQuickCatName(e.target.value)}
+                          placeholder={isAr ? "اسم الفئة الجديدة" : "New category name"}
+                          className={`flex-1 bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-3 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all ${isAr ? 'font-cairo text-right' : 'font-outfit'}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!quickCatName.trim()) return;
+                            const slug = quickCatName.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
+                            if (categories.some(c => c.slug === slug)) {
+                              alert(isAr ? "هذه الفئة موجودة بالفعل" : "Category already exists");
+                              return;
+                            }
+                            addCategory({
+                              slug,
+                              nameFr: quickCatName,
+                              nameAr: quickCatName,
+                              descFr: quickCatName,
+                              descAr: quickCatName
+                            });
+                            setShoeCategory(slug);
+                            setQuickCatName("");
+                            setIsQuickAddingCat(false);
+                          }}
+                          className="px-4 bg-neon-lime hover:bg-white text-obsidian rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+                        >
+                          {isAr ? "إضافة" : "Add"}
+                        </button>
+                      </div>
+                    ) : (
+                      <select
+                        value={shoeCategory}
+                        onChange={(e) => setShoeCategory(e.target.value)}
+                        className={`w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-3 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all cursor-pointer ${isAr ? 'font-cairo text-right' : 'font-outfit'}`}
+                        required
+                      >
+                        {categories.map((c) => (
+                          <option key={c.id} value={c.slug} className="bg-obsidian text-white">
+                            {isAr ? c.nameAr : c.nameFr}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                 </div>
 
@@ -1618,20 +1727,26 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="flex gap-2 p-2 rounded-xl bg-neutral-950 border border-neutral-850">
-                      <div className="h-8 w-8 rounded overflow-hidden flex-shrink-0 bg-neutral-900">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={getShoeImage(lead.shoeId)} alt="Shoe" className="h-full w-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[10px] font-bold text-white truncate">{getShoeTitle(lead.shoeId)}</div>
-                        <div className="text-[9px] text-neutral-500 font-mono mt-0.5">Size {lead.size}</div>
-                      </div>
+                    <div className="flex flex-col gap-2 p-2 rounded-xl bg-neutral-950 border border-neutral-850 max-h-32 overflow-y-auto scrollbar-thin">
+                      {lead.items.map((item, idx) => (
+                        <div key={idx} className="flex gap-2 items-center">
+                          <div className="h-8 w-8 rounded overflow-hidden flex-shrink-0 bg-neutral-900">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={getShoeImage(item.sneakerId)} alt="Shoe" className="h-full w-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[10px] font-bold text-white truncate">{item.quantity}x {getShoeTitle(item.sneakerId)}</div>
+                            <div className="text-[9px] text-neutral-500 font-mono mt-0.5">Size {item.size}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="flex justify-between items-center text-[10px] text-neutral-400 font-mono">
+                    <div className="flex justify-between items-center text-[10px] text-neutral-400 font-mono mt-2">
                       <span>Dest: {getWilayaName(lead.wilayaId)}</span>
-                      <span className="font-bold text-neon-lime">{formatPrice(getShoePriceVal(lead.shoeId) + getWilayaFeeVal(lead.wilayaId))}</span>
+                      <span className="font-bold text-neon-lime">
+                        {formatPrice(lead.items.reduce((sum, item) => sum + (getShoePriceVal(item.sneakerId) * item.quantity), 0) + getWilayaFeeVal(lead.wilayaId))}
+                      </span>
                     </div>
 
                     {lead.notes && (
@@ -1644,9 +1759,13 @@ export const AdminDashboard: React.FC = () => {
                       <a
                         href={(() => {
                           const phone = lead.phoneNumber.replace(/\+/g, "");
+                          const itemsTotal = lead.items.reduce((sum, item) => sum + (getShoePriceVal(item.sneakerId) * item.quantity), 0);
+                          const totalStr = formatPrice(itemsTotal + getWilayaFeeVal(lead.wilayaId));
+                          const itemsSummaryFr = lead.items.map(i => `${i.quantity}x ${getShoeTitle(i.sneakerId)} (Taille ${i.size})`).join(", ");
+                          const itemsSummaryAr = lead.items.map(i => `${i.quantity}x ${getShoeTitle(i.sneakerId)} (مقاس ${i.size})`).join("، ");
                           const msg = isAr
-                            ? `مرحبا ${lead.customerName}، نود تأكيد طلبك لـ ${getShoeTitle(lead.shoeId)} (المقاس ${lead.size}) إلى ${getWilayaName(lead.wilayaId)}. المبلغ الإجمالي: ${formatPrice(getShoePriceVal(lead.shoeId) + getWilayaFeeVal(lead.wilayaId))}.`
-                            : `Bonjour ${lead.customerName}, nous confirmons votre commande: ${getShoeTitle(lead.shoeId)} (Taille ${lead.size}) vers ${getWilayaName(lead.wilayaId)}. Total: ${formatPrice(getShoePriceVal(lead.shoeId) + getWilayaFeeVal(lead.wilayaId))}.`;
+                            ? `مرحبا ${lead.customerName}، نود تأكيد طلبك لـ ${itemsSummaryAr} إلى ${getWilayaName(lead.wilayaId)}. المبلغ الإجمالي: ${totalStr}.`
+                            : `Bonjour ${lead.customerName}, nous confirmons votre commande: ${itemsSummaryFr} vers ${getWilayaName(lead.wilayaId)}. Total: ${totalStr}.`;
                           return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
                         })()}
                         target="_blank"
@@ -1700,20 +1819,26 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="flex gap-2 p-2 rounded-xl bg-neutral-950 border border-neutral-850">
-                      <div className="h-8 w-8 rounded overflow-hidden flex-shrink-0 bg-neutral-900">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={getShoeImage(lead.shoeId)} alt="Shoe" className="h-full w-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[10px] font-bold text-white truncate">{getShoeTitle(lead.shoeId)}</div>
-                        <div className="text-[9px] text-neutral-500 font-mono mt-0.5">Size {lead.size}</div>
-                      </div>
+                    <div className="flex flex-col gap-2 p-2 rounded-xl bg-neutral-950 border border-neutral-850 max-h-32 overflow-y-auto scrollbar-thin">
+                      {lead.items.map((item, idx) => (
+                        <div key={idx} className="flex gap-2 items-center">
+                          <div className="h-8 w-8 rounded overflow-hidden flex-shrink-0 bg-neutral-900">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={getShoeImage(item.sneakerId)} alt="Shoe" className="h-full w-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[10px] font-bold text-white truncate">{item.quantity}x {getShoeTitle(item.sneakerId)}</div>
+                            <div className="text-[9px] text-neutral-500 font-mono mt-0.5">Size {item.size}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="flex justify-between items-center text-[10px] text-neutral-400 font-mono">
+                    <div className="flex justify-between items-center text-[10px] text-neutral-400 font-mono mt-2">
                       <span>Dest: {getWilayaName(lead.wilayaId)}</span>
-                      <span className="font-bold text-neon-lime">{formatPrice(getShoePriceVal(lead.shoeId) + getWilayaFeeVal(lead.wilayaId))}</span>
+                      <span className="font-bold text-neon-lime">
+                        {formatPrice(lead.items.reduce((sum, item) => sum + (getShoePriceVal(item.sneakerId) * item.quantity), 0) + getWilayaFeeVal(lead.wilayaId))}
+                      </span>
                     </div>
 
                     {lead.notes && (
@@ -1794,20 +1919,26 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="flex gap-2 p-2 rounded-xl bg-neutral-950 border border-neutral-900">
-                      <div className="h-8 w-8 rounded overflow-hidden flex-shrink-0 bg-neutral-900 opacity-60">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={getShoeImage(lead.shoeId)} alt="Shoe" className="h-full w-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[10px] font-bold text-neutral-400 truncate">{getShoeTitle(lead.shoeId)}</div>
-                        <div className="text-[9px] text-neutral-500 font-mono mt-0.5">Size {lead.size}</div>
-                      </div>
+                    <div className="flex flex-col gap-2 p-2 rounded-xl bg-neutral-950 border border-neutral-900 max-h-32 overflow-y-auto scrollbar-thin">
+                      {lead.items.map((item, idx) => (
+                        <div key={idx} className="flex gap-2 items-center">
+                          <div className="h-8 w-8 rounded overflow-hidden flex-shrink-0 bg-neutral-900 opacity-60">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={getShoeImage(item.sneakerId)} alt="Shoe" className="h-full w-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[10px] font-bold text-neutral-400 truncate">{item.quantity}x {getShoeTitle(item.sneakerId)}</div>
+                            <div className="text-[9px] text-neutral-500 font-mono mt-0.5">Size {item.size}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="flex justify-between items-center text-[10px] text-neutral-500 font-mono">
+                    <div className="flex justify-between items-center text-[10px] text-neutral-500 font-mono mt-2">
                       <span>Dest: {getWilayaName(lead.wilayaId)}</span>
-                      <span className="font-bold text-neon-lime">{formatPrice(getShoePriceVal(lead.shoeId) + getWilayaFeeVal(lead.wilayaId))}</span>
+                      <span className="font-bold text-neon-lime">
+                        {formatPrice(lead.items.reduce((sum, item) => sum + (getShoePriceVal(item.sneakerId) * item.quantity), 0) + getWilayaFeeVal(lead.wilayaId))}
+                      </span>
                     </div>
 
                     {(lead.trackingNumber || lead.shippingProvider) && (
@@ -1846,89 +1977,117 @@ export const AdminDashboard: React.FC = () => {
                 {isAr ? "إضافة فئة أحذية جديدة" : "Add Basket Category"}
               </h2>
 
-              <form onSubmit={handleCategorySubmit} className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Name (FR) *</label>
+              <form onSubmit={handleCategorySubmit} className="space-y-6">
+                {/* Main Name Input - Prominent */}
+                <div>
+                  <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
+                    Category Name (Primary) *
+                  </label>
+                  <div className="relative">
                     <input
                       type="text"
                       value={catNameFr}
                       onChange={(e) => handleCatNameFrChange(e.target.value)}
                       placeholder="e.g. Running Performance"
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
+                      className="w-full bg-neutral-950 border-2 border-neutral-800 rounded-2xl px-4 py-4 text-base text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-outfit font-bold"
                       required
                     />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 text-right font-cairo">الاسم (عربي) *</label>
-                    <input
-                      type="text"
-                      dir="rtl"
-                      value={catNameAr}
-                      onChange={(e) => setCatNameAr(e.target.value)}
-                      placeholder="مثال: أحذية جري"
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all text-right font-cairo"
-                      required
-                    />
+                    {catSlug && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 rounded-lg border border-neutral-800">
+                        <Tag size={10} className="text-neon-lime" />
+                        <span className="text-[10px] text-neutral-400 font-mono">/{catSlug}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">URL Slug (Autogenerated)</label>
-                  <input
-                    type="text"
-                    value={catSlug}
-                    onChange={(e) => setCatSlug(e.target.value)}
-                    placeholder="slug-value-auto"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-neutral-500 placeholder-neutral-700 focus:outline-none font-mono font-bold"
-                    readOnly
-                  />
-                </div>
+                {/* Optional Expandable Section */}
+                <div className="rounded-2xl border border-neutral-800/80 bg-neutral-900/20 overflow-hidden transition-all">
+                  <button 
+                    type="button"
+                    onClick={() => setShowAdvancedCatOptions(!showAdvancedCatOptions)}
+                    className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-neutral-900/50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Settings size={14} className="text-neutral-500" />
+                      <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest font-outfit">
+                        Advanced / Image / Multilingual Options (Optional)
+                      </span>
+                    </div>
+                    <ChevronRight size={16} className={`text-neutral-500 transition-transform duration-300 ${showAdvancedCatOptions ? "rotate-90" : ""}`} />
+                  </button>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Description (FR) *</label>
-                    <textarea
-                      rows={3}
-                      value={catDescFr}
-                      onChange={(e) => setCatDescFr(e.target.value)}
-                      placeholder="French summary..."
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-outfit resize-none"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 text-right font-cairo">الوصف (AR) *</label>
-                    <textarea
-                      rows={3}
-                      dir="rtl"
-                      value={catDescAr}
-                      onChange={(e) => setCatDescAr(e.target.value)}
-                      placeholder="الوصف بالعربية..."
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all text-right font-cairo resize-none"
-                      required
-                    />
-                  </div>
+                  {showAdvancedCatOptions && (
+                    <div className="p-5 border-t border-neutral-800/80 space-y-5 bg-neutral-950/30 animate-fadeIn">
+                      <div>
+                        <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Category Image URL</label>
+                        <input
+                          type="url"
+                          value={catImage}
+                          onChange={(e) => setCatImage(e.target.value)}
+                          placeholder="https://images.unsplash.com/..."
+                          className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 text-right font-cairo">الاسم (عربي) - اختياري</label>
+                        <input
+                          type="text"
+                          dir="rtl"
+                          value={catNameAr}
+                          onChange={(e) => setCatNameAr(e.target.value)}
+                          placeholder="مثال: أحذية جري"
+                          className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all text-right font-cairo"
+                        />
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Description (FR) - Optional</label>
+                          <textarea
+                            rows={2}
+                            value={catDescFr}
+                            onChange={(e) => setCatDescFr(e.target.value)}
+                            placeholder="Brief description for SEO..."
+                            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-outfit resize-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 text-right font-cairo">الوصف (AR) - اختياري</label>
+                          <textarea
+                            rows={2}
+                            dir="rtl"
+                            value={catDescAr}
+                            onChange={(e) => setCatDescAr(e.target.value)}
+                            placeholder="وصف للفئة..."
+                            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all text-right font-cairo resize-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {catFormError && (
-                  <div className="text-xs text-red-400 border border-red-500/20 bg-red-500/5 rounded-xl p-3.5">
+                  <div className="text-xs text-red-400 border border-red-500/20 bg-red-500/5 rounded-xl p-3.5 flex items-center gap-2">
+                    <AlertTriangle size={14} />
                     {catFormError}
                   </div>
                 )}
-
                 {catFormSuccess && (
-                  <div className="text-xs text-neon-lime border border-neon-lime/20 bg-neon-lime/5 rounded-xl p-3.5 flex items-center gap-1">
+                  <div className="text-xs text-neon-lime border border-neon-lime/20 bg-neon-lime/5 rounded-xl p-3.5 flex items-center gap-2">
                     <Check size={14} />
-                    <span>Category added successfully!</span>
+                    <span>Category created successfully!</span>
                   </div>
                 )}
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl bg-neon-lime hover:bg-white text-obsidian font-black text-xs uppercase tracking-wider transition-all hover:scale-[1.01] neon-glow-lime cursor-pointer font-outfit"
+                  className="w-full py-4 rounded-2xl bg-neon-lime hover:bg-white text-obsidian font-black text-sm uppercase tracking-wider transition-all hover:scale-[1.02] neon-glow-lime cursor-pointer flex justify-center items-center gap-2 font-outfit"
                 >
-                  {isAr ? "حفظ الفئة الجديدة" : "Register Category"}
+                  <Plus size={16} />
+                  {isAr ? "حفظ الفئة الجديدة" : "Create Category"}
                 </button>
               </form>
             </div>

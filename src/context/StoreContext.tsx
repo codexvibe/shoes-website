@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { Category, Sneaker, Lead, WilayaFee, INITIAL_CATEGORIES, INITIAL_SNEAKERS, INITIAL_WILAYAS } from "../data/mockData";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { Category, Sneaker, Lead, WilayaFee, INITIAL_WILAYAS, CartItem } from "../data/mockData";
+import { getSupabaseClient } from "../lib/supabaseClient";
 
 export type Language = "fr" | "ar";
 
@@ -35,22 +36,117 @@ interface StoreContextType {
   logoutAdmin: () => void;
   contactConfig: ContactConfig;
   setContactConfig: (config: ContactConfig) => void;
+  loading: boolean;
+  cart: CartItem[];
+  addToCart: (item: CartItem) => void;
+  removeFromCart: (id: string) => void;
+  updateCartQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
+  isCartOpen: boolean;
+  setIsCartOpen: (isOpen: boolean) => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
+// ── Mapping utilities: snake_case (DB) ↔ camelCase (frontend) ──
+
+function dbCategoryToFrontend(row: any): Category {
+  return {
+    id: row.id,
+    slug: row.slug,
+    nameFr: row.name_fr,
+    nameAr: row.name_ar,
+    descFr: row.desc_fr || "",
+    descAr: row.desc_ar || "",
+    image: row.image || undefined,
+  };
+}
+
+function dbSneakerToFrontend(row: any): Sneaker {
+  return {
+    id: row.id,
+    slug: row.slug,
+    nameFr: row.name_fr,
+    nameAr: row.name_ar,
+    price: row.price,
+    categorySlug: row.category_slug,
+    image: row.image || "",
+    sizes: row.sizes || [],
+    sizesStock: row.sizes_stock || {},
+    colorways: row.colorways || [],
+    descFr: row.desc_fr || "",
+    descAr: row.desc_ar || "",
+    featured: row.featured || false,
+    isHotDrop: row.is_hot_drop || false,
+    isNewArrival: row.is_new_arrival || false,
+  };
+}
+
+function dbLeadToFrontend(row: any): Lead {
+  return {
+    id: row.id,
+    customerName: row.customer_name,
+    phoneNumber: row.phone_number,
+    items: row.items || [],
+    wilayaId: row.wilaya_id,
+    status: row.status,
+    notes: row.notes || undefined,
+    createdAt: row.created_at,
+    trackingNumber: row.tracking_number || undefined,
+    shippingProvider: row.shipping_provider || undefined,
+    shippedAt: row.shipped_at || undefined,
+  };
+}
+
+function dbWilayaToFrontend(row: any): WilayaFee {
+  return {
+    id: row.id,
+    nameFr: row.name_fr,
+    nameAr: row.name_ar,
+    fee: row.fee,
+  };
+}
+
+// ── Provider ──
+
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>("fr");
-  const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
-  const [sneakers, setSneakers] = useState<Sneaker[]>(INITIAL_SNEAKERS);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [sneakers, setSneakers] = useState<Sneaker[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [wilayaFees, setWilayaFees] = useState<WilayaFee[]>(INITIAL_WILAYAS);
   const [heroBanner, setHeroBannerState] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [contactConfig, setContactConfig] = useState<ContactConfig>({
-    whatsapp: "+212612345678",
+  const [contactConfig, setContactConfigState] = useState<ContactConfig>({
+    whatsapp: "+213000000000",
     email: "contact@sneakersobsidian.com",
   });
+  const [loading, setLoading] = useState(true);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Load cart from local storage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedCart = localStorage.getItem("shoes_cart");
+      if (storedCart) {
+        try {
+          setCart(JSON.parse(storedCart));
+        } catch (e) {
+          console.error("Failed to parse cart", e);
+        }
+      }
+    }
+  }, []);
+
+  // Sync cart to local storage when it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("shoes_cart", JSON.stringify(cart));
+    }
+  }, [cart]);
+
+  const supabase = getSupabaseClient();
 
   // Toggle layout direction automatically when language changes
   const setLanguage = (lang: Language) => {
@@ -61,102 +157,71 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Load state from local storage and sync across tabs
+  // ── Load all data from Supabase on mount ──
+  const loadFromSupabase = useCallback(async () => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      // Fetch categories
+      const { data: catData } = await supabase
+        .from("categories")
+        .select("*")
+        .order("created_at", { ascending: true });
+      if (catData) setCategories(catData.map(dbCategoryToFrontend));
+
+      // Fetch sneakers
+      const { data: shoeData } = await supabase
+        .from("sneakers")
+        .select("*")
+        .order("created_at", { ascending: true });
+      if (shoeData) setSneakers(shoeData.map(dbSneakerToFrontend));
+
+      // Fetch leads
+      const { data: leadData } = await supabase
+        .from("leads")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (leadData) setLeads(leadData.map(dbLeadToFrontend));
+
+      // Fetch wilaya fees
+      const { data: wilayaData } = await supabase
+        .from("wilaya_fees")
+        .select("*")
+        .order("id", { ascending: true });
+      if (wilayaData && wilayaData.length > 0) {
+        setWilayaFees(wilayaData.map(dbWilayaToFrontend));
+      }
+
+      // Fetch contact config
+      const { data: configData } = await supabase
+        .from("contact_config")
+        .select("*")
+        .eq("id", 1)
+        .single();
+      if (configData) {
+        setContactConfigState({
+          whatsapp: configData.whatsapp,
+          email: configData.email,
+        });
+        if (configData.hero_banner) {
+          setHeroBannerState(configData.hero_banner);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load from Supabase:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const loadFromStorage = () => {
-        const storedCategories = localStorage.getItem("shoes_categories");
-        if (storedCategories) {
-          try {
-            setCategories(JSON.parse(storedCategories));
-          } catch (e) {
-            console.error("Failed to parse stored categories", e);
-          }
-        }
+      loadFromSupabase();
 
-        const storedSneakers = localStorage.getItem("shoes_sneakers");
-        if (storedSneakers) {
-          try {
-            const parsed = JSON.parse(storedSneakers) as Sneaker[];
-            // Normalize each sneaker to ensure all required array fields exist
-            const normalized = parsed.map((s: any) => {
-              // Aggressive price scrubbing to fix corrupted localStorage strings like "1,700 DH"
-              let scrubbedPrice = s.price;
-              if (typeof s.price === 'string') {
-                scrubbedPrice = parseFloat(s.price.replace(/[^0-9.]/g, ""));
-              }
-              if (isNaN(scrubbedPrice)) scrubbedPrice = 0;
-
-              return {
-                ...s,
-                price: scrubbedPrice,
-                sizes: Array.isArray(s.sizes) ? s.sizes : [39, 40, 41, 42, 43, 44, 45],
-                sizesStock: s.sizesStock && typeof s.sizesStock === 'object' ? s.sizesStock : {},
-                colorways: Array.isArray(s.colorways) ? s.colorways : ["Default"],
-              };
-            });
-            setSneakers(normalized);
-          } catch (e) {
-            console.error("Failed to parse stored sneakers", e);
-          }
-        }
-
-        const storedLeads = localStorage.getItem("shoes_leads");
-        if (storedLeads) {
-          try {
-            setLeads(JSON.parse(storedLeads));
-          } catch (e) {
-            console.error("Failed to parse stored leads", e);
-          }
-        }
-
-        const storedWilayas = localStorage.getItem("shoes_wilayas");
-        if (storedWilayas) {
-          try {
-            const parsedWilayas = JSON.parse(storedWilayas) as WilayaFee[];
-            const mergedWilayas = [...parsedWilayas];
-            INITIAL_WILAYAS.forEach(iw => {
-              if (!mergedWilayas.some(pw => pw.id === iw.id)) {
-                mergedWilayas.push(iw);
-              }
-            });
-            setWilayaFees(mergedWilayas);
-            if (mergedWilayas.length > parsedWilayas.length) {
-              localStorage.setItem("shoes_wilayas", JSON.stringify(mergedWilayas));
-            }
-          } catch (e) {
-            console.error("Failed to parse stored wilayas", e);
-          }
-        }
-
-        const storedHeroBanner = localStorage.getItem("shoes_herobanner");
-        if (storedHeroBanner) {
-          setHeroBannerState(storedHeroBanner);
-        } else {
-          setHeroBannerState(null);
-        }
-
-        const storedContact = localStorage.getItem("shoes_contact");
-        if (storedContact) {
-          try {
-            setContactConfig(JSON.parse(storedContact));
-          } catch (e) {
-            console.error("Failed to parse stored contact details", e);
-          }
-        }
-      };
-
-      loadFromStorage();
-
-      // Listen for changes from other tabs (like the admin panel)
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key && e.key.startsWith("shoes_")) {
-          loadFromStorage();
-        }
-      };
-
-      window.addEventListener("storage", handleStorageChange);
-
+      // Check admin session
       const adminSession = sessionStorage.getItem("shoes_admin");
       if (adminSession === "true") {
         setIsAdmin(true);
@@ -166,141 +231,352 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
       document.documentElement.lang = language;
 
-      return () => {
-        window.removeEventListener("storage", handleStorageChange);
-      };
-    }
-  }, [language]);
+      // ── Supabase Realtime subscriptions ──
+      if (supabase) {
+        const channel = supabase
+          .channel("store-changes")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "categories" },
+            () => { loadFromSupabase(); }
+          )
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "sneakers" },
+            () => { loadFromSupabase(); }
+          )
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "leads" },
+            () => { loadFromSupabase(); }
+          )
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "contact_config" },
+            () => { loadFromSupabase(); }
+          )
+          .subscribe();
 
-  // Persist categories when changed
-  const addCategory = (newCat: Omit<Category, "id">) => {
-    const fullCat: Category = {
-      ...newCat,
-      id: `cat_${Date.now()}`
-    };
-    const updated = [...categories, fullCat];
-    setCategories(updated);
-    localStorage.setItem("shoes_categories", JSON.stringify(updated));
-  };
-
-  const deleteCategory = (slug: string) => {
-    const updated = categories.filter((cat) => cat.slug !== slug);
-    setCategories(updated);
-    localStorage.setItem("shoes_categories", JSON.stringify(updated));
-  };
-
-  // Sneaker management
-  const addSneaker = (newShoe: Omit<Sneaker, "id">) => {
-    const fullShoe: Sneaker = {
-      ...newShoe,
-      id: `shoe_${Date.now()}`
-    };
-    const updated = [...sneakers, fullShoe];
-    setSneakers(updated);
-    localStorage.setItem("shoes_sneakers", JSON.stringify(updated));
-  };
-
-  const deleteSneaker = (id: string) => {
-    const updated = sneakers.filter((shoe) => shoe.id !== id);
-    setSneakers(updated);
-    localStorage.setItem("shoes_sneakers", JSON.stringify(updated));
-  };
-
-  const updateSneaker = (id: string, updatedShoe: Omit<Sneaker, "id">) => {
-    const updated = sneakers.map((shoe) => {
-      if (shoe.id === id) {
-        return { ...updatedShoe, id };
-      }
-      return shoe;
-    });
-    setSneakers(updated);
-    localStorage.setItem("shoes_sneakers", JSON.stringify(updated));
-  };
-
-  // Keyboard-navigable stock manager
-  const updateStock = (shoeId: string, size: number, quantity: number) => {
-    const updated = sneakers.map((shoe) => {
-      if (shoe.id === shoeId) {
-        const newStock = { ...shoe.sizesStock, [size]: quantity };
-        // Ensure size exists in sizes array
-        const newSizes = shoe.sizes.includes(size) 
-          ? shoe.sizes 
-          : [...shoe.sizes, size].sort((a, b) => a - b);
-        return {
-          ...shoe,
-          sizes: newSizes,
-          sizesStock: newStock
+        return () => {
+          supabase.removeChannel(channel);
         };
       }
-      return shoe;
-    });
-    setSneakers(updated);
-    localStorage.setItem("shoes_sneakers", JSON.stringify(updated));
-  };
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase]);
 
-  // CRM Leads Management
-  const addLead = (newLead: Omit<Lead, "id" | "createdAt">) => {
-    const fullLead: Lead = {
-      ...newLead,
-      id: `lead_${Date.now()}`,
-      createdAt: new Date().toISOString()
-    };
-    const updated = [fullLead, ...leads];
-    setLeads(updated);
-    localStorage.setItem("shoes_leads", JSON.stringify(updated));
-  };
+  // ── Categories ──
 
-  const updateLeadStatus = (id: string, status: Lead["status"]) => {
-    const updated = leads.map((lead) => {
-      if (lead.id === id) {
-        return { ...lead, status };
-      }
-      return lead;
-    });
-    setLeads(updated);
-    localStorage.setItem("shoes_leads", JSON.stringify(updated));
-  };
+  const addCategory = async (newCat: Omit<Category, "id">) => {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("categories")
+      .insert({
+        slug: newCat.slug,
+        name_fr: newCat.nameFr,
+        name_ar: newCat.nameAr,
+        desc_fr: newCat.descFr,
+        desc_ar: newCat.descAr,
+        image: newCat.image || null,
+      })
+      .select()
+      .single();
 
-  const updateLeadTracking = (id: string, updates: Partial<Pick<Lead, "trackingNumber" | "shippingProvider" | "shippedAt">>) => {
-    const updated = leads.map((lead) => {
-      if (lead.id === id) {
-        return { ...lead, ...updates };
-      }
-      return lead;
-    });
-    setLeads(updated);
-    localStorage.setItem("shoes_leads", JSON.stringify(updated));
-  };
-
-  const deleteLead = (id: string) => {
-    const updated = leads.filter((lead) => lead.id !== id);
-    setLeads(updated);
-    localStorage.setItem("shoes_leads", JSON.stringify(updated));
-  };
-
-  // Wilaya Shipping Configuration
-  const updateWilayaFee = (id: string, fee: number) => {
-    const updated = wilayaFees.map((w) => {
-      if (w.id === id) {
-        return { ...w, fee };
-      }
-      return w;
-    });
-    setWilayaFees(updated);
-    localStorage.setItem("shoes_wilayas", JSON.stringify(updated));
-  };
-
-  // Marketing Banner Manager
-  const setHeroBanner = (image: string | null) => {
-    setHeroBannerState(image);
-    if (image) {
-      localStorage.setItem("shoes_herobanner", image);
-    } else {
-      localStorage.removeItem("shoes_herobanner");
+    if (error) {
+      console.error("Failed to add category:", error);
+      alert("Failed to add category: " + error.message);
+      return;
+    }
+    if (data) {
+      setCategories((prev) => [...prev, dbCategoryToFrontend(data)]);
     }
   };
 
-  // Auth handler
+  const deleteCategory = async (slug: string) => {
+    if (!supabase) return;
+    const { error } = await supabase
+      .from("categories")
+      .delete()
+      .eq("slug", slug);
+
+    if (error) {
+      console.error("Failed to delete category:", error);
+      return;
+    }
+    setCategories((prev) => prev.filter((cat) => cat.slug !== slug));
+  };
+
+  // ── Sneakers ──
+
+  const addSneaker = async (newShoe: Omit<Sneaker, "id">) => {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("sneakers")
+      .insert({
+        slug: newShoe.slug,
+        name_fr: newShoe.nameFr,
+        name_ar: newShoe.nameAr,
+        price: newShoe.price,
+        category_slug: newShoe.categorySlug,
+        image: newShoe.image || null,
+        sizes: newShoe.sizes,
+        sizes_stock: newShoe.sizesStock,
+        colorways: newShoe.colorways,
+        desc_fr: newShoe.descFr,
+        desc_ar: newShoe.descAr,
+        featured: newShoe.featured || false,
+        is_hot_drop: newShoe.isHotDrop || false,
+        is_new_arrival: newShoe.isNewArrival || false,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Failed to add sneaker:", error);
+      alert("Failed to add sneaker: " + error.message);
+      return;
+    }
+    if (data) {
+      setSneakers((prev) => [...prev, dbSneakerToFrontend(data)]);
+    }
+  };
+
+  const deleteSneaker = async (id: string) => {
+    if (!supabase) return;
+    const { error } = await supabase
+      .from("sneakers")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Failed to delete sneaker:", error);
+      return;
+    }
+    setSneakers((prev) => prev.filter((shoe) => shoe.id !== id));
+  };
+
+  const updateSneaker = async (id: string, updatedShoe: Omit<Sneaker, "id">) => {
+    if (!supabase) return;
+    const { error } = await supabase
+      .from("sneakers")
+      .update({
+        slug: updatedShoe.slug,
+        name_fr: updatedShoe.nameFr,
+        name_ar: updatedShoe.nameAr,
+        price: updatedShoe.price,
+        category_slug: updatedShoe.categorySlug,
+        image: updatedShoe.image || null,
+        sizes: updatedShoe.sizes,
+        sizes_stock: updatedShoe.sizesStock,
+        colorways: updatedShoe.colorways,
+        desc_fr: updatedShoe.descFr,
+        desc_ar: updatedShoe.descAr,
+        featured: updatedShoe.featured || false,
+        is_hot_drop: updatedShoe.isHotDrop || false,
+        is_new_arrival: updatedShoe.isNewArrival || false,
+      })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Failed to update sneaker:", error);
+      alert("Failed to update sneaker: " + error.message);
+      return;
+    }
+    setSneakers((prev) =>
+      prev.map((shoe) => (shoe.id === id ? { ...updatedShoe, id } : shoe))
+    );
+  };
+
+  const updateStock = async (shoeId: string, size: number, quantity: number) => {
+    if (!supabase) return;
+    const shoe = sneakers.find((s) => s.id === shoeId);
+    if (!shoe) return;
+
+    const newStock = { ...shoe.sizesStock, [size]: quantity };
+    const newSizes = shoe.sizes.includes(size)
+      ? shoe.sizes
+      : [...shoe.sizes, size].sort((a, b) => a - b);
+
+    const { error } = await supabase
+      .from("sneakers")
+      .update({
+        sizes: newSizes,
+        sizes_stock: newStock,
+      })
+      .eq("id", shoeId);
+
+    if (error) {
+      console.error("Failed to update stock:", error);
+      return;
+    }
+    setSneakers((prev) =>
+      prev.map((s) =>
+        s.id === shoeId ? { ...s, sizes: newSizes, sizesStock: newStock } : s
+      )
+    );
+  };
+
+  // ── Cart ──
+
+  const addToCart = (item: CartItem) => {
+    setCart((prev) => {
+      const existing = prev.find((i) => i.sneakerId === item.sneakerId && i.size === item.size);
+      if (existing) {
+        return prev.map((i) =>
+          i.id === existing.id ? { ...i, quantity: i.quantity + item.quantity } : i
+        );
+      }
+      return [...prev, item];
+    });
+    setIsCartOpen(true); // Auto-open cart when adding
+  };
+
+  const removeFromCart = (id: string) => {
+    setCart((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const updateCartQuantity = (id: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(id);
+      return;
+    }
+    setCart((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)));
+  };
+
+  const clearCart = () => setCart([]);
+
+  // ── Leads (CRM) ──
+
+  const addLead = async (newLead: Omit<Lead, "id" | "createdAt">) => {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("leads")
+      .insert({
+        customer_name: newLead.customerName,
+        phone_number: newLead.phoneNumber,
+        items: newLead.items,
+        wilaya_id: newLead.wilayaId,
+        status: newLead.status || "todo",
+        notes: newLead.notes || null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Failed to add lead:", error);
+      alert("Failed to submit order: " + error.message);
+      return;
+    }
+    if (data) {
+      setLeads((prev) => [dbLeadToFrontend(data), ...prev]);
+    }
+  };
+
+  const updateLeadStatus = async (id: string, status: Lead["status"]) => {
+    if (!supabase) return;
+    const { error } = await supabase
+      .from("leads")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Failed to update lead status:", error);
+      return;
+    }
+    setLeads((prev) =>
+      prev.map((lead) => (lead.id === id ? { ...lead, status } : lead))
+    );
+  };
+
+  const updateLeadTracking = async (
+    id: string,
+    updates: Partial<Pick<Lead, "trackingNumber" | "shippingProvider" | "shippedAt">>
+  ) => {
+    if (!supabase) return;
+    const dbUpdates: any = {};
+    if (updates.trackingNumber !== undefined) dbUpdates.tracking_number = updates.trackingNumber;
+    if (updates.shippingProvider !== undefined) dbUpdates.shipping_provider = updates.shippingProvider;
+    if (updates.shippedAt !== undefined) dbUpdates.shipped_at = updates.shippedAt;
+
+    const { error } = await supabase
+      .from("leads")
+      .update(dbUpdates)
+      .eq("id", id);
+
+    if (error) {
+      console.error("Failed to update lead tracking:", error);
+      return;
+    }
+    setLeads((prev) =>
+      prev.map((lead) => (lead.id === id ? { ...lead, ...updates } : lead))
+    );
+  };
+
+  const deleteLead = async (id: string) => {
+    if (!supabase) return;
+    const { error } = await supabase
+      .from("leads")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Failed to delete lead:", error);
+      return;
+    }
+    setLeads((prev) => prev.filter((lead) => lead.id !== id));
+  };
+
+  // ── Wilaya Fees ──
+
+  const updateWilayaFee = async (id: string, fee: number) => {
+    if (!supabase) return;
+    const { error } = await supabase
+      .from("wilaya_fees")
+      .update({ fee })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Failed to update wilaya fee:", error);
+      return;
+    }
+    setWilayaFees((prev) =>
+      prev.map((w) => (w.id === id ? { ...w, fee } : w))
+    );
+  };
+
+  // ── Hero Banner & Contact Config ──
+
+  const setHeroBanner = async (image: string | null) => {
+    if (!supabase) return;
+    setHeroBannerState(image);
+    const { error } = await supabase
+      .from("contact_config")
+      .update({ hero_banner: image })
+      .eq("id", 1);
+
+    if (error) {
+      console.error("Failed to update hero banner:", error);
+    }
+  };
+
+  const setContactConfig = async (config: ContactConfig) => {
+    if (!supabase) return;
+    setContactConfigState(config);
+    const { error } = await supabase
+      .from("contact_config")
+      .update({
+        whatsapp: config.whatsapp,
+        email: config.email,
+      })
+      .eq("id", 1);
+
+    if (error) {
+      console.error("Failed to update contact config:", error);
+    }
+  };
+
+  // ── Auth ──
+
   const loginAdmin = (password: string): boolean => {
     if (password === "AdminShoes2026") {
       setIsAdmin(true);
@@ -313,12 +589,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const logoutAdmin = () => {
     setIsAdmin(false);
     sessionStorage.removeItem("shoes_admin");
-  };
-
-  // Persist contact configurations
-  const saveContactConfig = (config: ContactConfig) => {
-    setContactConfig(config);
-    localStorage.setItem("shoes_contact", JSON.stringify(config));
   };
 
   return (
@@ -347,7 +617,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         loginAdmin,
         logoutAdmin,
         contactConfig,
-        setContactConfig: saveContactConfig,
+        setContactConfig,
+        loading,
+        cart,
+        addToCart,
+        removeFromCart,
+        updateCartQuantity,
+        clearCart,
+        isCartOpen,
+        setIsCartOpen,
       }}
     >
       {children}

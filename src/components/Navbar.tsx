@@ -1,18 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
-import { Globe, Menu, X } from "lucide-react";
+import { Globe, Menu, X, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 
 export const Navbar: React.FC = () => {
-  const { language, setLanguage } = useStore();
+  const { language, setLanguage, cart, setIsCartOpen } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
   
   const isAr = language === "ar";
-  // Determine if we are on the admin page by checking window.location on client side, 
-  // since we don't have next/router easily giving us the pathname synchronously in app router without usePathname
-  const isAdminPage = typeof window !== 'undefined' && window.location.pathname.includes("/admin");
+  const isAdminPage = pathname?.includes("/admin");
 
   const toggleLanguage = () => {
     setLanguage(isAr ? "fr" : "ar");
@@ -71,6 +73,22 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Elements */}
           <div className="hidden md:flex items-center gap-4">
+            {/* Cart Button */}
+            {!isAdminPage && (
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 text-neutral-400 hover:text-neon-lime transition-colors"
+                title="View Cart"
+              >
+                <ShoppingCart size={20} />
+                {cartItemCount > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-obsidian bg-neon-lime rounded-full">
+                    {cartItemCount}
+                  </span>
+                )}
+              </button>
+            )}
+
             {/* Language Switcher Widget */}
             <button
               onClick={toggleLanguage}
@@ -83,8 +101,21 @@ export const Navbar: React.FC = () => {
             </button>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu buttons */}
           <div className="flex md:hidden items-center gap-2">
+            {!isAdminPage && (
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 text-neutral-400 hover:text-neon-lime"
+              >
+                <ShoppingCart size={20} />
+                {cartItemCount > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-obsidian bg-neon-lime rounded-full">
+                    {cartItemCount}
+                  </span>
+                )}
+              </button>
+            )}
             <button
               onClick={toggleLanguage}
               className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-2 text-neutral-400 hover:text-white"

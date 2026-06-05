@@ -3,25 +3,27 @@
 import React, { useState } from "react";
 import { useStore } from "../context/StoreContext";
 import { X, MessageSquare, Mail, ShoppingCart, Check, Truck, ChevronDown } from "lucide-react";
-import { Sneaker } from "../data/mockData";
 
 interface ContactModalProps {
-  sneaker: Sneaker;
-  selectedSize: number | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSize, onClose }) => {
-  const { language, contactConfig, wilayaFees } = useStore();
-  const [size, setSize] = useState<number | null>(selectedSize);
-  const [quantity, setQuantity] = useState<number>(1);
+export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
+  const { language, contactConfig, wilayaFees, cart, sneakers, addLead, clearCart } = useStore();
   const [selectedWilayaId, setSelectedWilayaId] = useState<string>(wilayaFees[0]?.id || "16");
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [wilayaSearch, setWilayaSearch] = useState<string>("");
+  
+  const [customerName, setCustomerName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderError, setOrderError] = useState("");
 
   const isAr = language === "ar";
-  const shoeName = isAr ? sneaker.nameAr : sneaker.nameFr;
+
+  if (!isOpen) return null;
 
   // Selected Wilaya calculations
   const filteredWilayas = wilayaFees.filter(w => 
@@ -32,9 +34,17 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
 
   const selectedWilaya = wilayaFees.find(w => w.id === selectedWilayaId) || wilayaFees[0];
   const deliveryFee = selectedWilaya ? selectedWilaya.fee : 0;
-  const safePrice = Number(sneaker.price) || 0;
-  const sneakerTotal = safePrice * quantity;
-  const grandTotal = sneakerTotal + deliveryFee;
+  
+  const getSneakerDetails = (sneakerId: string) => {
+    return sneakers.find((s) => s.id === sneakerId);
+  };
+
+  const cartSubtotal = cart.reduce((total, item) => {
+    const shoe = getSneakerDetails(item.sneakerId);
+    return total + (shoe?.price || 0) * item.quantity;
+  }, 0);
+
+  const grandTotal = cartSubtotal + deliveryFee;
 
   const formatPrice = (price: number) => {
     const safe = Math.round(Number(price) || 0);
@@ -42,32 +52,35 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
     return isAr ? `${formatted} د.ج` : `${formatted} DA`;
   };
 
-  const handleSizeSelect = (sz: number) => {
-    setSize(sz);
+  const getWilayaName = (id: string) => {
+    const w = wilayaFees.find(x => x.id === id);
+    return w ? (isAr ? w.nameAr : w.nameFr) : id;
   };
+
+  const cartSummaryText = cart.map(item => {
+    const shoe = getSneakerDetails(item.sneakerId);
+    const name = shoe ? (isAr ? shoe.nameAr : shoe.nameFr) : "Unknown Shoe";
+    return `- ${name} (Size: ${item.size}, Qty: ${item.quantity})`;
+  }).join("\n");
 
   const getWhatsAppLink = () => {
     const phone = contactConfig.whatsapp.replace(/\+/g, "");
-    const sizeStr = size ? (isAr ? `بمقاس ${size}` : `en taille ${size}`) : "";
-    const qtyStr = quantity > 1 ? (isAr ? `الكمية: ${quantity}` : `(Quantité: ${quantity})`) : "";
     const wilayaStr = selectedWilaya ? (isAr ? `التوصيل إلى ${selectedWilaya.nameAr}` : `Livraison vers ${selectedWilaya.nameFr}`) : "";
     
-    const textFr = `Bonjour, je souhaite commander la paire de baskets *${sneaker.nameFr}* ${sizeStr} ${qtyStr} au prix de *${formatPrice(sneaker.price)}* sur votre showcase. ${wilayaStr} (+${formatPrice(deliveryFee)}). *Total: ${formatPrice(grandTotal)}*. Veuillez me confirmer la disponibilité.`;
-    const textAr = `مرحباً، أود طلب حذاء *${sneaker.nameAr}* ${sizeStr} ${qtyStr} بسعر *${formatPrice(sneaker.price)}* من معرضكم الإلكتروني. ${wilayaStr} (+${formatPrice(deliveryFee)}). *الإجمالي: ${formatPrice(grandTotal)}*. أرجو تأكيد التوفر.`;
+    const textFr = `Bonjour, je souhaite passer la commande suivante :\n${cartSummaryText}\n\n${wilayaStr} (+${formatPrice(deliveryFee)}).\n*Total: ${formatPrice(grandTotal)}*.`;
+    const textAr = `مرحباً، أود تقديم الطلب التالي:\n${cartSummaryText}\n\n${wilayaStr} (+${formatPrice(deliveryFee)}).\n*الإجمالي: ${formatPrice(grandTotal)}*.`;
     
     const text = encodeURIComponent(isAr ? textAr : textFr);
     return `https://wa.me/${phone}?text=${text}`;
   };
 
   const getEmailLink = () => {
-    const subjectFr = `Commande Showcase: ${sneaker.nameFr}`;
-    const subjectAr = `طلب شراء: ${sneaker.nameAr}`;
-    const sizeStr = size ? `Size: ${size}` : "";
-    const qtyStr = `Qty: ${quantity}`;
+    const subjectFr = `Nouvelle Commande Showcase`;
+    const subjectAr = `طلب شراء جديد`;
     const wilayaStr = selectedWilaya ? `Wilaya: ${selectedWilaya.nameFr} (+${formatPrice(deliveryFee)})` : "";
     
-    const bodyFr = `Bonjour,\n\nJe souhaite commander la paire suivante:\n- Modèle: ${sneaker.nameFr}\n- ${sizeStr}\n- ${qtyStr}\n- Prix: ${formatPrice(sneaker.price)}\n- ${wilayaStr}\n\n*Total de la commande: ${formatPrice(grandTotal)}*\n\nMerci de me recontacter pour finaliser l'achat.`;
-    const bodyAr = `مرحباً،\n\nأود طلب الحذاء التالي:\n- الموديل: ${sneaker.nameAr}\n- المقاس: ${size || 'غير محدد'}\n- الكمية: ${quantity}\n- السعر: ${formatPrice(sneaker.price)}\n- ${wilayaStr}\n\n*الإجمالي: ${formatPrice(grandTotal)}*\n\nشكراً لكم.`;
+    const bodyFr = `Bonjour,\n\nJe souhaite passer la commande suivante:\n${cartSummaryText}\n\n- ${wilayaStr}\n\n*Total de la commande: ${formatPrice(grandTotal)}*\n\nMerci de me recontacter pour finaliser l'achat.`;
+    const bodyAr = `مرحباً،\n\nأود طلب الآتي:\n${cartSummaryText}\n\n- ${wilayaStr}\n\n*الإجمالي: ${formatPrice(grandTotal)}*\n\nشكراً لكم.`;
 
     const subject = encodeURIComponent(isAr ? subjectAr : subjectFr);
     const body = encodeURIComponent(isAr ? bodyAr : bodyFr);
@@ -75,20 +88,66 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
   };
 
   const copyDetails = () => {
-    const sizeStr = size ? `Size ${size}` : "N/A";
-    const text = `${shoeName} - ${sizeStr} - Price: ${formatPrice(sneaker.price)} - Delivery: ${getWilayaName(selectedWilayaId)} - Total: ${formatPrice(grandTotal)}`;
+    const text = `Order Details:\n${cartSummaryText}\nDelivery: ${getWilayaName(selectedWilayaId)}\nTotal: ${formatPrice(grandTotal)}`;
     navigator.clipboard.writeText(text);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const getWilayaName = (id: string) => {
-    const w = wilayaFees.find(x => x.id === id);
-    return w ? (isAr ? w.nameAr : w.nameFr) : id;
+  const handlePlaceOrder = () => {
+    setOrderError("");
+    if (cart.length === 0) {
+      setOrderError(isAr ? "السلة فارغة." : "Your cart is empty.");
+      return;
+    }
+    if (!customerName.trim() || !phoneNumber.trim()) {
+      setOrderError(isAr ? "الرجاء إدخال الاسم ورقم الهاتف." : "Please enter your name and phone number.");
+      return;
+    }
+
+    addLead({
+      customerName,
+      phoneNumber,
+      items: cart,
+      wilayaId: selectedWilayaId,
+      status: "todo",
+    });
+    
+    clearCart();
+    setOrderSuccess(true);
   };
 
+  if (orderSuccess) {
+    return (
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-obsidian/90 backdrop-blur-md animate-fadeIn">
+        <div className="w-full max-w-md rounded-3xl border border-neon-lime/30 bg-[#0d0d11] p-8 shadow-2xl shadow-neon-lime/10 text-center">
+          <div className="w-16 h-16 mx-auto bg-neon-lime/20 text-neon-lime rounded-full flex items-center justify-center mb-6">
+            <Check size={32} />
+          </div>
+          <h3 className={`text-2xl font-black text-white mb-2 ${isAr ? 'font-cairo' : 'font-outfit uppercase'}`}>
+            {isAr ? "تم استلام طلبك بنجاح!" : "ORDER RECEIVED!"}
+          </h3>
+          <p className={`text-neutral-400 mb-8 ${isAr ? 'font-cairo' : 'font-outfit'}`}>
+            {isAr 
+              ? "شكراً لك! سيتواصل معك فريقنا قريباً لتأكيد الطلب وترتيب التوصيل."
+              : "Thank you! Our team will contact you shortly to confirm the order and arrange delivery."}
+          </p>
+          <button
+            onClick={() => {
+              setOrderSuccess(false);
+              onClose();
+            }}
+            className="w-full py-4 rounded-2xl bg-white text-obsidian font-black text-sm uppercase tracking-wider transition-all hover:bg-neutral-200 font-outfit"
+          >
+            {isAr ? "إغلاق" : "Close"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian/90 backdrop-blur-md animate-fadeIn overflow-y-auto">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-obsidian/90 backdrop-blur-md animate-fadeIn overflow-y-auto">
       {/* Container Card */}
       <div className="relative w-full max-w-xl max-h-[95vh] rounded-3xl border border-neutral-800 bg-[#0d0d11] p-5 sm:p-6 overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent my-auto">
         
@@ -118,47 +177,21 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
           </div>
         </div>
 
-        {/* Product Brief */}
-        <div className="flex gap-4 p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/60 mb-5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={sneaker.image}
-            alt={shoeName}
-            className="w-16 h-16 rounded-xl object-cover border border-neutral-800 flex-shrink-0"
-          />
-          <div className="flex flex-col justify-center flex-1">
-            <span className={`text-[10px] uppercase font-bold text-neon-lime font-outfit tracking-widest`}>
-              {sneaker.categorySlug.replace("-", " ")}
-            </span>
-            <h4 className={`text-sm font-bold text-white mt-1 ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-              {shoeName}
-            </h4>
-            <span className="text-neon-orange font-black text-sm mt-1 font-outfit">
-              {formatPrice(sneaker.price)}
-            </span>
-          </div>
-        </div>
-
-        {/* Size Selection */}
-        <div className="mb-4">
-          <label className={`block text-xs font-bold text-neutral-400 mb-2 uppercase tracking-wider ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-            {isAr ? "تأكيد المقاس المختار:" : "CONFIRM SIZE:"}
-          </label>
-          <div className="flex flex-wrap gap-1.5">
-            {sneaker.sizes.map((sz) => (
-              <button
-                key={sz}
-                onClick={() => handleSizeSelect(sz)}
-                className={`w-10 h-10 rounded-lg text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
-                  size === sz
-                    ? "bg-neon-lime text-obsidian border-neon-lime font-black"
-                    : "bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-700 hover:text-white"
-                }`}
-              >
-                {sz}
-              </button>
-            ))}
-          </div>
+        {/* Order Summary (Brief) */}
+        <div className="flex flex-col gap-2 p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/60 mb-5 max-h-32 overflow-y-auto scrollbar-thin">
+          {cart.map((item) => {
+            const shoe = getSneakerDetails(item.sneakerId);
+            return (
+              <div key={item.id} className="flex items-center justify-between">
+                <span className={`text-sm text-white ${isAr ? 'font-cairo' : 'font-outfit'}`}>
+                  {item.quantity}x {shoe ? (isAr ? shoe.nameAr : shoe.nameFr) : "Item"} (Sz: {item.size})
+                </span>
+                <span className="text-xs text-neutral-400 font-mono">
+                  {formatPrice((shoe?.price || 0) * item.quantity)}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
         {/* Delivery Wilaya Selection */}
@@ -216,33 +249,11 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
           </div>
         </div>
 
-        {/* Quantity Selection */}
-        <div className="mb-4 flex items-center justify-between border-t border-neutral-900 pt-4">
-          <label className={`text-xs font-bold text-neutral-400 uppercase tracking-wider ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-            {isAr ? "الكمية المطلوبة:" : "QUANTITY:"}
-          </label>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-7 h-7 rounded-lg bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 font-bold flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-colors"
-            >
-              -
-            </button>
-            <span className="font-outfit text-white font-black text-sm w-6 text-center">{quantity}</span>
-            <button
-              onClick={() => setQuantity(quantity + 1)}
-              className="w-7 h-7 rounded-lg bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 font-bold flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-colors"
-            >
-              +
-            </button>
-          </div>
-        </div>
-
         {/* Detailed Price Summary - Bigger Design */}
         <div className="mb-6 rounded-2xl bg-neutral-900/40 border border-neutral-800 p-5 space-y-3">
           <div className="flex justify-between items-center text-sm text-neutral-400 font-outfit">
             <span>Subtotal:</span>
-            <span className="font-mono text-white">{formatPrice(sneakerTotal)}</span>
+            <span className="font-mono text-white">{formatPrice(cartSubtotal)}</span>
           </div>
           <div className="flex justify-between items-center text-sm text-neutral-400 font-outfit">
             <span>Delivery Fee <span className="text-[10px]">({getWilayaName(selectedWilayaId)})</span>:</span>
@@ -254,27 +265,79 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
           </div>
         </div>
 
+        {/* Customer Details */}
+        <div className="mb-6 space-y-4 border-t border-neutral-900 pt-5">
+          <label className={`block text-xs font-bold text-neutral-400 uppercase tracking-wider ${isAr ? 'font-cairo text-right' : 'font-outfit'}`}>
+            {isAr ? "معلومات الاتصال:" : "CONTACT INFO:"}
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <input 
+                type="text" 
+                placeholder={isAr ? "الاسم الكامل *" : "Full Name *"}
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                dir={isAr ? "rtl" : "ltr"}
+                className={`w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-lime/60 transition-all ${isAr ? 'font-cairo text-right' : 'font-outfit'}`}
+              />
+            </div>
+            <div>
+              <input 
+                type="tel" 
+                placeholder={isAr ? "رقم الهاتف *" : "Phone Number *"}
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                dir="ltr"
+                className={`w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-lime/60 transition-all font-mono text-left ${isAr ? 'text-right' : ''}`}
+              />
+            </div>
+          </div>
+          {orderError && (
+            <div className={`text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 mt-2 ${isAr ? 'font-cairo text-right' : 'font-outfit'}`}>
+              {orderError}
+            </div>
+          )}
+        </div>
+
         {/* Order CTA Buttons */}
         <div className="space-y-3.5">
-          {/* WhatsApp CTA */}
-          <a
-            href={getWhatsAppLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`flex items-center justify-center gap-3 w-full rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-white py-3.5 font-black transition-all hover:scale-[1.02] shadow-lg shadow-[#25d366]/20 cursor-pointer ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-wider'}`}
+          {/* Main Direct Order CTA */}
+          <button
+            onClick={handlePlaceOrder}
+            className={`flex items-center justify-center gap-3 w-full rounded-2xl bg-neon-lime hover:bg-white text-obsidian py-4 font-black transition-all hover:scale-[1.02] shadow-lg shadow-neon-lime/20 cursor-pointer ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-wider'}`}
           >
-            <MessageSquare size={18} fill="currentColor" />
-            <span>{isAr ? "طلب عبر الواتساب" : "Commander via WhatsApp"}</span>
-          </a>
+            <Check size={18} />
+            <span>{isAr ? "تأكيد الطلب الآن" : "PLACE ORDER NOW"}</span>
+          </button>
+          
+          <div className="text-center my-3 relative">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-neutral-800"></div></div>
+            <span className={`relative bg-[#0d0d11] px-3 text-[10px] text-neutral-500 uppercase tracking-widest ${isAr ? 'font-cairo' : 'font-outfit'}`}>
+              {isAr ? "أو يمكنك الطلب عبر" : "OR ORDER VIA"}
+            </span>
+          </div>
 
-          {/* Email CTA */}
-          <a
-            href={getEmailLink()}
-            className={`flex items-center justify-center gap-3 w-full rounded-2xl bg-neutral-900 hover:bg-neutral-850 text-neutral-200 border border-neutral-800 hover:border-neutral-700 py-3.5 font-bold transition-all hover:scale-[1.02] cursor-pointer ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-wider'}`}
-          >
-            <Mail size={16} />
-            <span>{isAr ? "طلب عبر البريد الإلكتروني" : "Commander via Email"}</span>
-          </a>
+          <div className="grid grid-cols-2 gap-3">
+            {/* WhatsApp CTA */}
+            <a
+              href={getWhatsAppLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center justify-center gap-2 rounded-xl bg-neutral-900 hover:bg-[#25D366]/20 text-[#25D366] border border-neutral-800 hover:border-[#25D366]/50 py-3 font-bold transition-all cursor-pointer ${isAr ? 'font-cairo text-[11px]' : 'font-outfit text-xs'}`}
+            >
+              <MessageSquare size={14} fill="currentColor" />
+              <span>WhatsApp</span>
+            </a>
+
+            {/* Email CTA */}
+            <a
+              href={getEmailLink()}
+              className={`flex items-center justify-center gap-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 py-3 font-bold transition-all cursor-pointer ${isAr ? 'font-cairo text-[11px]' : 'font-outfit text-xs'}`}
+            >
+              <Mail size={14} />
+              <span>Email</span>
+            </a>
+          </div>
 
           {/* Copy Details CTA */}
           <button
@@ -288,7 +351,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ sneaker, selectedSiz
               </>
             ) : (
               <>
-                <span>{isAr ? "نسخ تفاصيل المنتج للمشاركة" : "Copier les détails du modèle"}</span>
+                <span>{isAr ? "نسخ تفاصيل المنتج للمشاركة" : "Copier les détails de la commande"}</span>
               </>
             )}
           </button>

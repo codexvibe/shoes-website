@@ -7,11 +7,9 @@ import { ContactModal } from "./ContactModal";
 import { ShoppingCart, Heart, ShieldAlert, Sparkles, Filter, MessageCircle } from "lucide-react";
 
 export const SneakerGallery: React.FC = () => {
-  const { sneakers, categories, language, contactConfig } = useStore();
+  const { sneakers, categories, language, contactConfig, addToCart } = useStore();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [activeContactShoe, setActiveContactShoe] = useState<Sneaker | null>(null);
-  const [activeContactSize, setActiveContactSize] = useState<number | null>(null);
   const [selectedSizes, setSelectedSizes] = useState<Record<string, number>>({});
 
   const isAr = language === "ar";
@@ -44,10 +42,18 @@ export const SneakerGallery: React.FC = () => {
     );
   };
 
-  const handleOrderClick = (sneaker: Sneaker) => {
-    const chosenSize = selectedSizes[sneaker.id] || null;
-    setActiveContactShoe(sneaker);
-    setActiveContactSize(chosenSize);
+  const handleAddToCart = (sneaker: Sneaker) => {
+    const chosenSize = selectedSizes[sneaker.id];
+    if (!chosenSize) {
+      alert(isAr ? "الرجاء اختيار المقاس أولاً" : "Veuillez d'abord choisir la taille");
+      return;
+    }
+    addToCart({
+      id: `cart_${Date.now()}`,
+      sneakerId: sneaker.id,
+      size: chosenSize,
+      quantity: 1,
+    });
   };
 
   // Filter products by active category
@@ -238,15 +244,15 @@ export const SneakerGallery: React.FC = () => {
                         <span>{isAr ? "اطلب عبر واتساب" : "Order via WhatsApp"}</span>
                       </a>
 
-                      {/* Fallback Contact Owner */}
+                      {/* Fallback Contact Owner -> Add to Cart */}
                       <button
-                        onClick={() => handleOrderClick(shoe)}
+                        onClick={() => handleAddToCart(shoe)}
                         className={`flex items-center justify-center gap-2.5 w-full rounded-xl bg-neutral-900 border border-neutral-800/80 hover:border-neon-lime/40 text-white hover:text-neon-lime py-3.5 text-xs font-bold transition-all duration-300 hover:bg-neon-lime/5 cursor-pointer ${
                           hasSelectedSize ? "border-neon-lime/25 bg-neon-lime/[0.02]" : ""
                         } ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-widest'}`}
                       >
                         <ShoppingCart size={14} />
-                        <span>{isAr ? "تواصل مع صاحب المتجر" : "Contact Owner to Order"}</span>
+                        <span>{isAr ? "أضف إلى السلة" : "Add to Cart"}</span>
                       </button>
                     </div>
 
@@ -271,18 +277,6 @@ export const SneakerGallery: React.FC = () => {
         )}
 
       </div>
-
-      {/* Render Contact Overlay Modal if Active */}
-      {activeContactShoe && (
-        <ContactModal
-          sneaker={activeContactShoe}
-          selectedSize={activeContactSize}
-          onClose={() => {
-            setActiveContactShoe(null);
-            setActiveContactSize(null);
-          }}
-        />
-      )}
     </section>
   );
 };
