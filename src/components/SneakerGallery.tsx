@@ -7,10 +7,9 @@ import { ContactModal } from "./ContactModal";
 import { ShoppingCart, Heart, ShieldAlert, Sparkles, Filter, MessageCircle } from "lucide-react";
 
 export const SneakerGallery: React.FC = () => {
-  const { sneakers, categories, language, contactConfig, addToCart } = useStore();
+  const { sneakers, categories, language } = useStore();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [selectedSizes, setSelectedSizes] = useState<Record<string, number>>({});
 
   const isAr = language === "ar";
 
@@ -29,31 +28,10 @@ export const SneakerGallery: React.FC = () => {
     };
   }, []);
 
-  const handleSizeSelect = (shoeId: string, size: number) => {
-    setSelectedSizes((prev) => ({
-      ...prev,
-      [shoeId]: size,
-    }));
-  };
-
   const toggleFavorite = (shoeId: string) => {
     setFavorites((prev) =>
       prev.includes(shoeId) ? prev.filter((id) => id !== shoeId) : [...prev, shoeId]
     );
-  };
-
-  const handleAddToCart = (sneaker: Sneaker) => {
-    const chosenSize = selectedSizes[sneaker.id];
-    if (!chosenSize) {
-      alert(isAr ? "الرجاء اختيار المقاس أولاً" : "Veuillez d'abord choisir la taille");
-      return;
-    }
-    addToCart({
-      id: `cart_${Date.now()}`,
-      sneakerId: sneaker.id,
-      size: chosenSize,
-      quantity: 1,
-    });
   };
 
   // Filter products by active category
@@ -178,7 +156,7 @@ export const SneakerGallery: React.FC = () => {
                   </div>
 
                   {/* Detailed Description Panel */}
-                  <div className="p-6 flex-1 flex flex-col justify-between">
+                  <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
                     
                     {/* Title, Category & Price Row */}
                     <div>
@@ -200,60 +178,16 @@ export const SneakerGallery: React.FC = () => {
                       </p>
                     </div>
 
-                    {/* Sizes Selection Bubbles */}
-                    <div className="mt-5">
-                      <span className={`block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 ${isAr ? 'font-cairo text-right' : 'font-outfit'}`}>
-                        {isAr ? "المقاسات المتوفرة (اختر مقاساً):" : "Available Sizes (Select):"}
-                      </span>
-                      <div className="flex flex-wrap gap-1.5 justify-start rtl:justify-end">
-                        {shoe.sizes.map((sz) => (
-                          <button
-                            key={sz}
-                            onClick={() => handleSizeSelect(shoe.id, sz)}
-                            className={`w-9 h-9 rounded-lg text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
-                              activeSize === sz
-                                ? "bg-neon-lime text-obsidian border-neon-lime font-black"
-                                : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:border-neutral-700 hover:text-white"
-                            }`}
-                          >
-                            {sz}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Order Action Button CTA */}
-                    <div className="mt-6 pt-5 border-t border-neutral-900 space-y-2">
-                      {/* WhatsApp One-Click */}
+                    {/* View Details CTA */}
+                    <div className="mt-6 pt-5 border-t border-neutral-900">
                       <a
-                        href={(() => {
-                          const phone = contactConfig.whatsapp.replace(/\+/g, "");
-                          const sizePart = hasSelectedSize ? (isAr ? `، المقاس ${activeSize}` : `, Taille ${activeSize}`) : "";
-                          const msg = isAr
-                            ? `مرحباً، أنا مهتم بـ ${shoe.nameAr}${sizePart}، السعر ${Math.round(Number(shoe.price) || 0)} د.ج`
-                            : `Bonjour, je suis intéressé par la ${shoe.nameFr}${sizePart}, Prix ${Math.round(Number(shoe.price) || 0)} DA`;
-                          return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-                        })()}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`flex items-center justify-center gap-2.5 w-full rounded-xl bg-emerald-600/10 border border-emerald-500/30 hover:border-emerald-400/60 text-emerald-400 hover:text-emerald-300 py-3.5 text-xs font-bold transition-all duration-300 hover:bg-emerald-500/15 cursor-pointer ${
+                        href={`/product/${shoe.id}`}
+                        className={`flex items-center justify-center w-full rounded-xl bg-white text-obsidian py-3.5 text-xs font-black transition-all duration-300 hover:bg-neutral-200 cursor-pointer ${
                           isAr ? 'font-cairo' : 'font-outfit uppercase tracking-widest'
                         }`}
                       >
-                        <MessageCircle size={14} />
-                        <span>{isAr ? "اطلب عبر واتساب" : "Order via WhatsApp"}</span>
+                        {isAr ? "التفاصيل والطلب" : "View Details & Order"}
                       </a>
-
-                      {/* Fallback Contact Owner -> Add to Cart */}
-                      <button
-                        onClick={() => handleAddToCart(shoe)}
-                        className={`flex items-center justify-center gap-2.5 w-full rounded-xl bg-neutral-900 border border-neutral-800/80 hover:border-neon-lime/40 text-white hover:text-neon-lime py-3.5 text-xs font-bold transition-all duration-300 hover:bg-neon-lime/5 cursor-pointer ${
-                          hasSelectedSize ? "border-neon-lime/25 bg-neon-lime/[0.02]" : ""
-                        } ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-widest'}`}
-                      >
-                        <ShoppingCart size={14} />
-                        <span>{isAr ? "أضف إلى السلة" : "Add to Cart"}</span>
-                      </button>
                     </div>
 
                   </div>
