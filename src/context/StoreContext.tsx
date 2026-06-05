@@ -11,6 +11,59 @@ interface ContactConfig {
   email: string;
 }
 
+interface DbCategoryRow {
+  id: string;
+  slug: string;
+  name_fr: string;
+  name_ar: string;
+  desc_fr?: string | null;
+  desc_ar?: string | null;
+  image?: string | null;
+}
+
+interface DbSneakerRow {
+  id: string;
+  slug: string;
+  name_fr: string;
+  name_ar: string;
+  price: number;
+  category_slug: string;
+  image?: string | null;
+  sizes?: number[] | null;
+  sizes_stock?: Sneaker["sizesStock"] | null;
+  colorways?: string[] | null;
+  desc_fr?: string | null;
+  desc_ar?: string | null;
+  featured?: boolean | null;
+  is_hot_drop?: boolean | null;
+  is_new_arrival?: boolean | null;
+}
+
+interface DbLeadRow {
+  id: string;
+  customer_name: string;
+  phone_number: string;
+  items?: CartItem[] | null;
+  wilaya_id: string;
+  status: Lead["status"];
+  notes?: string | null;
+  created_at: string;
+  tracking_number?: string | null;
+  shipping_provider?: string | null;
+  shipped_at?: string | null;
+}
+
+interface DbWilayaRow {
+  id: string | number;
+  name_fr: string;
+  name_ar: string;
+  fee: number;
+}
+
+type AuthSubscription = {
+  unsubscribe: () => void;
+};
+
 interface StoreContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -52,7 +105,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 // ── Mapping utilities: snake_case (DB) ↔ camelCase (frontend) ──
 
-function dbCategoryToFrontend(row: any): Category {
+function dbCategoryToFrontend(row: DbCategoryRow): Category {
   return {
     id: row.id,
     slug: row.slug,
@@ -64,7 +117,7 @@ function dbCategoryToFrontend(row: any): Category {
   };
 }
 
-function dbSneakerToFrontend(row: any): Sneaker {
+function dbSneakerToFrontend(row: DbSneakerRow): Sneaker {
   return {
     id: row.id,
     slug: row.slug,
@@ -84,7 +137,7 @@ function dbSneakerToFrontend(row: any): Sneaker {
   };
 }
 
-function dbLeadToFrontend(row: any): Lead {
+function dbLeadToFrontend(row: DbLeadRow): Lead {
   return {
     id: row.id,
     customerName: row.customer_name,
@@ -100,7 +153,7 @@ function dbLeadToFrontend(row: any): Lead {
   };
 }
 
-function dbWilayaToFrontend(row: any): WilayaFee {
+function dbWilayaToFrontend(row: DbWilayaRow): WilayaFee {
   return {
     id: row.id.toString(),
     nameFr: row.name_fr,
@@ -124,22 +177,24 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     email: "contact@sneakersobsidian.com",
   });
   const [loading, setLoading] = useState(true);
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-
-  // Load cart from local storage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedCart = localStorage.getItem("shoes_cart");
-      if (storedCart) {
-        try {
-          setCart(JSON.parse(storedCart));
-        } catch (e) {
-          console.error("Failed to parse cart", e);
-        }
-      }
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === "undefined") {
+      return [];
     }
-  }, []);
+
+    const storedCart = window.localStorage.getItem("shoes_cart");
+    if (!storedCart) {
+      return [];
+    }
+
+    try {
+      return JSON.parse(storedCart) as CartItem[];
+    } catch (error) {
+      console.error("Failed to parse cart", error);
+      return [];
+    }
+  });
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Sync cart to local storage when it changes
   useEffect(() => {
@@ -230,9 +285,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadFromSupabase();
 
-      let authListener: any = null;
+      let authListener: AuthSubscription | null = null;
       // Check admin session using Supabase Auth
       if (supabase) {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -515,7 +571,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     updates: Partial<Pick<Lead, "trackingNumber" | "shippingProvider" | "shippedAt">>
   ) => {
     if (!supabase) return;
-    const dbUpdates: any = {};
+    const dbUpdates: Partial<{
+      tracking_number: string;
+      shipping_provider: string;
+      shipped_at: string;
+    }> = {};
     if (updates.trackingNumber !== undefined) dbUpdates.tracking_number = updates.trackingNumber;
     if (updates.shippingProvider !== undefined) dbUpdates.shipping_provider = updates.shippingProvider;
     if (updates.shippedAt !== undefined) dbUpdates.shipped_at = updates.shippedAt;

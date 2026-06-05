@@ -115,6 +115,13 @@ INSERT INTO wilaya_fees (id, name_fr, name_ar, fee) VALUES
 (58, '58 - In Guezzam', '58 - عين قزام', 1200)
 ON CONFLICT (id) DO NOTHING;
 
+-- Keep the identity sequence aligned with the seeded rows above.
+SELECT setval(
+  pg_get_serial_sequence('wilaya_fees', 'id'),
+  COALESCE((SELECT MAX(id) FROM wilaya_fees), 1),
+  true
+);
+
 -- ==========================================
 -- 4. Leads (Orders) Table
 -- ==========================================

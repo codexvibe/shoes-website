@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useStore } from "../context/StoreContext";
-import { Sneaker } from "../data/mockData";
-import { ContactModal } from "./ContactModal";
-import { ShoppingCart, Heart, ShieldAlert, Sparkles, Filter, MessageCircle } from "lucide-react";
+import { Heart, ShieldAlert, Sparkles } from "lucide-react";
 
 export const SneakerGallery: React.FC = () => {
   const { sneakers, categories, language } = useStore();
@@ -178,14 +177,14 @@ export const SneakerGallery: React.FC = () => {
 
                     {/* View Details CTA */}
                     <div className="mt-6 pt-5 border-t border-neutral-900">
-                      <a
+                      <Link
                         href={`/product/${shoe.id}`}
                         className={`flex items-center justify-center w-full rounded-xl bg-white text-obsidian py-3.5 text-xs font-black transition-all duration-300 hover:bg-neutral-200 cursor-pointer ${
                           isAr ? 'font-cairo' : 'font-outfit uppercase tracking-widest'
                         }`}
                       >
-                        {isAr ? "التفاصيل والطلب" : "View Details & Order"}
-                      </a>
+                        {isAr ? "عرض التفاصيل" : "View Details"}
+                      </Link>
                     </div>
 
                   </div>

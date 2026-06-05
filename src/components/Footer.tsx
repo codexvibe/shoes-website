@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useStore } from "../context/StoreContext";
 import { Phone, Mail } from "lucide-react";
 
@@ -63,14 +64,14 @@ export const Footer: React.FC = () => {
             </h5>
             <ul className="space-y-2.5 text-center md:text-left md:rtl:text-right">
               <li>
-                <a href="/#collection" className={`text-xs hover:text-white transition-colors ${isAr ? 'font-cairo' : 'font-outfit'}`}>
+                <Link href="/#collection" className={`text-xs hover:text-white transition-colors ${isAr ? 'font-cairo' : 'font-outfit'}`}>
                   {isAr ? "المجموعة الكاملة" : "Full Collection"}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/#categories" className={`text-xs hover:text-white transition-colors ${isAr ? 'font-cairo' : 'font-outfit'}`}>
+                <Link href="/#categories" className={`text-xs hover:text-white transition-colors ${isAr ? 'font-cairo' : 'font-outfit'}`}>
                   {isAr ? "فئات المنتجات" : "Categories"}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

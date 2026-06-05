@@ -8,21 +8,11 @@ import { CategoryGrid } from "@/components/CategoryGrid";
 import { SneakerGallery } from "@/components/SneakerGallery";
 import { CartDrawer } from "@/components/CartDrawer";
 import { Footer } from "@/components/Footer";
-import { Phone, Mail, Clock, ShieldCheck, RefreshCw, Truck } from "lucide-react";
+import { Phone, Clock, ShieldCheck } from "lucide-react";
 
 export default function Storefront() {
-  const { language, contactConfig } = useStore();
+  const { language } = useStore();
   const isAr = language === "ar";
-
-  const getWhatsAppLink = () => {
-    const phone = contactConfig.whatsapp.replace(/\+/g, "");
-    const text = encodeURIComponent(
-      isAr 
-        ? "مرحباً، أود الاستفسار عن الأحذية الرياضية المتوفرة في المتجر." 
-        : "Bonjour, je souhaite me renseigner sur les sneakers disponibles dans votre showcase."
-    );
-    return `https://wa.me/${phone}?text=${text}`;
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-obsidian text-zinc-100 selection:bg-neon-lime selection:text-obsidian">

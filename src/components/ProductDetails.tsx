@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "../context/StoreContext";
-import { ShoppingCart, Heart, ShieldCheck, Truck, RotateCcw, MessageCircle, ChevronLeft, ArrowLeft } from "lucide-react";
+import { ShoppingCart, Heart, ShieldCheck, Truck, RotateCcw, MessageCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -21,10 +21,11 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
         <h2 className={`text-3xl font-black text-white mb-4 ${isAr ? "font-cairo" : "font-outfit"}`}>
           {isAr ? "المنتج غير موجود" : "Product Not Found"}
         </h2>
-        <Link href="/">
-          <button className="bg-neon-lime text-obsidian px-6 py-3 rounded-xl font-bold font-outfit uppercase tracking-widest neon-glow-lime hover:bg-[#a3e635] transition-colors">
-            {isAr ? "العودة للرئيسية" : "Back to Home"}
-          </button>
+        <Link
+          href="/"
+          className="bg-neon-lime text-obsidian px-6 py-3 rounded-xl font-bold font-outfit uppercase tracking-widest neon-glow-lime hover:bg-[#a3e635] transition-colors"
+        >
+          {isAr ? "العودة للرئيسية" : "Back to Home"}
         </Link>
       </div>
     );
@@ -36,7 +37,7 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
       return;
     }
     addToCart({
-      id: `cart_${Date.now()}`,
+      id: `${shoe.id}_${selectedSize}`,
       sneakerId: shoe.id,
       size: selectedSize,
       quantity: 1,
