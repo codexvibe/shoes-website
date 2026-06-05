@@ -102,7 +102,7 @@ function dbLeadToFrontend(row: any): Lead {
 
 function dbWilayaToFrontend(row: any): WilayaFee {
   return {
-    id: row.id,
+    id: row.id.toString(),
     nameFr: row.name_fr,
     nameAr: row.name_ar,
     fee: row.fee,
