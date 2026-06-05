@@ -93,73 +93,93 @@ export const CategoryGrid: React.FC = () => {
           </p>
         </div>
 
-        {/* ======== Unified Horizontal Cards Grid ======== */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          {categories.map((category) => {
-            const meta = getMeta(category.slug);
+        {/* ======== Unified Carousel / Grid Layout ======== */}
+        <div className="relative">
+          <div
+            ref={scrollRef}
+            className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-6 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {categories.map((category) => {
+              const meta = getMeta(category.slug);
 
-            return (
-              <div
-                key={category.id}
-                onClick={() => handleCategoryClick(category.slug)}
-                className="group relative h-[180px] sm:h-[220px] w-full rounded-2xl lg:rounded-3xl overflow-hidden cursor-pointer transition-all duration-500"
-                style={{
-                  boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
-                }}
-              >
-                {/* Background Image */}
-                <div className="absolute inset-0 z-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={category.image || meta.image}
-                    alt={category.nameFr}
-                    className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110 brightness-[0.35] group-hover:brightness-[0.45]"
-                  />
-                </div>
-
-                {/* Gradient overlays */}
-                <div className={`absolute inset-0 z-[1] bg-gradient-to-br ${meta.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/90 via-black/40 to-transparent sm:bg-gradient-to-r sm:from-black/90 sm:via-black/50 sm:to-transparent"></div>
-
-                {/* Animated border glow on hover */}
+              return (
                 <div
-                  className="absolute inset-0 z-[2] rounded-2xl lg:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  key={category.id}
+                  onClick={() => handleCategoryClick(category.slug)}
+                  className="group relative flex-shrink-0 w-[85vw] md:w-auto h-[180px] sm:h-[220px] rounded-2xl lg:rounded-3xl overflow-hidden cursor-pointer snap-center transition-all duration-500"
                   style={{
-                    boxShadow: `inset 0 0 0 1.5px rgba(${meta.accentRgb}, 0.4), 0 0 30px -10px rgba(${meta.accentRgb}, 0.15)`,
+                    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
                   }}
-                ></div>
-
-                {/* Content */}
-                <div className="absolute inset-0 z-10 p-5 sm:p-6 lg:p-8 flex flex-col justify-between">
-                  {/* Top: icon badge */}
-                  <div className={`flex items-start ${isAr ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`flex items-center gap-2 px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-lg transition-all duration-300 group-hover:bg-white/[0.1] group-hover:border-white/[0.15] ${meta.accent}`}
-                    >
-                      {meta.icon}
-                    </div>
+                >
+                  {/* Background Image */}
+                  <div className="absolute inset-0 z-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={category.image || meta.image}
+                      alt={category.nameFr}
+                      className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110 brightness-[0.35] group-hover:brightness-[0.45]"
+                    />
                   </div>
 
-                  {/* Bottom: title + CTA */}
-                  <div className={`flex items-end justify-between ${isAr ? "flex-row-reverse" : "flex-row"}`}>
-                    <div className="flex-1">
-                      <h4 className={`font-black text-white tracking-wide mb-1 sm:mb-2 text-xl sm:text-2xl transition-all duration-300 ${isAr ? "font-cairo text-right" : "font-outfit uppercase"}`}>
-                        {isAr ? category.nameAr : category.nameFr}
-                      </h4>
-                      <p className={`text-[11px] sm:text-xs text-neutral-400 leading-relaxed line-clamp-1 sm:line-clamp-2 group-hover:text-neutral-300 transition-colors duration-300 max-w-[80%] ${isAr ? "font-cairo text-right ml-auto" : "font-outfit"}`}>
-                        {isAr ? category.descAr : category.descFr}
-                      </p>
+                  {/* Gradient overlays */}
+                  <div className={`absolute inset-0 z-[1] bg-gradient-to-br ${meta.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                  <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/90 via-black/40 to-transparent sm:bg-gradient-to-r sm:from-black/90 sm:via-black/50 sm:to-transparent"></div>
+
+                  {/* Animated border glow on hover */}
+                  <div
+                    className="absolute inset-0 z-[2] rounded-2xl lg:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{
+                      boxShadow: `inset 0 0 0 1.5px rgba(${meta.accentRgb}, 0.4), 0 0 30px -10px rgba(${meta.accentRgb}, 0.15)`,
+                    }}
+                  ></div>
+
+                  {/* Content */}
+                  <div className="absolute inset-0 z-10 p-5 sm:p-6 lg:p-8 flex flex-col justify-between">
+                    {/* Top: icon badge */}
+                    <div className={`flex items-start ${isAr ? "justify-end" : "justify-start"}`}>
+                      <div
+                        className={`flex items-center gap-2 px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-lg transition-all duration-300 group-hover:bg-white/[0.1] group-hover:border-white/[0.15] ${meta.accent}`}
+                      >
+                        {meta.icon}
+                      </div>
                     </div>
 
-                    {/* CTA arrow (bottom right/left depending on language) */}
-                    <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 bg-white/5 backdrop-blur-md group-hover:bg-white/10 transition-all duration-300 ${isAr ? "mr-4 group-hover:-translate-x-1" : "ml-4 group-hover:translate-x-1"}`}>
-                      <ArrowRight size={18} className={`${meta.accent} ${isAr ? "rotate-180" : ""}`} />
+                    {/* Bottom: title + CTA */}
+                    <div className={`flex items-end justify-between ${isAr ? "flex-row-reverse" : "flex-row"}`}>
+                      <div className="flex-1">
+                        <h4 className={`font-black text-white tracking-wide mb-1 sm:mb-2 text-xl sm:text-2xl transition-all duration-300 ${isAr ? "font-cairo text-right" : "font-outfit uppercase"}`}>
+                          {isAr ? category.nameAr : category.nameFr}
+                        </h4>
+                        <p className={`text-[11px] sm:text-xs text-neutral-400 leading-relaxed line-clamp-1 sm:line-clamp-2 group-hover:text-neutral-300 transition-colors duration-300 max-w-[80%] ${isAr ? "font-cairo text-right ml-auto" : "font-outfit"}`}>
+                          {isAr ? category.descAr : category.descFr}
+                        </p>
+                      </div>
+
+                      {/* CTA arrow */}
+                      <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 bg-white/5 backdrop-blur-md group-hover:bg-white/10 transition-all duration-300 ${isAr ? "mr-4 group-hover:-translate-x-1" : "ml-4 group-hover:translate-x-1"}`}>
+                        <ArrowRight size={18} className={`${meta.accent} ${isAr ? "rotate-180" : ""}`} />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          {/* Dot indicators for mobile */}
+          <div className="flex md:hidden items-center justify-center gap-2 mt-2">
+            {categories.map((_, i) => (
+              <div
+                key={i}
+                className={`rounded-full transition-all duration-300 ${
+                  i === activeIndex
+                    ? "w-6 h-1.5 bg-neon-lime"
+                    : "w-1.5 h-1.5 bg-neutral-700"
+                }`}
+              ></div>
+            ))}
+          </div>
         </div>
 
       </div>
