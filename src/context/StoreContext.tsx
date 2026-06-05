@@ -107,7 +107,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 function dbCategoryToFrontend(row: DbCategoryRow): Category {
   return {
-    id: row.id,
+    id: String(row.id),
     slug: row.slug,
     nameFr: row.name_fr,
     nameAr: row.name_ar,
@@ -119,7 +119,7 @@ function dbCategoryToFrontend(row: DbCategoryRow): Category {
 
 function dbSneakerToFrontend(row: DbSneakerRow): Sneaker {
   return {
-    id: row.id,
+    id: String(row.id),
     slug: row.slug,
     nameFr: row.name_fr,
     nameAr: row.name_ar,
@@ -139,7 +139,7 @@ function dbSneakerToFrontend(row: DbSneakerRow): Sneaker {
 
 function dbLeadToFrontend(row: DbLeadRow): Lead {
   return {
-    id: row.id,
+    id: String(row.id),
     customerName: row.customer_name,
     phoneNumber: row.phone_number,
     items: row.items || [],
@@ -155,7 +155,7 @@ function dbLeadToFrontend(row: DbLeadRow): Lead {
 
 function dbWilayaToFrontend(row: DbWilayaRow): WilayaFee {
   return {
-    id: row.id.toString(),
+    id: String(row.id),
     nameFr: row.name_fr,
     nameAr: row.name_ar,
     fee: row.fee,

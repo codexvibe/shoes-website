@@ -13,7 +13,7 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
   const [isFav, setIsFav] = useState(false);
 
   const isAr = language === "ar";
-  const shoe = sneakers.find((s) => s.id === id);
+  const shoe = sneakers.find((s) => String(s.id) === id || s.slug === id);
 
   if (loading) {
     return (

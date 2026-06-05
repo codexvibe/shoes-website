@@ -178,7 +178,7 @@ export const SneakerGallery: React.FC = () => {
                     {/* View Details CTA */}
                     <div className="mt-6 pt-5 border-t border-neutral-900">
                       <Link
-                        href={`/product/${shoe.id}`}
+                        href={`/product/${shoe.slug || shoe.id}`}
                         className={`flex items-center justify-center w-full rounded-xl bg-white text-obsidian py-3.5 text-xs font-black transition-all duration-300 hover:bg-neutral-200 cursor-pointer ${
                           isAr ? 'font-cairo' : 'font-outfit uppercase tracking-widest'
                         }`}
