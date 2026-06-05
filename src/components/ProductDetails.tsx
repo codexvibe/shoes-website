@@ -8,12 +8,25 @@ import { useRouter } from "next/navigation";
 
 export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
   const router = useRouter();
-  const { sneakers, language, contactConfig, addToCart } = useStore();
+  const { sneakers, language, contactConfig, addToCart, loading } = useStore();
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [isFav, setIsFav] = useState(false);
 
   const isAr = language === "ar";
   const shoe = sneakers.find((s) => s.id === id);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+          <div className="h-14 w-14 rounded-full border-4 border-white/10 border-t-neon-lime animate-spin mb-6" />
+          <h2 className={`text-3xl font-black text-white ${isAr ? "font-cairo" : "font-outfit"}`}>
+            {isAr ? "Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ù†ØªØ¬..." : "Loading product..."}
+          </h2>
+        </div>
+      </div>
+    );
+  }
 
   if (!shoe) {
     return (
