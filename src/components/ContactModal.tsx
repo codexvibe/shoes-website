@@ -177,21 +177,35 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
           </div>
         </div>
 
-        {/* Order Summary (Brief) */}
-        <div className="flex flex-col gap-2 p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/60 mb-5 max-h-32 overflow-y-auto scrollbar-thin">
-          {cart.map((item) => {
-            const shoe = getSneakerDetails(item.sneakerId);
-            return (
-              <div key={item.id} className="flex items-center justify-between">
-                <span className={`text-sm text-white ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-                  {item.quantity}x {shoe ? (isAr ? shoe.nameAr : shoe.nameFr) : "Item"} (Sz: {item.size})
-                </span>
-                <span className="text-xs text-neutral-400 font-mono">
-                  {formatPrice((shoe?.price || 0) * item.quantity)}
-                </span>
-              </div>
-            );
-          })}
+        {/* Order Summary Table */}
+        <div className="mb-6 rounded-2xl border border-neutral-800 overflow-hidden">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-neutral-900/80 text-neutral-400 text-[10px] uppercase tracking-wider font-outfit">
+              <tr>
+                <th className={`px-4 py-3 ${isAr ? 'text-right font-cairo' : 'text-left'}`}>{isAr ? "المنتج" : "Product"}</th>
+                <th className={`px-4 py-3 text-center ${isAr ? 'font-cairo' : ''}`}>{isAr ? "المقاس" : "Size"}</th>
+                <th className={`px-4 py-3 text-center ${isAr ? 'font-cairo' : ''}`}>{isAr ? "الكمية" : "Qty"}</th>
+                <th className={`px-4 py-3 ${isAr ? 'text-left font-cairo' : 'text-right'}`}>{isAr ? "السعر" : "Price"}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-800 bg-neutral-950/50">
+              {cart.map((item) => {
+                const shoe = getSneakerDetails(item.sneakerId);
+                return (
+                  <tr key={item.id} className="hover:bg-neutral-900/50 transition-colors">
+                    <td className={`px-4 py-3 text-white font-semibold ${isAr ? 'font-cairo text-right' : 'font-outfit text-left'}`}>
+                      {shoe ? (isAr ? shoe.nameAr : shoe.nameFr) : "Item"}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-400 text-center font-mono text-xs">{item.size}</td>
+                    <td className="px-4 py-3 text-neutral-400 text-center font-mono text-xs">x{item.quantity}</td>
+                    <td className={`px-4 py-3 text-white font-mono text-xs ${isAr ? 'text-left' : 'text-right'}`}>
+                      {formatPrice((shoe?.price || 0) * item.quantity)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
         {/* Delivery Wilaya Selection */}
