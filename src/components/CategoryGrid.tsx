@@ -93,21 +93,16 @@ export const CategoryGrid: React.FC = () => {
           </p>
         </div>
 
-        {/* ======== DESKTOP: Bento Grid Layout ======== */}
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-12 gap-4 lg:gap-5 auto-rows-[220px] lg:auto-rows-[240px]">
-          {categories.map((category, i) => {
+        {/* ======== Unified Horizontal Cards Grid ======== */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          {categories.map((category) => {
             const meta = getMeta(category.slug);
-            // Bento layout: first item spans full left column, others stack right
-            const spanClass =
-              i === 0
-                ? "lg:col-span-7 md:col-span-1 row-span-2"
-                : "lg:col-span-5 md:col-span-1 row-span-1";
 
             return (
               <div
                 key={category.id}
                 onClick={() => handleCategoryClick(category.slug)}
-                className={`group relative rounded-2xl lg:rounded-3xl overflow-hidden cursor-pointer transition-all duration-500 ${spanClass}`}
+                className="group relative h-[180px] sm:h-[220px] w-full rounded-2xl lg:rounded-3xl overflow-hidden cursor-pointer transition-all duration-500"
                 style={{
                   boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
                 }}
@@ -124,7 +119,7 @@ export const CategoryGrid: React.FC = () => {
 
                 {/* Gradient overlays */}
                 <div className={`absolute inset-0 z-[1] bg-gradient-to-br ${meta.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/90 via-black/40 to-transparent sm:bg-gradient-to-r sm:from-black/90 sm:via-black/50 sm:to-transparent"></div>
 
                 {/* Animated border glow on hover */}
                 <div
@@ -135,130 +130,36 @@ export const CategoryGrid: React.FC = () => {
                 ></div>
 
                 {/* Content */}
-                <div className="absolute inset-0 z-10 p-6 lg:p-8 flex flex-col justify-between">
+                <div className="absolute inset-0 z-10 p-5 sm:p-6 lg:p-8 flex flex-col justify-between">
                   {/* Top: icon badge */}
-                  <div className="flex items-start justify-between">
+                  <div className={`flex items-start ${isAr ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-lg transition-all duration-300 group-hover:bg-white/[0.1] group-hover:border-white/[0.15] ${meta.accent}`}
+                      className={`flex items-center gap-2 px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-lg transition-all duration-300 group-hover:bg-white/[0.1] group-hover:border-white/[0.15] ${meta.accent}`}
                     >
                       {meta.icon}
-                      <span className={`text-[10px] font-black tracking-wider ${isAr ? "font-cairo" : "font-outfit uppercase"}`}>
-                        {isAr ? category.nameAr : category.nameFr}
-                      </span>
                     </div>
                   </div>
 
                   {/* Bottom: title + CTA */}
-                  <div>
-                    <h4 className={`font-black text-white tracking-wide mb-2 transition-all duration-300 ${i === 0 ? "text-2xl lg:text-4xl" : "text-xl lg:text-2xl"} ${isAr ? "font-cairo text-right" : "font-outfit uppercase"}`}>
-                      {isAr ? category.nameAr : category.nameFr}
-                    </h4>
-                    <p className={`text-xs sm:text-sm text-neutral-400 leading-relaxed line-clamp-2 group-hover:text-neutral-300 transition-colors duration-300 ${i === 0 ? "max-w-md" : "max-w-xs"} ${isAr ? "font-cairo text-right" : "font-outfit"}`}>
-                      {isAr ? category.descAr : category.descFr}
-                    </p>
+                  <div className={`flex items-end justify-between ${isAr ? "flex-row-reverse" : "flex-row"}`}>
+                    <div className="flex-1">
+                      <h4 className={`font-black text-white tracking-wide mb-1 sm:mb-2 text-xl sm:text-2xl transition-all duration-300 ${isAr ? "font-cairo text-right" : "font-outfit uppercase"}`}>
+                        {isAr ? category.nameAr : category.nameFr}
+                      </h4>
+                      <p className={`text-[11px] sm:text-xs text-neutral-400 leading-relaxed line-clamp-1 sm:line-clamp-2 group-hover:text-neutral-300 transition-colors duration-300 max-w-[80%] ${isAr ? "font-cairo text-right ml-auto" : "font-outfit"}`}>
+                        {isAr ? category.descAr : category.descFr}
+                      </p>
+                    </div>
 
-                    {/* CTA arrow */}
-                    <div className="mt-4 flex items-center gap-2 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                      <span className={`text-xs font-bold ${meta.accent} ${isAr ? "font-cairo" : "font-outfit uppercase tracking-widest"}`}>
-                        {isAr ? "استكشف الفئة" : "EXPLORER"}
-                      </span>
-                      <ArrowRight size={14} className={`${meta.accent} transition-transform duration-300 group-hover:translate-x-1`} />
+                    {/* CTA arrow (bottom right/left depending on language) */}
+                    <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 bg-white/5 backdrop-blur-md group-hover:bg-white/10 transition-all duration-300 ${isAr ? "mr-4 group-hover:-translate-x-1" : "ml-4 group-hover:translate-x-1"}`}>
+                      <ArrowRight size={18} className={`${meta.accent} ${isAr ? "rotate-180" : ""}`} />
                     </div>
                   </div>
                 </div>
               </div>
             );
           })}
-        </div>
-
-        {/* ======== MOBILE: Horizontal Scroll Carousel ======== */}
-        <div className="md:hidden">
-          <div
-            ref={scrollRef}
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-6 -mx-4 px-4"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {categories.map((category, i) => {
-              const meta = getMeta(category.slug);
-              return (
-                <div
-                  key={category.id}
-                  onClick={() => handleCategoryClick(category.slug)}
-                  className="group relative flex-shrink-0 w-[78vw] h-[380px] rounded-2xl overflow-hidden cursor-pointer snap-center"
-                  style={{
-                    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
-                  }}
-                >
-                  {/* Background Image */}
-                  <div className="absolute inset-0 z-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={category.image || meta.image}
-                      alt={category.nameFr}
-                      className="w-full h-full object-cover brightness-[0.35]"
-                    />
-                  </div>
-
-                  {/* Gradient overlays */}
-                  <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
-                  <div
-                    className="absolute inset-0 z-[2] rounded-2xl pointer-events-none"
-                    style={{
-                      boxShadow: `inset 0 0 0 1px rgba(${meta.accentRgb}, 0.2)`,
-                    }}
-                  ></div>
-
-                  {/* Content */}
-                  <div className="absolute inset-0 z-10 p-6 flex flex-col justify-between">
-                    {/* Top: icon */}
-                    <div
-                      className={`self-start flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.07] border border-white/[0.1] backdrop-blur-lg ${meta.accent}`}
-                    >
-                      {meta.icon}
-                    </div>
-
-                    {/* Bottom: title + description */}
-                    <div>
-                      <h4 className={`text-2xl font-black text-white tracking-wide mb-2 ${isAr ? "font-cairo text-right" : "font-outfit uppercase"}`}>
-                        {isAr ? category.nameAr : category.nameFr}
-                      </h4>
-                      <p className={`text-xs text-neutral-400 leading-relaxed line-clamp-2 mb-4 ${isAr ? "font-cairo text-right" : "font-outfit"}`}>
-                        {isAr ? category.descAr : category.descFr}
-                      </p>
-
-                      {/* CTA Button */}
-                      <div
-                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 ${meta.accent}`}
-                        style={{
-                          background: `rgba(${meta.accentRgb}, 0.08)`,
-                          border: `1px solid rgba(${meta.accentRgb}, 0.2)`,
-                        }}
-                      >
-                        <span className={isAr ? "font-cairo" : "font-outfit uppercase tracking-widest"}>
-                          {isAr ? "استكشف" : "EXPLORER"}
-                        </span>
-                        <ChevronRight size={14} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Dot indicators for mobile */}
-          <div className="flex items-center justify-center gap-2 mt-2">
-            {categories.map((_, i) => (
-              <div
-                key={i}
-                className={`rounded-full transition-all duration-300 ${
-                  i === activeIndex
-                    ? "w-6 h-1.5 bg-neon-lime"
-                    : "w-1.5 h-1.5 bg-neutral-700"
-                }`}
-              ></div>
-            ))}
-          </div>
         </div>
 
       </div>
