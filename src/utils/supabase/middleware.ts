@@ -12,9 +12,13 @@ export const updateSession = async (request: NextRequest) => {
     },
   });
 
+  if (!supabaseUrl || !supabaseKey || !supabaseUrl.startsWith("http")) {
+    return supabaseResponse;
+  }
+
   const supabase = createServerClient(
-    supabaseUrl!,
-    supabaseKey!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
@@ -36,7 +40,12 @@ export const updateSession = async (request: NextRequest) => {
   // IMPORTANT: Do not add any logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to
   // debug issues with users being randomly logged out.
-  await supabase.auth.getUser();
+  try {
+    await supabase.auth.getUser();
+  } catch (error) {
+    console.warn("Supabase session refresh skipped:", error);
+    return supabaseResponse;
+  }
 
   return supabaseResponse;
 };
