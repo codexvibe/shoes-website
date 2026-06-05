@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS sneakers (
 -- 3. Wilaya Fees Table
 -- ==========================================
 CREATE TABLE IF NOT EXISTS wilaya_fees (
-  id TEXT PRIMARY KEY,
+  id TEXT PRIMARY KEY DEFAULT uuid_generate_v4()::text,
   name_fr TEXT NOT NULL,
   name_ar TEXT NOT NULL,
   fee INTEGER NOT NULL
@@ -192,6 +192,9 @@ CREATE POLICY "Wilaya fees are insertable by admins" ON wilaya_fees FOR INSERT W
 
 DROP POLICY IF EXISTS "Wilaya fees are updatable by admins" ON wilaya_fees;
 CREATE POLICY "Wilaya fees are updatable by admins" ON wilaya_fees FOR UPDATE USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Wilaya fees are deletable by admins" ON wilaya_fees;
+CREATE POLICY "Wilaya fees are deletable by admins" ON wilaya_fees FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Leads: Public can INSERT, only authenticated (Admin) can view/update/delete
 DROP POLICY IF EXISTS "Leads can be created by anyone" ON leads;

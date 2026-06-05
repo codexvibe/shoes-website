@@ -47,6 +47,8 @@ export const AdminDashboard: React.FC = () => {
     deleteLead,
     wilayaFees,
     updateWilayaFee,
+    addWilaya,
+    deleteWilaya,
     heroBanner,
     setHeroBanner,
     language, 
@@ -166,6 +168,12 @@ export const AdminDashboard: React.FC = () => {
   // --- TAB 5: WILAYA FEES STATES ---
   const [wilayaEditId, setWilayaEditId] = useState<string | null>(null);
   const [wilayaEditFee, setWilayaEditFee] = useState<string>("");
+  const [wilayaSearch, setWilayaSearch] = useState("");
+  const [showAddWilaya, setShowAddWilaya] = useState(false);
+  const [newWilayaNameFr, setNewWilayaNameFr] = useState("");
+  const [newWilayaNameAr, setNewWilayaNameAr] = useState("");
+  const [newWilayaFee, setNewWilayaFee] = useState("");
+  const [wilayaAddSuccess, setWilayaAddSuccess] = useState(false);
 
   // --- TAB 6: MARKETING BANNER STATES ---
   const [bannerDragActive, setBannerDragActive] = useState(false);
@@ -2148,27 +2156,134 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === "shipping" && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8 animate-fadeIn">
           <div className="lg:col-span-7 rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8">
-            <div className="flex items-center justify-between border-b border-neutral-900 pb-5 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-900 pb-5 mb-6 gap-4">
               <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <Truck size={18} className="text-neon-orange" />
                 Wilaya Delivery Fees Setup
               </h2>
-              <span className="rounded-md bg-neutral-900 border border-neutral-850 px-2 py-0.5 text-[10px] font-mono text-neutral-400">
-                ACTIVE_FEES
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="rounded-md bg-neutral-900 border border-neutral-850 px-2 py-0.5 text-[10px] font-mono text-neutral-400">
+                  {wilayaFees.length} WILAYAS
+                </span>
+                <button
+                  onClick={() => setShowAddWilaya(!showAddWilaya)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-all border ${
+                    showAddWilaya
+                      ? "bg-neon-lime/10 text-neon-lime border-neon-lime/30"
+                      : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:border-neutral-700 hover:text-white"
+                  } font-outfit uppercase tracking-wider`}
+                >
+                  <Plus size={12} />
+                  {showAddWilaya ? "CANCEL" : "ADD WILAYA"}
+                </button>
+              </div>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Add Wilaya Form */}
+            {showAddWilaya && (
+              <div className="mb-6 rounded-2xl border border-neon-lime/20 bg-neon-lime/[0.02] p-5 animate-fadeIn">
+                <h3 className="text-xs font-black text-neon-lime uppercase tracking-widest mb-4 font-outfit flex items-center gap-2">
+                  <Plus size={14} />
+                  Add New Wilaya
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Name (FR) *</label>
+                    <input
+                      type="text"
+                      value={newWilayaNameFr}
+                      onChange={(e) => setNewWilayaNameFr(e.target.value)}
+                      placeholder="Ex: 59 - Bordj Badji"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-cairo text-right">الاسم (AR) *</label>
+                    <input
+                      type="text"
+                      dir="rtl"
+                      value={newWilayaNameAr}
+                      onChange={(e) => setNewWilayaNameAr(e.target.value)}
+                      placeholder="مثال: 59 - برج باجي"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all font-cairo text-right"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Fee (DA) *</label>
+                    <input
+                      type="number"
+                      value={newWilayaFee}
+                      onChange={(e) => setNewWilayaFee(e.target.value)}
+                      placeholder="600"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
+                    />
+                  </div>
+                </div>
+
+                {wilayaAddSuccess && (
+                  <div className="text-xs text-neon-lime border border-neon-lime/20 bg-neon-lime/5 rounded-lg p-2 mb-3 flex items-center gap-1.5 font-outfit">
+                    <Check size={12} />
+                    <span>Wilaya added successfully!</span>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => {
+                    if (!newWilayaNameFr.trim() || !newWilayaNameAr.trim() || !newWilayaFee.trim()) {
+                      alert("Please fill all fields");
+                      return;
+                    }
+                    const feeVal = parseFloat(newWilayaFee);
+                    if (isNaN(feeVal) || feeVal < 0) {
+                      alert("Please enter a valid fee");
+                      return;
+                    }
+                    addWilaya({
+                      nameFr: newWilayaNameFr.trim(),
+                      nameAr: newWilayaNameAr.trim(),
+                      fee: feeVal,
+                    });
+                    setNewWilayaNameFr("");
+                    setNewWilayaNameAr("");
+                    setNewWilayaFee("");
+                    setWilayaAddSuccess(true);
+                    setTimeout(() => setWilayaAddSuccess(false), 3000);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-neon-lime/10 border border-neon-lime/30 hover:bg-neon-lime hover:text-obsidian text-neon-lime text-xs font-black cursor-pointer transition-all font-outfit uppercase tracking-wider"
+                >
+                  Add Wilaya to Database
+                </button>
+              </div>
+            )}
+
+            {/* Search filter */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder={isAr ? "ابحث عن ولاية..." : "Search wilayas..."}
+                value={wilayaSearch}
+                onChange={(e) => setWilayaSearch(e.target.value)}
+                className="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-neon-orange/50 transition-all font-outfit"
+              />
+            </div>
+
+            <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
               <table className="w-full text-left">
-                <thead>
+                <thead className="sticky top-0 bg-asphalt/95 backdrop-blur-md z-10">
                   <tr className="border-b border-neutral-900 text-[10px] font-black text-neutral-500 uppercase tracking-widest">
                     <th className="py-3 px-4 font-outfit">Wilaya / Province</th>
                     <th className="py-3 px-4 font-outfit">Delivery Fee</th>
-                    <th className="py-3 px-4 text-center font-outfit">Configure</th>
+                    <th className="py-3 px-4 text-center font-outfit">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-900/50">
-                  {wilayaFees.map((w) => {
+                  {wilayaFees
+                    .filter((w) =>
+                      w.nameFr.toLowerCase().includes(wilayaSearch.toLowerCase()) ||
+                      w.nameAr.includes(wilayaSearch) ||
+                      w.id.includes(wilayaSearch)
+                    )
+                    .map((w) => {
                     const editing = wilayaEditId === w.id;
                     return (
                       <tr key={w.id} className="text-xs text-neutral-300 hover:bg-neutral-900/10 transition-colors">
@@ -2189,32 +2304,46 @@ export const AdminDashboard: React.FC = () => {
                           )}
                         </td>
                         <td className="py-4 px-4 text-center">
-                          {editing ? (
-                            <div className="flex justify-center gap-1.5">
-                              <button
-                                onClick={() => handleSaveWilayaFee(w.id)}
-                                className="p-1.5 bg-neon-orange/10 hover:bg-neon-orange hover:text-obsidian text-neon-orange border border-neon-orange/20 rounded-lg text-[10px] font-bold cursor-pointer"
-                              >
-                                SAVE
-                              </button>
-                              <button
-                                onClick={() => setWilayaEditId(null)}
-                                className="p-1.5 bg-neutral-800 text-neutral-400 hover:text-white rounded-lg text-[10px] font-bold cursor-pointer"
-                              >
-                                CANCEL
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                setWilayaEditId(w.id);
-                                setWilayaEditFee(w.fee.toString());
-                              }}
-                              className="px-3.5 py-1.5 bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white rounded-lg text-[10px] font-bold cursor-pointer transition-colors"
-                            >
-                              Adjust Fee
-                            </button>
-                          )}
+                          <div className="flex items-center justify-center gap-1.5">
+                            {editing ? (
+                              <>
+                                <button
+                                  onClick={() => handleSaveWilayaFee(w.id)}
+                                  className="p-1.5 bg-neon-orange/10 hover:bg-neon-orange hover:text-obsidian text-neon-orange border border-neon-orange/20 rounded-lg text-[10px] font-bold cursor-pointer"
+                                >
+                                  SAVE
+                                </button>
+                                <button
+                                  onClick={() => setWilayaEditId(null)}
+                                  className="p-1.5 bg-neutral-800 text-neutral-400 hover:text-white rounded-lg text-[10px] font-bold cursor-pointer"
+                                >
+                                  CANCEL
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    setWilayaEditId(w.id);
+                                    setWilayaEditFee(w.fee.toString());
+                                  }}
+                                  className="px-2.5 py-1.5 bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white rounded-lg text-[10px] font-bold cursor-pointer transition-colors"
+                                >
+                                  Edit Fee
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (confirm(isAr ? `حذف ولاية "${w.nameAr}"؟` : `Delete "${w.nameFr}"?`)) {
+                                      deleteWilaya(w.id);
+                                    }
+                                  }}
+                                  className="p-1.5 rounded-lg text-neutral-500 hover:text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -2222,6 +2351,16 @@ export const AdminDashboard: React.FC = () => {
                 </tbody>
               </table>
             </div>
+
+            {wilayaFees.filter((w) =>
+              w.nameFr.toLowerCase().includes(wilayaSearch.toLowerCase()) ||
+              w.nameAr.includes(wilayaSearch) ||
+              w.id.includes(wilayaSearch)
+            ).length === 0 && (
+              <div className="text-center py-8 text-neutral-500 text-xs font-outfit">
+                No wilayas match your search.
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-5">
@@ -2276,6 +2415,38 @@ export const AdminDashboard: React.FC = () => {
                   Save Settings
                 </button>
               </form>
+            </div>
+
+            {/* Wilaya Stats Card */}
+            <div className="rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8 mt-6">
+              <h2 className="text-lg font-bold text-white mb-4 uppercase tracking-wider flex items-center gap-2 border-b border-neutral-900 pb-4">
+                <TrendingUp size={18} className="text-neon-lime" />
+                Delivery Stats
+              </h2>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-neutral-400 font-outfit">Total Wilayas</span>
+                  <span className="text-white font-black font-mono">{wilayaFees.length}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-neutral-400 font-outfit">Avg. Delivery Fee</span>
+                  <span className="text-neon-orange font-bold font-mono">
+                    {formatPrice(Math.round(wilayaFees.reduce((a, b) => a + b.fee, 0) / (wilayaFees.length || 1)))}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-neutral-400 font-outfit">Min Fee</span>
+                  <span className="text-emerald-400 font-bold font-mono">
+                    {formatPrice(Math.min(...wilayaFees.map(w => w.fee)))}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-neutral-400 font-outfit">Max Fee</span>
+                  <span className="text-red-400 font-bold font-mono">
+                    {formatPrice(Math.max(...wilayaFees.map(w => w.fee)))}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

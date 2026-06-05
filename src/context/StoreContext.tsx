@@ -29,6 +29,8 @@ interface StoreContextType {
   deleteLead: (id: string) => void;
   wilayaFees: WilayaFee[];
   updateWilayaFee: (id: string, fee: number) => void;
+  addWilaya: (wilaya: Omit<WilayaFee, "id">) => void;
+  deleteWilaya: (id: string) => void;
   heroBanner: string | null;
   setHeroBanner: (image: string | null) => void;
   isAdmin: boolean;
@@ -555,6 +557,43 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
+  const addWilaya = async (newWilaya: Omit<WilayaFee, "id">) => {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("wilaya_fees")
+      .insert({
+        name_fr: newWilaya.nameFr,
+        name_ar: newWilaya.nameAr,
+        fee: newWilaya.fee,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Failed to add wilaya:", error);
+      alert("Failed to add wilaya: " + error.message);
+      return;
+    }
+    if (data) {
+      setWilayaFees((prev) => [...prev, dbWilayaToFrontend(data)]);
+    }
+  };
+
+  const deleteWilaya = async (id: string) => {
+    if (!supabase) return;
+    const { error } = await supabase
+      .from("wilaya_fees")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Failed to delete wilaya:", error);
+      alert("Failed to delete wilaya: " + error.message);
+      return;
+    }
+    setWilayaFees((prev) => prev.filter((w) => w.id !== id));
+  };
+
   // ── Hero Banner & Contact Config ──
 
   const setHeroBanner = async (image: string | null) => {
@@ -633,6 +672,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteLead,
         wilayaFees,
         updateWilayaFee,
+        addWilaya,
+        deleteWilaya,
         heroBanner,
         setHeroBanner,
         isAdmin,
