@@ -1,17 +1,10 @@
+-- ==========================================
 -- Supabase Database Schema for Sneakers Store
--- Automatically generated based on mockData.ts interfaces
+-- Safe to re-run (fully idempotent)
+-- ==========================================
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- ==========================================
--- 0. Drop Existing Tables (DANGER: Deletes all data)
--- ==========================================
-DROP TABLE IF EXISTS leads CASCADE;
-DROP TABLE IF EXISTS sneakers CASCADE;
-DROP TABLE IF EXISTS categories CASCADE;
-DROP TABLE IF EXISTS wilaya_fees CASCADE;
-DROP TABLE IF EXISTS contact_config CASCADE;
 
 -- ==========================================
 -- 1. Categories Table
@@ -150,7 +143,7 @@ CREATE TABLE IF NOT EXISTS contact_config (
 );
 
 -- Insert initial contact config
-INSERT INTO contact_config (id, whatsapp, email) 
+INSERT INTO contact_config (id, whatsapp, email)
 VALUES (1, '+213000000000', 'contact@sneakersobsidian.com')
 ON CONFLICT (id) DO NOTHING;
 
@@ -165,30 +158,59 @@ ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contact_config ENABLE ROW LEVEL SECURITY;
 
 -- Categories: Public can read, authenticated (Admin) can write
+DROP POLICY IF EXISTS "Categories are viewable by everyone" ON categories;
 CREATE POLICY "Categories are viewable by everyone" ON categories FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Categories are insertable by admins" ON categories;
 CREATE POLICY "Categories are insertable by admins" ON categories FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Categories are updatable by admins" ON categories;
 CREATE POLICY "Categories are updatable by admins" ON categories FOR UPDATE USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Categories are deletable by admins" ON categories;
 CREATE POLICY "Categories are deletable by admins" ON categories FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Sneakers: Public can read, authenticated (Admin) can write
+DROP POLICY IF EXISTS "Sneakers are viewable by everyone" ON sneakers;
 CREATE POLICY "Sneakers are viewable by everyone" ON sneakers FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Sneakers are insertable by admins" ON sneakers;
 CREATE POLICY "Sneakers are insertable by admins" ON sneakers FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Sneakers are updatable by admins" ON sneakers;
 CREATE POLICY "Sneakers are updatable by admins" ON sneakers FOR UPDATE USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Sneakers are deletable by admins" ON sneakers;
 CREATE POLICY "Sneakers are deletable by admins" ON sneakers FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Wilaya Fees: Public can read, authenticated (Admin) can write
+DROP POLICY IF EXISTS "Wilaya fees are viewable by everyone" ON wilaya_fees;
 CREATE POLICY "Wilaya fees are viewable by everyone" ON wilaya_fees FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Wilaya fees are insertable by admins" ON wilaya_fees;
 CREATE POLICY "Wilaya fees are insertable by admins" ON wilaya_fees FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Wilaya fees are updatable by admins" ON wilaya_fees;
 CREATE POLICY "Wilaya fees are updatable by admins" ON wilaya_fees FOR UPDATE USING (auth.role() = 'authenticated');
 
 -- Leads: Public can INSERT, only authenticated (Admin) can view/update/delete
+DROP POLICY IF EXISTS "Leads can be created by anyone" ON leads;
 CREATE POLICY "Leads can be created by anyone" ON leads FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Leads are viewable by admins only" ON leads;
 CREATE POLICY "Leads are viewable by admins only" ON leads FOR SELECT USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Leads are updatable by admins only" ON leads;
 CREATE POLICY "Leads are updatable by admins only" ON leads FOR UPDATE USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Leads are deletable by admins only" ON leads;
 CREATE POLICY "Leads are deletable by admins only" ON leads FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Contact Config: Public can read, authenticated can update
+DROP POLICY IF EXISTS "Contact config viewable by everyone" ON contact_config;
 CREATE POLICY "Contact config viewable by everyone" ON contact_config FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Contact config updatable by admins" ON contact_config;
 CREATE POLICY "Contact config updatable by admins" ON contact_config FOR UPDATE USING (auth.role() = 'authenticated');
 
 -- ==========================================
@@ -203,6 +225,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_sneakers_modtime ON sneakers;
 CREATE TRIGGER update_sneakers_modtime
 BEFORE UPDATE ON sneakers
 FOR EACH ROW
@@ -211,8 +234,26 @@ EXECUTE FUNCTION update_updated_at_column();
 -- ==========================================
 -- 8. Enable Realtime
 -- ==========================================
--- Add tables to the realtime publication
-ALTER PUBLICATION supabase_realtime ADD TABLE categories;
-ALTER PUBLICATION supabase_realtime ADD TABLE sneakers;
-ALTER PUBLICATION supabase_realtime ADD TABLE leads;
-ALTER PUBLICATION supabase_realtime ADD TABLE contact_config;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE categories;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE sneakers;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE leads;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE contact_config;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
