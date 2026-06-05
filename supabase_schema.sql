@@ -118,8 +118,8 @@ ON CONFLICT (id) DO NOTHING;
 -- Keep the identity sequence aligned with the seeded rows above.
 SELECT setval(
   pg_get_serial_sequence('wilaya_fees', 'id'),
-  COALESCE((SELECT MAX(id) FROM wilaya_fees), 1),
-  true
+  COALESCE((SELECT MAX(id::bigint) + 1 FROM wilaya_fees), 1::bigint),
+  false
 );
 
 -- ==========================================
