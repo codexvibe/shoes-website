@@ -1511,7 +1511,7 @@ export const AdminDashboard: React.FC = () => {
                           </div>
                           <div>
                             <div className="font-bold text-white text-xs">{shoe.nameFr}</div>
-                            <div className="text-[8px] text-neutral-500 font-mono mt-0.5">{shoe.categorySlug.replace("-", " ")}</div>
+                            <div className="text-[8px] text-neutral-500 font-mono mt-0.5">{(shoe.categorySlug || "").replace("-", " ")}</div>
                           </div>
                         </div>
                       </td>

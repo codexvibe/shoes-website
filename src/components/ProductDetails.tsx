@@ -107,7 +107,7 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
         <div className="flex flex-col justify-center">
           <div className="mb-8">
             <span className="inline-block text-xs font-bold text-neon-lime uppercase tracking-widest mb-3 font-outfit bg-neon-lime/10 px-3 py-1 rounded-full">
-              {shoe.categorySlug.replace("-", " ")}
+              {(shoe.categorySlug || "").replace("-", " ")}
             </span>
             <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight ${isAr ? "font-cairo text-right" : "font-outfit uppercase"}`}>
               {isAr ? shoe.nameAr : shoe.nameFr}
