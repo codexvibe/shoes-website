@@ -268,3 +268,21 @@ BEGIN
   ALTER PUBLICATION supabase_realtime ADD TABLE contact_config;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+
+-- ==========================================
+-- 9. Migrations / Schema Updates
+-- ==========================================
+-- Add 'colors' column if it does not exist (for existing tables)
+DO $$
+BEGIN
+  ALTER TABLE sneakers ADD COLUMN colors JSONB DEFAULT '[]'::jsonb;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+-- ==========================================
+-- 10. Reload Schema Cache
+-- ==========================================
+-- Run this if you just modified the schema directly in SQL Editor
+NOTIFY pgrst, 'reload schema';
+
+
