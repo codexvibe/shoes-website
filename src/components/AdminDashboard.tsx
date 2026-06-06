@@ -115,6 +115,8 @@ export const AdminDashboard: React.FC = () => {
   
   // NEW Variants
   const [shoeVariantColors, setShoeVariantColors] = useState<SneakerColor[]>([]);
+  const [showVariantGallery, setShowVariantGallery] = useState(false);
+  const [showEditVariantGallery, setShowEditVariantGallery] = useState(false);
   const [variantNameFr, setVariantNameFr] = useState("");
   const [variantNameAr, setVariantNameAr] = useState("");
   const [variantHex, setVariantHex] = useState("#FFFFFF");
@@ -569,10 +571,13 @@ export const AdminDashboard: React.FC = () => {
 
     setCrmName("");
     setCrmPhone("");
-    setCrmNotes("");
+      setCrmNotes("");
     setCrmSuccess(true);
     setTimeout(() => setCrmSuccess(false), 3000);
   };
+
+  // Category states
+  const [showCategoryGallery, setShowCategoryGallery] = useState(false);
 
   // Category submission
   const handleCategorySubmit = (e: React.FormEvent) => {
@@ -1342,14 +1347,47 @@ export const AdminDashboard: React.FC = () => {
                         placeholder="#FFFFFF"
                         className="w-24 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-mono"
                       />
-                      <input
-                        type="text"
-                        value={variantImage}
-                        onChange={(e) => setVariantImage(e.target.value)}
-                        placeholder={isAr ? "رابط صورة هذا اللون" : "Image URL for this color"}
-                        className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
-                      />
+                      <div className="flex-1 flex gap-2">
+                        <input
+                          type="text"
+                          value={variantImage}
+                          onChange={(e) => setVariantImage(e.target.value)}
+                          placeholder={isAr ? "رابط صورة هذا اللون" : "Image URL for this color"}
+                          className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowVariantGallery(!showVariantGallery)}
+                          className="px-3 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white rounded-lg border border-neutral-700 transition-colors flex items-center justify-center cursor-pointer"
+                          title="Choose from Gallery"
+                        >
+                          <ImageIcon size={14} />
+                        </button>
+                      </div>
                     </div>
+                    
+                    {/* Variant Image Gallery */}
+                    {showVariantGallery && (
+                      <div className="grid grid-cols-4 gap-2 border border-neutral-800 bg-neutral-950 p-2 rounded-xl mb-4 animate-fadeIn">
+                        {presetImages.map((img, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => {
+                              setVariantImage(img.url);
+                              setShowVariantGallery(false);
+                            }}
+                            className="relative aspect-square rounded-lg overflow-hidden border border-neutral-850 hover:border-neon-orange transition-all cursor-pointer bg-neutral-900 group"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={img.url} alt={img.name} className="h-full w-full object-cover" />
+                            <div className="absolute inset-0 bg-obsidian/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                              <span className="text-[8px] text-white font-bold font-mono">CHOOSE</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
@@ -2951,14 +2989,47 @@ export const AdminDashboard: React.FC = () => {
                       placeholder="#FFFFFF"
                       className="w-24 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-mono"
                     />
-                    <input
-                      type="text"
-                      value={editVariantImage}
-                      onChange={(e) => setEditVariantImage(e.target.value)}
-                      placeholder="Image URL for this color"
-                      className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
-                    />
+                    <div className="flex-1 flex gap-2">
+                      <input
+                        type="text"
+                        value={editVariantImage}
+                        onChange={(e) => setEditVariantImage(e.target.value)}
+                        placeholder="Image URL for this color"
+                        className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowEditVariantGallery(!showEditVariantGallery)}
+                        className="px-3 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white rounded-lg border border-neutral-700 transition-colors flex items-center justify-center cursor-pointer"
+                        title="Choose from Gallery"
+                      >
+                        <ImageIcon size={14} />
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Edit Variant Image Gallery */}
+                  {showEditVariantGallery && (
+                    <div className="grid grid-cols-4 gap-2 border border-neutral-800 bg-neutral-950 p-2 rounded-xl mb-4 animate-fadeIn">
+                      {presetImages.map((img, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            setEditVariantImage(img.url);
+                            setShowEditVariantGallery(false);
+                          }}
+                          className="relative aspect-square rounded-lg overflow-hidden border border-neutral-850 hover:border-neon-orange transition-all cursor-pointer bg-neutral-900 group"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img.url} alt={img.name} className="h-full w-full object-cover" />
+                          <div className="absolute inset-0 bg-obsidian/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                            <span className="text-[8px] text-white font-bold font-mono">CHOOSE</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => {

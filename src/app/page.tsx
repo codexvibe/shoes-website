@@ -6,8 +6,8 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { CategoryGrid } from "@/components/CategoryGrid";
 import { SneakerGallery } from "@/components/SneakerGallery";
-import { CartDrawer } from "@/components/CartDrawer";
 import { Footer } from "@/components/Footer";
+
 import { Phone, Clock, ShieldCheck } from "lucide-react";
 
 export default function Storefront() {
@@ -90,9 +90,6 @@ export default function Storefront() {
 
       {/* Main Footer (Bilingual and Detailed) */}
       <Footer />
-
-      {/* Slide-over Cart */}
-      <CartDrawer />
 
     </div>
   );

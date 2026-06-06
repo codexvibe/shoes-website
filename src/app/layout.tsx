@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Cairo } from "next/font/google";
 import { StoreProvider } from "@/context/StoreContext";
+import { CartDrawer } from "@/components/CartDrawer";
 import "@/app/globals.css";
 
 // Load Google Fonts for premium athletic typographic hierarchy
@@ -37,6 +38,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-obsidian text-zinc-100">
         <StoreProvider>
           {children}
+          <CartDrawer />
         </StoreProvider>
       </body>
     </html>
