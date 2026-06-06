@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "../context/StoreContext";
+import { SneakerColor } from "../data/mockData";
 import { ShoppingCart, Heart, ShieldCheck, Truck, RotateCcw, MessageCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +11,9 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
   const router = useRouter();
   const { sneakers, language, contactConfig, addToCart, loading } = useStore();
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [selectedColor, setSelectedColor] = useState<SneakerColor | null>(null);
   const [isFav, setIsFav] = useState(false);
+  const [imageTransition, setImageTransition] = useState(false);
 
   const isAr = language === "ar";
   const shoe = sneakers.find((s) => String(s.id) === id || s.slug === id);
@@ -21,7 +24,7 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <div className="h-14 w-14 rounded-full border-4 border-white/10 border-t-neon-lime animate-spin mb-6" />
           <h2 className={`text-3xl font-black text-white ${isAr ? "font-cairo" : "font-outfit"}`}>
-            {isAr ? "Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ù†ØªØ¬..." : "Loading product..."}
+            {isAr ? "جاري تحميل المنتج..." : "Loading product..."}
           </h2>
         </div>
       </div>
@@ -44,16 +47,37 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
     );
   }
 
+  const hasColors = shoe.colors && shoe.colors.length > 0;
+
+  // The displayed image: selected color's image, or default shoe image
+  const displayedImage = selectedColor?.image || shoe.image;
+
+  const handleColorSelect = (color: SneakerColor) => {
+    if (selectedColor?.hex === color.hex && selectedColor?.nameFr === color.nameFr) return;
+    // Trigger fade-out
+    setImageTransition(true);
+    setTimeout(() => {
+      setSelectedColor(color);
+      setImageTransition(false);
+    }, 200);
+  };
+
   const handleAddToCart = () => {
     if (!selectedSize) {
       alert(isAr ? "الرجاء اختيار المقاس أولاً" : "Veuillez d'abord choisir la taille");
       return;
     }
+    if (hasColors && !selectedColor) {
+      alert(isAr ? "الرجاء اختيار اللون أولاً" : "Veuillez d'abord choisir la couleur");
+      return;
+    }
+    const colorSuffix = selectedColor ? `_${selectedColor.nameFr}` : "";
     addToCart({
-      id: `${shoe.id}_${selectedSize}`,
+      id: `${shoe.id}_${selectedSize}${colorSuffix}`,
       sneakerId: shoe.id,
       size: selectedSize,
       quantity: 1,
+      color: selectedColor || undefined,
     });
   };
 
@@ -72,14 +96,16 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16">
         
-        {/* Left: Product Image */}
+        {/* Left: Product Image with fade transition */}
         <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square bg-[#0a0a0c] rounded-3xl overflow-hidden border border-white/5 flex items-center justify-center group">
           <div className="absolute inset-0 bg-gradient-to-tr from-neon-lime/10 via-transparent to-neon-orange/5 opacity-50"></div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={shoe.image}
+            src={displayedImage}
             alt={isAr ? shoe.nameAr : shoe.nameFr}
-            className="w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110 z-10"
+            className={`w-full h-full object-cover transform transition-all duration-500 ease-out group-hover:scale-105 z-10 ${
+              imageTransition ? "opacity-0 scale-95" : "opacity-100 scale-100"
+            }`}
           />
           {/* Badges */}
           <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
@@ -101,6 +127,16 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
           >
             <Heart size={20} className={isFav ? "fill-red-500 text-red-500" : "text-white"} />
           </button>
+
+          {/* Color indicator badge on image */}
+          {selectedColor && (
+            <div className="absolute bottom-6 left-6 z-20 flex items-center gap-2 bg-black/70 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10">
+              <div className="w-4 h-4 rounded-full border border-white/30" style={{ backgroundColor: selectedColor.hex }} />
+              <span className={`text-[11px] font-bold text-white ${isAr ? "font-cairo" : "font-outfit"}`}>
+                {isAr ? selectedColor.nameAr : selectedColor.nameFr}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Right: Product Details */}
@@ -121,6 +157,50 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
           </div>
 
           <div className="h-px w-full bg-white/10 my-8"></div>
+
+          {/* ═══════ COLOR SWATCHES ═══════ */}
+          {hasColors && (
+            <div className="mb-8">
+              <div className={`flex items-center justify-between mb-4 ${isAr ? 'flex-row-reverse' : ''}`}>
+                <h3 className={`text-sm font-bold text-white uppercase tracking-widest ${isAr ? "font-cairo" : "font-outfit"}`}>
+                  {isAr ? "اختر اللون" : "Select Color"}
+                </h3>
+                {selectedColor && (
+                  <span className={`text-xs text-neon-orange font-bold ${isAr ? "font-cairo" : "font-outfit"}`}>
+                    {isAr ? selectedColor.nameAr : selectedColor.nameFr}
+                  </span>
+                )}
+              </div>
+              
+              <div className={`flex flex-wrap gap-3 ${isAr ? "justify-end" : ""}`}>
+                {shoe.colors!.map((color, idx) => {
+                  const isSelected = selectedColor?.hex === color.hex && selectedColor?.nameFr === color.nameFr;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleColorSelect(color)}
+                      title={isAr ? color.nameAr : color.nameFr}
+                      className={`relative w-12 h-12 rounded-xl transition-all duration-300 cursor-pointer border-2 flex items-center justify-center ${
+                        isSelected
+                          ? "border-neon-orange scale-110 shadow-[0_0_15px_rgba(234,88,12,0.4)]"
+                          : "border-white/10 hover:border-white/40 hover:scale-105"
+                      }`}
+                    >
+                      <div
+                        className="w-8 h-8 rounded-lg"
+                        style={{ backgroundColor: color.hex }}
+                      />
+                      {isSelected && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-neon-orange rounded-full flex items-center justify-center">
+                          <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Sizes */}
           <div className="mb-10">
@@ -163,9 +243,10 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
               href={(() => {
                 const phone = contactConfig.whatsapp.replace(/\+/g, "");
                 const sizePart = selectedSize ? (isAr ? `، المقاس ${selectedSize}` : `, Taille ${selectedSize}`) : "";
+                const colorPart = selectedColor ? (isAr ? `، اللون ${selectedColor.nameAr}` : `, Couleur ${selectedColor.nameFr}`) : "";
                 const msg = isAr
-                  ? `مرحباً، أريد شراء ${shoe.nameAr}${sizePart}، السعر ${Math.round(Number(shoe.price) || 0)} د.ج`
-                  : `Bonjour, je veux acheter la ${shoe.nameFr}${sizePart}, Prix ${Math.round(Number(shoe.price) || 0)} DA`;
+                  ? `مرحباً، أريد شراء ${shoe.nameAr}${colorPart}${sizePart}، السعر ${Math.round(Number(shoe.price) || 0)} د.ج`
+                  : `Bonjour, je veux acheter la ${shoe.nameFr}${colorPart}${sizePart}, Prix ${Math.round(Number(shoe.price) || 0)} DA`;
                 return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
               })()}
               target="_blank"

@@ -127,7 +127,8 @@ export const CartDrawer: React.FC = () => {
     .map((item) => {
       const shoe = getSneakerDetails(item.sneakerId);
       const name = shoe ? (isAr ? shoe.nameAr : shoe.nameFr) : "Unknown Shoe";
-      return `- ${name} (Size: ${item.size}, Qty: ${item.quantity})`;
+      const colorPart = item.color ? (isAr ? `, اللون: ${item.color.nameAr}` : `, Color: ${item.color.nameFr}`) : "";
+      return `- ${name} (Size: ${item.size}${colorPart}, Qty: ${item.quantity})`;
     })
     .join("\n");
 
@@ -258,7 +259,7 @@ export const CartDrawer: React.FC = () => {
                       <div className="w-20 h-20 rounded-xl bg-neutral-950 overflow-hidden flex-shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={shoe.image}
+                          src={item.color?.image || shoe.image}
                           alt={shoe.nameFr}
                           className="w-full h-full object-cover"
                         />
@@ -277,6 +278,14 @@ export const CartDrawer: React.FC = () => {
                             <p className="text-[10px] text-neutral-500 font-outfit uppercase mt-0.5">
                               {isAr ? `المقاس: ${item.size}` : `Taille: ${item.size}`}
                             </p>
+                            {item.color && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <div className="w-3 h-3 rounded-full border border-white/20" style={{ backgroundColor: item.color.hex }} />
+                                <span className="text-[10px] text-neutral-400 font-outfit">
+                                  {isAr ? item.color.nameAr : item.color.nameFr}
+                                </span>
+                              </div>
+                            )}
                           </div>
                           <button
                             onClick={() => removeFromCart(item.id)}

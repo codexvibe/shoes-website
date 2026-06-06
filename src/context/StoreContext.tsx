@@ -32,6 +32,7 @@ interface DbSneakerRow {
   sizes?: number[] | null;
   sizes_stock?: Sneaker["sizesStock"] | null;
   colorways?: string[] | null;
+  colors?: any | null;
   desc_fr?: string | null;
   desc_ar?: string | null;
   featured?: boolean | null;
@@ -129,6 +130,7 @@ function dbSneakerToFrontend(row: DbSneakerRow): Sneaker {
     sizes: row.sizes || [],
     sizesStock: row.sizes_stock || {},
     colorways: row.colorways || [],
+    colors: row.colors || [],
     descFr: row.desc_fr || "",
     descAr: row.desc_ar || "",
     featured: row.featured || false,
@@ -400,6 +402,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         sizes: newShoe.sizes,
         sizes_stock: newShoe.sizesStock,
         colorways: newShoe.colorways,
+        colors: newShoe.colors || [],
         desc_fr: newShoe.descFr,
         desc_ar: newShoe.descAr,
         featured: newShoe.featured || false,
@@ -447,6 +450,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         sizes: updatedShoe.sizes,
         sizes_stock: updatedShoe.sizesStock,
         colorways: updatedShoe.colorways,
+        colors: updatedShoe.colors || [],
         desc_fr: updatedShoe.descFr,
         desc_ar: updatedShoe.descAr,
         featured: updatedShoe.featured || false,

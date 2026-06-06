@@ -28,7 +28,7 @@ import {
   Edit,
   X
 } from "lucide-react";
-import { Sneaker, Lead, WilayaFee } from "../data/mockData";
+import { Sneaker, Lead, WilayaFee, SneakerColor } from "../data/mockData";
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -112,6 +112,13 @@ export const AdminDashboard: React.FC = () => {
   const presetColors = ["Black", "White", "Neon Lime", "Electric Orange", "Red", "Grey", "Blue", "Gold", "Terracotta"];
   const [selectedColors, setSelectedColors] = useState<string[]>(["Black"]);
   const [customColor, setCustomColor] = useState("");
+  
+  // NEW Variants
+  const [shoeVariantColors, setShoeVariantColors] = useState<SneakerColor[]>([]);
+  const [variantNameFr, setVariantNameFr] = useState("");
+  const [variantNameAr, setVariantNameAr] = useState("");
+  const [variantHex, setVariantHex] = useState("#FFFFFF");
+  const [variantImage, setVariantImage] = useState("");
 
   // Dropzone State
   const [dragActive, setDragActive] = useState(false);
@@ -136,6 +143,11 @@ export const AdminDashboard: React.FC = () => {
   const [editSizes, setEditSizes] = useState<number[]>([]);
   const [editColors, setEditColors] = useState<string[]>([]);
   const [editCustomColor, setEditCustomColor] = useState("");
+  const [editShoeVariantColors, setEditShoeVariantColors] = useState<SneakerColor[]>([]);
+  const [editVariantNameFr, setEditVariantNameFr] = useState("");
+  const [editVariantNameAr, setEditVariantNameAr] = useState("");
+  const [editVariantHex, setEditVariantHex] = useState("#FFFFFF");
+  const [editVariantImage, setEditVariantImage] = useState("");
   const [editShowGallery, setEditShowGallery] = useState(false);
   const [editDragActive, setEditDragActive] = useState(false);
   const [editImageError, setEditImageError] = useState(false);
@@ -394,6 +406,7 @@ export const AdminDashboard: React.FC = () => {
       sizes: shoeSizes,
       sizesStock: initialStock,
       colorways: selectedColors.length > 0 ? selectedColors : ["Default"],
+      colors: shoeVariantColors,
       descFr: shoeDescFr,
       descAr: shoeDescAr,
       featured: shoeFeatured,
@@ -412,6 +425,7 @@ export const AdminDashboard: React.FC = () => {
     setShoeNewArrival(false);
     setShoeSizes([39, 40, 41, 42, 43, 44, 45]);
     setSelectedColors(["Black"]);
+    setShoeVariantColors([]);
     setShoeImageError(false);
     setShoeFormSuccess(true);
     setTimeout(() => setShoeFormSuccess(false), 3000);
@@ -432,6 +446,7 @@ export const AdminDashboard: React.FC = () => {
     setEditNewArrival(!!shoe.isNewArrival);
     setEditSizes(Array.isArray(shoe.sizes) ? shoe.sizes : [39, 40, 41, 42, 43, 44, 45]);
     setEditColors(Array.isArray(shoe.colorways) ? shoe.colorways : ["Default"]);
+    setEditShoeVariantColors(shoe.colors || []);
     setEditImageError(false);
     setEditShowGallery(false);
   };
@@ -475,6 +490,7 @@ export const AdminDashboard: React.FC = () => {
       sizes: editSizes,
       sizesStock: updatedStock,
       colorways: editColors.length > 0 ? editColors : ["Default"],
+      colors: editShoeVariantColors,
       descFr: editDescFr,
       descAr: editDescAr,
       featured: editFeatured,
@@ -1253,6 +1269,109 @@ export const AdminDashboard: React.FC = () => {
                       className="px-3.5 py-1.5 bg-neutral-800 text-white rounded-lg text-xs font-bold font-outfit border border-neutral-700 hover:bg-neutral-700 cursor-pointer"
                     >
                       ADD
+                    </button>
+                  </div>
+                </div>
+
+                {/* ══════ COLOR VARIANTS (Image per Color) ══════ */}
+                <div>
+                  <label className="block text-[10px] font-bold text-neon-orange uppercase tracking-widest mb-2 font-outfit">
+                    🎨 {isAr ? "ألوان المنتج (صورة لكل لون)" : "Color Variants (Image per Color)"}
+                  </label>
+                  <p className="text-[10px] text-neutral-500 mb-3 font-outfit">
+                    {isAr ? "أضف ألوان مختلفة لنفس الموديل. كل لون بصورته الخاصة." : "Add different colors for the same model. Each color with its own image."}
+                  </p>
+
+                  {/* Listed variants */}
+                  {shoeVariantColors.length > 0 && (
+                    <div className="space-y-2 mb-3">
+                      {shoeVariantColors.map((vc, idx) => (
+                        <div key={idx} className="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2">
+                          <div className="w-7 h-7 rounded-full border-2 border-white/20 flex-shrink-0" style={{ backgroundColor: vc.hex }} />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-bold text-white font-outfit truncate">{vc.nameFr}</div>
+                            <div className="text-[9px] text-neutral-500 font-mono truncate">{vc.nameAr} · {vc.hex}</div>
+                          </div>
+                          {vc.image && (
+                            <div className="w-8 h-8 rounded-lg overflow-hidden border border-neutral-700 flex-shrink-0">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={vc.image} alt={vc.nameFr} className="w-full h-full object-cover" />
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setShoeVariantColors(shoeVariantColors.filter((_, i) => i !== idx))}
+                            className="text-red-500 hover:text-red-400 p-1 cursor-pointer"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add new variant form */}
+                  <div className="bg-neutral-950/50 border border-dashed border-neutral-700 rounded-xl p-3 space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        value={variantNameFr}
+                        onChange={(e) => setVariantNameFr(e.target.value)}
+                        placeholder={isAr ? "اسم اللون (FR)" : "Color name (FR)"}
+                        className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                      />
+                      <input
+                        type="text"
+                        value={variantNameAr}
+                        onChange={(e) => setVariantNameAr(e.target.value)}
+                        placeholder={isAr ? "اسم اللون (AR)" : "Color name (AR)"}
+                        className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-cairo text-right"
+                      />
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="color"
+                        value={variantHex}
+                        onChange={(e) => setVariantHex(e.target.value)}
+                        className="w-10 h-10 rounded-lg border border-neutral-700 cursor-pointer bg-transparent p-0.5"
+                      />
+                      <input
+                        type="text"
+                        value={variantHex}
+                        onChange={(e) => setVariantHex(e.target.value)}
+                        placeholder="#FFFFFF"
+                        className="w-24 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-mono"
+                      />
+                      <input
+                        type="text"
+                        value={variantImage}
+                        onChange={(e) => setVariantImage(e.target.value)}
+                        placeholder={isAr ? "رابط صورة هذا اللون" : "Image URL for this color"}
+                        className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!variantNameFr || !variantImage) {
+                          alert(isAr ? "يرجى ملء اسم اللون ورابط الصورة" : "Please fill color name and image URL");
+                          return;
+                        }
+                        setShoeVariantColors([...shoeVariantColors, {
+                          nameFr: variantNameFr,
+                          nameAr: variantNameAr || variantNameFr,
+                          hex: variantHex,
+                          image: variantImage,
+                        }]);
+                        setVariantNameFr("");
+                        setVariantNameAr("");
+                        setVariantHex("#FFFFFF");
+                        setVariantImage("");
+                      }}
+                      className="w-full flex items-center justify-center gap-2 bg-neon-orange/10 border border-neon-orange/30 text-neon-orange hover:bg-neon-orange/20 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer font-outfit"
+                    >
+                      <Plus size={14} />
+                      {isAr ? "إضافة لون" : "Add Color Variant"}
                     </button>
                   </div>
                 </div>
@@ -2764,6 +2883,104 @@ export const AdminDashboard: React.FC = () => {
                     className="px-3.5 py-1.5 bg-neutral-800 text-white rounded-lg text-xs font-bold font-outfit border border-neutral-700 hover:bg-neutral-700 cursor-pointer"
                   >
                     ADD
+                  </button>
+                </div>
+              </div>
+
+              {/* ══════ COLOR VARIANTS (Edit Modal) ══════ */}
+              <div>
+                <label className="block text-[10px] font-bold text-neon-orange uppercase tracking-widest mb-2 font-outfit">
+                  🎨 {isAr ? "ألوان المنتج (صورة لكل لون)" : "Color Variants (Image per Color)"}
+                </label>
+
+                {editShoeVariantColors.length > 0 && (
+                  <div className="space-y-2 mb-3">
+                    {editShoeVariantColors.map((vc, idx) => (
+                      <div key={idx} className="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2">
+                        <div className="w-7 h-7 rounded-full border-2 border-white/20 flex-shrink-0" style={{ backgroundColor: vc.hex }} />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-bold text-white font-outfit truncate">{vc.nameFr}</div>
+                          <div className="text-[9px] text-neutral-500 font-mono truncate">{vc.nameAr} · {vc.hex}</div>
+                        </div>
+                        {vc.image && (
+                          <div className="w-8 h-8 rounded-lg overflow-hidden border border-neutral-700 flex-shrink-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={vc.image} alt={vc.nameFr} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setEditShoeVariantColors(editShoeVariantColors.filter((_, i) => i !== idx))}
+                          className="text-red-500 hover:text-red-400 p-1 cursor-pointer"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="bg-neutral-950/50 border border-dashed border-neutral-700 rounded-xl p-3 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={editVariantNameFr}
+                      onChange={(e) => setEditVariantNameFr(e.target.value)}
+                      placeholder="Color name (FR)"
+                      className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                    />
+                    <input
+                      type="text"
+                      value={editVariantNameAr}
+                      onChange={(e) => setEditVariantNameAr(e.target.value)}
+                      placeholder="Color name (AR)"
+                      className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-cairo text-right"
+                    />
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="color"
+                      value={editVariantHex}
+                      onChange={(e) => setEditVariantHex(e.target.value)}
+                      className="w-10 h-10 rounded-lg border border-neutral-700 cursor-pointer bg-transparent p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={editVariantHex}
+                      onChange={(e) => setEditVariantHex(e.target.value)}
+                      placeholder="#FFFFFF"
+                      className="w-24 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-mono"
+                    />
+                    <input
+                      type="text"
+                      value={editVariantImage}
+                      onChange={(e) => setEditVariantImage(e.target.value)}
+                      placeholder="Image URL for this color"
+                      className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!editVariantNameFr || !editVariantImage) {
+                        alert("Please fill color name and image URL");
+                        return;
+                      }
+                      setEditShoeVariantColors([...editShoeVariantColors, {
+                        nameFr: editVariantNameFr,
+                        nameAr: editVariantNameAr || editVariantNameFr,
+                        hex: editVariantHex,
+                        image: editVariantImage,
+                      }]);
+                      setEditVariantNameFr("");
+                      setEditVariantNameAr("");
+                      setEditVariantHex("#FFFFFF");
+                      setEditVariantImage("");
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-neon-orange/10 border border-neon-orange/30 text-neon-orange hover:bg-neon-orange/20 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer font-outfit"
+                  >
+                    <Plus size={14} />
+                    Add Color Variant
                   </button>
                 </div>
               </div>

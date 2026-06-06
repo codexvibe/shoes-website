@@ -8,6 +8,13 @@ export interface Category {
   image?: string;
 }
 
+export interface SneakerColor {
+  nameFr: string;
+  nameAr: string;
+  hex: string;
+  image: string;
+}
+
 export interface Sneaker {
   id: string;
   slug: string;
@@ -18,7 +25,8 @@ export interface Sneaker {
   image: string;
   sizes: number[];
   sizesStock: Record<number, number>; // size -> quantity
-  colorways: string[];
+  colorways: string[]; // Deprecated, use colors instead
+  colors?: SneakerColor[];
   descFr: string;
   descAr: string;
   featured?: boolean;
@@ -52,6 +60,7 @@ export interface CartItem {
   sneakerId: string;
   size: number;
   quantity: number;
+  color?: SneakerColor; // Optional chosen color
 }
 
 export const INITIAL_CATEGORIES: Category[] = [];

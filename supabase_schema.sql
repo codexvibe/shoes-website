@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS sneakers (
   sizes INTEGER[] DEFAULT '{}',
   sizes_stock JSONB DEFAULT '{}'::jsonb,
   colorways TEXT[] DEFAULT '{}',
+  colors JSONB DEFAULT '[]'::jsonb,
   desc_fr TEXT,
   desc_ar TEXT,
   featured BOOLEAN DEFAULT false,
