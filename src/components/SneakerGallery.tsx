@@ -159,7 +159,7 @@ export const SneakerGallery: React.FC = () => {
                     <div>
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] uppercase font-bold text-neon-lime tracking-widest font-outfit">
-                          {shoe.categorySlug.replace("-", " ")}
+                          {(shoe.categorySlug || "").replace("-", " ")}
                         </span>
                         <span className="text-neon-orange font-black text-sm font-outfit">
                           {isAr ? `${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج` : `${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA`}
