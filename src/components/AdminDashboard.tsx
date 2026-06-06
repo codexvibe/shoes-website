@@ -1347,21 +1347,21 @@ export const AdminDashboard: React.FC = () => {
                         placeholder="#FFFFFF"
                         className="w-24 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-mono"
                       />
-                      <div className="flex-1 flex gap-2">
+                      <div className="flex-1 flex flex-col gap-2">
                         <input
                           type="text"
                           value={variantImage}
                           onChange={(e) => setVariantImage(e.target.value)}
                           placeholder={isAr ? "رابط صورة هذا اللون" : "Image URL for this color"}
-                          className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                          className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
                         />
                         <button
                           type="button"
                           onClick={() => setShowVariantGallery(!showVariantGallery)}
-                          className="px-3 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white rounded-lg border border-neutral-700 transition-colors flex items-center justify-center cursor-pointer"
-                          title="Choose from Gallery"
+                          className="w-full py-1.5 bg-neutral-800 hover:bg-neutral-700 text-[10px] font-bold text-neutral-300 hover:text-white rounded-lg border border-neutral-700 transition-all flex items-center justify-center gap-1.5 cursor-pointer font-outfit"
                         >
-                          <ImageIcon size={14} />
+                          <ImageIcon size={12} className="text-neon-orange" />
+                          {showVariantGallery ? "HIDE GALLERY" : "SELECT IMAGE FROM GALLERY (اختر من المعرض)"}
                         </button>
                       </div>
                     </div>
@@ -2989,21 +2989,21 @@ export const AdminDashboard: React.FC = () => {
                       placeholder="#FFFFFF"
                       className="w-24 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-mono"
                     />
-                    <div className="flex-1 flex gap-2">
+                    <div className="flex-1 flex flex-col gap-2">
                       <input
                         type="text"
                         value={editVariantImage}
                         onChange={(e) => setEditVariantImage(e.target.value)}
                         placeholder="Image URL for this color"
-                        className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                        className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
                       />
                       <button
                         type="button"
                         onClick={() => setShowEditVariantGallery(!showEditVariantGallery)}
-                        className="px-3 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white rounded-lg border border-neutral-700 transition-colors flex items-center justify-center cursor-pointer"
-                        title="Choose from Gallery"
+                        className="w-full py-1.5 bg-neutral-800 hover:bg-neutral-700 text-[10px] font-bold text-neutral-300 hover:text-white rounded-lg border border-neutral-700 transition-all flex items-center justify-center gap-1.5 cursor-pointer font-outfit"
                       >
-                        <ImageIcon size={14} />
+                        <ImageIcon size={12} className="text-neon-orange" />
+                        {showEditVariantGallery ? "HIDE GALLERY" : "SELECT IMAGE FROM GALLERY"}
                       </button>
                     </div>
                   </div>
