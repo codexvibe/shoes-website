@@ -732,7 +732,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     if (error) {
       console.error("Failed to update contact config:", error);
-      alert("Database error: Failed to save Contact Settings.\nDetails: " + error.message);
+      if (error.message.includes("Could not find the 'announcement' column")) {
+        alert("⚠️ DATABASE UPDATE REQUIRED ⚠️\n\nYour Supabase database does not have the new Appearance columns yet (or the cache is stuck).\n\nPlease go to your Supabase Dashboard -> SQL Editor, and run exactly this code:\n\nALTER TABLE contact_config ADD COLUMN IF NOT EXISTS site_name TEXT DEFAULT 'SNKRS ALG';\nALTER TABLE contact_config ADD COLUMN IF NOT EXISTS primary_color TEXT DEFAULT '#00ffcc';\nALTER TABLE contact_config ADD COLUMN IF NOT EXISTS announcement TEXT DEFAULT 'Welcome!';\nNOTIFY pgrst, 'reload schema';\n\nThen try saving again!");
+      } else {
+        alert("Database error: Failed to save Contact Settings.\nDetails: " + error.message);
+      }
     } else {
       console.log("Successfully updated contact_config in Supabase!");
     }
