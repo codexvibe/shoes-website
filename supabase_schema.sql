@@ -286,29 +286,13 @@ END $$;
 -- 9. Migrations / Schema Updates
 -- ==========================================
 -- Add 'colors' column if it does not exist (for existing tables)
-DO $$
-BEGIN
-  ALTER TABLE sneakers ADD COLUMN colors JSONB DEFAULT '[]'::jsonb;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
+-- Add 'colors' column if it does not exist (for existing tables)
+ALTER TABLE sneakers ADD COLUMN IF NOT EXISTS colors JSONB DEFAULT '[]'::jsonb;
 
-DO $$
-BEGIN
-  ALTER TABLE contact_config ADD COLUMN site_name TEXT DEFAULT 'SNKRS ALG';
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
-
-DO $$
-BEGIN
-  ALTER TABLE contact_config ADD COLUMN primary_color TEXT DEFAULT '#00ffcc';
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
-
-DO $$
-BEGIN
-  ALTER TABLE contact_config ADD COLUMN announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.';
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
+-- Add new appearance columns if they don't exist
+ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS site_name TEXT DEFAULT 'SNKRS ALG';
+ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS primary_color TEXT DEFAULT '#00ffcc';
+ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.';
 
 -- ==========================================
 -- 10. Initial Data Seed (After Migrations)
