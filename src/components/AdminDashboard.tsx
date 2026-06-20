@@ -2278,14 +2278,43 @@ export const AdminDashboard: React.FC = () => {
                   {showAdvancedCatOptions && (
                     <div className="p-5 border-t border-neutral-800/80 space-y-5 bg-neutral-950/30 animate-fadeIn">
                       <div>
-                        <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Category Image URL</label>
-                        <input
-                          type="url"
-                          value={catImage}
-                          onChange={(e) => setCatImage(e.target.value)}
-                          placeholder="https://images.unsplash.com/..."
-                          className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
-                        />
+                        <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Category Image</label>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="text"
+                            value={catImage}
+                            onChange={(e) => setCatImage(e.target.value)}
+                            placeholder="URL or Upload from PC/Phone..."
+                            className="flex-1 bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
+                          />
+                          <input
+                            type="file"
+                            id="catImageUpload"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setCatImage(reader.result as string);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById('catImageUpload')?.click()}
+                            className="px-4 py-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+                          >
+                            <UploadCloud size={14} className="text-neon-lime" />
+                            Upload Image
+                          </button>
+                        </div>
+                        {catImage && catImage.startsWith('data:image') && (
+                          <div className="mt-2 text-[9px] text-neon-lime font-mono">Image successfully loaded from local storage.</div>
+                        )}
                       </div>
                       
                       <div>
