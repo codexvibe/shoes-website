@@ -1107,7 +1107,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8">
               <h2 className="text-lg font-bold text-white mb-6 uppercase tracking-wider flex items-center gap-2 border-b border-neutral-900 pb-4">
                 <Plus size={18} className="text-neon-lime" />
-                {isAr ? "بوابة رفع سنيكرز ثنائية اللغة" : "Bilingual Product Uploader"}
+                {isAr ? "إضافة منتج جديد" : "Ajouter un produit"}
               </h2>
 
               <form onSubmit={handleSneakerSubmit} className="space-y-5">
@@ -1115,7 +1115,7 @@ export const AdminDashboard: React.FC = () => {
                 {/* Drag & Drop File Zone */}
                 <div>
                   <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
-                    Sneaker Artwork Upload *
+                    Image du Produit *
                   </label>
                   
                   <div
@@ -1157,10 +1157,10 @@ export const AdminDashboard: React.FC = () => {
                       <div className="flex flex-col items-center justify-center">
                         <UploadCloud className="text-neutral-500 animate-bounce mb-2" size={24} />
                         <p className="text-xs font-bold text-white uppercase font-outfit">
-                          {isAr ? "اسحب وأسقط صورة الحذاء الرياضي" : "Drag & Drop Sneaker Image"}
+                          {isAr ? "اسحب وأسقط الصورة" : "Glisser-déposer l'image"}
                         </p>
                         <p className="text-[9px] text-neutral-600 mt-1 uppercase font-mono">
-                          {isAr ? "أو اضغط للتصفح من ملفاتك" : "or click to browse local files"}
+                          {isAr ? "أو اضغط للتصفح" : "ou cliquer pour parcourir"}
                         </p>
                       </div>
                     )}
@@ -1175,7 +1175,7 @@ export const AdminDashboard: React.FC = () => {
                     className="w-full py-2 bg-neutral-900 hover:bg-neutral-850 text-[10px] font-bold text-neutral-400 hover:text-white rounded-xl border border-neutral-800 transition-all flex items-center justify-center gap-1.5 cursor-pointer font-outfit"
                   >
                     <ImageIcon size={12} className="text-neon-lime" />
-                    {showGallery ? "HIDE PRESET GALLERY" : "SELECT FROM PRESET SNEAKERS GALLERY"}
+                    {showGallery ? "MASQUER LA GALERIE" : "SÉLECTIONNER DEPUIS LA GALERIE"}
                   </button>
 
                   {showGallery && (
@@ -1205,7 +1205,7 @@ export const AdminDashboard: React.FC = () => {
                 {/* Name fields */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Model Name (FR) *</label>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Nom du modèle (FR) *</label>
                     <input
                       type="text"
                       value={shoeNameFr}
@@ -1232,7 +1232,7 @@ export const AdminDashboard: React.FC = () => {
                 {/* Price & Category */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Price (DA) *</label>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Prix (DA) *</label>
                     <input
                       type="number"
                       value={shoePrice}
@@ -1245,7 +1245,7 @@ export const AdminDashboard: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className={`block text-[10px] font-bold text-neutral-400 uppercase tracking-widest ${isAr ? 'text-right font-cairo' : 'font-outfit'}`}>
-                        {isAr ? "فئة المجموعة *" : "Category Selection *"}
+                        {isAr ? "الفئة *" : "Catégorie *"}
                       </label>
                       <button
                         type="button"
@@ -1309,7 +1309,7 @@ export const AdminDashboard: React.FC = () => {
 
                 {/* Colorways */}
                 <div>
-                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Colorways Multi-Select</label>
+                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Couleurs disponibles</label>
                   <div className="flex flex-wrap gap-1.5 mb-2.5">
                     {presetColors.map((color) => {
                       const selected = selectedColors.includes(color);
@@ -1350,11 +1350,8 @@ export const AdminDashboard: React.FC = () => {
                 {/* ══════ COLOR VARIANTS (Image per Color) ══════ */}
                 <div>
                   <label className="block text-[10px] font-bold text-neon-orange uppercase tracking-widest mb-2 font-outfit">
-                    🎨 {isAr ? "ألوان المنتج (صورة لكل لون)" : "Color Variants (Image per Color)"}
+                    🎨 {isAr ? "صور الألوان المتعددة" : "Variantes de couleurs"}
                   </label>
-                  <p className="text-[10px] text-neutral-500 mb-3 font-outfit">
-                    {isAr ? "أضف ألوان مختلفة لنفس الموديل. كل لون بصورته الخاصة." : "Add different colors for the same model. Each color with its own image."}
-                  </p>
 
                   {/* Listed variants */}
                   {shoeVariantColors.length > 0 && (
@@ -3033,7 +3030,7 @@ export const AdminDashboard: React.FC = () => {
 
               {/* Colorways */}
               <div>
-                <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Colorways Setup</label>
+                <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">{isAr ? "خيارات الألوان" : "Couleurs disponibles"}</label>
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {presetColors.map((color) => {
                     const selected = editColors.includes(color);

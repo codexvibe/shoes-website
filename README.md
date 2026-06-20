@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <img src="https://images.unsplash.com/photo-1552346154-21d32810baa3?q=80&w=2000&auto=format&fit=crop" alt="Premium Sneaker Store Banner" width="100%" />
 
-## Getting Started
+  # 👟 Premium Sneaker Storefront
 
-First, run the development server:
+  **A modern, blazing-fast, and bilingual (French & Arabic) e-commerce platform built for limited-edition sneakers and streetwear.**
+  
+  [![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-19.2-blue?style=for-the-badge&logo=react)](https://react.dev/)
+  [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+  [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
 
+</div>
+
+---
+
+## 🌟 About The Project
+
+This project is a fully-featured, high-performance E-commerce storefront tailored specifically for sneakerheads. Designed with a dark "obsidian and neon" aesthetic, it delivers a premium, immersive shopping experience. The application provides seamless language switching between French and Arabic (with full RTL support).
+
+### 📸 Showcase
+
+| Storefront Hero | Product Gallery |
+| :---: | :---: |
+| <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=700" alt="Hero Section" width="400" /> | <img src="https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=700" alt="Gallery" width="400" /> |
+| **Bilingual Interface** | **Admin Dashboard** |
+| <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=700" alt="Bilingual" width="400" /> | <img src="https://images.unsplash.com/photo-1551150441-3f3828204ef0?auto=format&fit=crop&q=80&w=700" alt="Admin" width="400" /> |
+
+*(Note: Replace these placeholder images with actual application screenshots if desired!)*
+
+## ✨ Key Features
+
+- **🛍️ Dynamic Sneaker Gallery**: Advanced filtering by category, "Hot Drops", and "New Arrivals".
+- **🌍 Bilingual & RTL Ready**: Seamless real-time switching between French (LTR) and Arabic (RTL).
+- **🛒 Seamless Checkout**: Frictionless cart management designed for quick conversions.
+- **🛡️ Secure Admin Dashboard**: Full inventory and order management system built for store owners.
+- **⚡ Blazing Fast**: Built on Next.js App Router with optimized image loading and server-side rendering.
+- **🎨 Modern UI/UX**: Dark mode by default, featuring glassmorphism, micro-animations, and custom neon accents.
+- **🗄️ Supabase Integration**: Real-time database syncing, authentication, and secure data storage.
+
+## 🛠️ Technology Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Library**: React 19
+- **Styling**: Tailwind CSS v4
+- **Database / Auth**: Supabase SSR
+- **Icons**: Lucide React
+- **Language**: TypeScript
+
+## 🚀 Getting Started
+
+To run this project locally:
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/yourusername/shoes-website.git
+cd shoes-website
+```
+
+### 2. Install dependencies
+```bash
+npm install
+```
+
+### 3. Set up Environment Variables
+Create a `.env.local` file in the root directory and add your Supabase credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 4. Run the development server
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🤝 Contributing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
 
-## Learn More
+## 📜 License
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is open-source and available under the [MIT License](LICENSE).
