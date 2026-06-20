@@ -83,8 +83,9 @@ interface StoreContextType {
   deleteLead: (id: string) => void;
   wilayaFees: WilayaFee[];
   updateWilayaFee: (id: string, fee: number) => void;
-  addWilaya: (wilaya: Omit<WilayaFee, "id">) => void;
+  addWilaya: (wilaya: WilayaFee) => void;
   deleteWilaya: (id: string) => void;
+  resetWilayas: () => Promise<void>;
   heroBanner: string | null;
   setHeroBanner: (image: string | null) => void;
   isAdmin: boolean;
@@ -630,11 +631,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  const addWilaya = async (newWilaya: Omit<WilayaFee, "id">) => {
+  const addWilaya = async (newWilaya: WilayaFee) => {
     if (!supabase) return;
     const { data, error } = await supabase
       .from("wilaya_fees")
       .insert({
+        id: parseInt(newWilaya.id, 10),
         name_fr: newWilaya.nameFr,
         name_ar: newWilaya.nameAr,
         fee: newWilaya.fee,
@@ -665,6 +667,29 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
     setWilayaFees((prev) => prev.filter((w) => w.id !== id));
+  };
+
+  const resetWilayas = async () => {
+    if (!supabase) return;
+    try {
+      // 1. Delete all existing ones
+      await supabase.from("wilaya_fees").delete().neq('id', -1);
+      
+      // 2. Insert the fresh 69 wilayas
+      const formatted = INITIAL_WILAYAS.map(w => ({
+        id: parseInt(w.id, 10),
+        name_fr: w.nameFr,
+        name_ar: w.nameAr,
+        fee: w.fee
+      }));
+      const { error } = await supabase.from("wilaya_fees").insert(formatted);
+      if (error) throw error;
+      
+      alert("Success! The new 69 Wilayas have been synced to the database.");
+      loadFromSupabase();
+    } catch (err: any) {
+      alert("Failed to reset wilayas: " + err.message);
+    }
   };
 
   // ── Hero Banner & Contact Config ──
@@ -747,6 +772,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateWilayaFee,
         addWilaya,
         deleteWilaya,
+        resetWilayas,
         heroBanner,
         setHeroBanner,
         isAdmin,

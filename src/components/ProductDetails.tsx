@@ -14,16 +14,11 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
   const [selectedColor, setSelectedColor] = useState<SneakerColor | null>(null);
   const [isFav, setIsFav] = useState(false);
   const [imageTransition, setImageTransition] = useState(false);
-  const [displayedImage, setDisplayedImage] = useState<string>("");
 
   const isAr = language === "ar";
   const shoe = sneakers.find((s) => String(s.id) === id || s.slug === id);
 
-  useEffect(() => {
-    if (shoe) {
-      setDisplayedImage(selectedColor?.image || shoe.image);
-    }
-  }, [shoe, selectedColor]);
+  const displayedImage = selectedColor?.image || shoe?.image || "";
 
   if (loading) {
     return (

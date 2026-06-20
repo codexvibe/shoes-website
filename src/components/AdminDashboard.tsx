@@ -49,6 +49,7 @@ export const AdminDashboard: React.FC = () => {
     updateWilayaFee,
     addWilaya,
     deleteWilaya,
+    resetWilayas,
     heroBanner,
     setHeroBanner,
     language, 
@@ -184,6 +185,7 @@ export const AdminDashboard: React.FC = () => {
   const [wilayaEditFee, setWilayaEditFee] = useState<string>("");
   const [wilayaSearch, setWilayaSearch] = useState("");
   const [showAddWilaya, setShowAddWilaya] = useState(false);
+  const [newWilayaId, setNewWilayaId] = useState("");
   const [newWilayaNameFr, setNewWilayaNameFr] = useState("");
   const [newWilayaNameAr, setNewWilayaNameAr] = useState("");
   const [newWilayaFee, setNewWilayaFee] = useState("");
@@ -225,6 +227,19 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const processFileIfHeic = async (file: File | Blob): Promise<File | Blob> => {
+    if ((file as File).name?.toLowerCase().endsWith(".heic") || file.type === "image/heic") {
+      try {
+        const heic2any = (await import("heic2any")).default;
+        const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
+        return Array.isArray(converted) ? converted[0] : converted;
+      } catch (error) {
+        console.error("HEIC conversion failed", error);
+      }
+    }
+    return file;
+  };
+
   const handleDrop = (e: React.DragEvent, isEdit = false) => {
     e.preventDefault();
     e.stopPropagation();
@@ -241,9 +256,9 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleVariantFileInput = (e: React.ChangeEvent<HTMLInputElement>, isEdit = false) => {
+  const handleVariantFileInput = async (e: React.ChangeEvent<HTMLInputElement>, isEdit = false) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+      const file = await processFileIfHeic(e.target.files[0]);
       if (!file.type.startsWith("image/")) {
         const msg = isAr ? "يرجى اختيار ملف صورة صالح." : "Veuillez choisir un fichier image valide.";
         alert(msg);
@@ -287,7 +302,8 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleFile = (file: File, isEdit = false) => {
+  const handleFile = async (rawFile: File, isEdit = false) => {
+    const file = await processFileIfHeic(rawFile);
     if (!file.type.startsWith("image/")) {
       const msg = isAr ? "يرجى اختيار ملف صورة صالح." : "Veuillez choisir un fichier image valide.";
       if (isEdit) alert(msg);
@@ -706,7 +722,8 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleBannerFile = (file: File) => {
+  const handleBannerFile = async (rawFile: File) => {
+    const file = await processFileIfHeic(rawFile);
     if (!file.type.startsWith("image/")) return;
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -1111,7 +1128,7 @@ export const AdminDashboard: React.FC = () => {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/*,.heic,.heif"
                       onChange={(e) => handleFileInput(e, false)}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     />
@@ -1396,7 +1413,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="flex-1 flex flex-col gap-2">
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/*,.heic,.heif"
                           id="variantImageUpload"
                           className="hidden"
                           onChange={(e) => handleVariantFileInput(e, false)}
@@ -2381,6 +2398,18 @@ export const AdminDashboard: React.FC = () => {
                   {wilayaFees.length} WILAYAS
                 </span>
                 <button
+                  onClick={async () => {
+                    const confirm = window.confirm("This will erase existing wilayas and import the 69 new wilayas. Continue?");
+                    if (confirm) {
+                      await resetWilayas();
+                    }
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-all border bg-neon-lime/10 text-neon-lime border-neon-lime/30 hover:bg-neon-lime hover:text-obsidian font-outfit uppercase tracking-wider`}
+                >
+                  <Database size={12} />
+                  AUTO SYNC 69 WILAYAS
+                </button>
+                <button
                   onClick={() => setShowAddWilaya(!showAddWilaya)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-all border ${
                     showAddWilaya
@@ -2401,14 +2430,24 @@ export const AdminDashboard: React.FC = () => {
                   <Plus size={14} />
                   Add New Wilaya
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">ID / Code *</label>
+                    <input
+                      type="text"
+                      value={newWilayaId}
+                      onChange={(e) => setNewWilayaId(e.target.value)}
+                      placeholder="Ex: 70"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
+                    />
+                  </div>
                   <div>
                     <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Name (FR) *</label>
                     <input
                       type="text"
                       value={newWilayaNameFr}
                       onChange={(e) => setNewWilayaNameFr(e.target.value)}
-                      placeholder="Ex: 59 - Bordj Badji"
+                      placeholder="Ex: 70 - France"
                       className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
                     />
                   </div>
@@ -2419,7 +2458,7 @@ export const AdminDashboard: React.FC = () => {
                       dir="rtl"
                       value={newWilayaNameAr}
                       onChange={(e) => setNewWilayaNameAr(e.target.value)}
-                      placeholder="مثال: 59 - برج باجي"
+                      placeholder="مثال: 70 - فرنسا"
                       className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all font-cairo text-right"
                     />
                   </div>
@@ -2444,7 +2483,7 @@ export const AdminDashboard: React.FC = () => {
 
                 <button
                   onClick={() => {
-                    if (!newWilayaNameFr.trim() || !newWilayaNameAr.trim() || !newWilayaFee.trim()) {
+                    if (!newWilayaId.trim() || !newWilayaNameFr.trim() || !newWilayaNameAr.trim() || !newWilayaFee.trim()) {
                       alert("Please fill all fields");
                       return;
                     }
@@ -2454,10 +2493,12 @@ export const AdminDashboard: React.FC = () => {
                       return;
                     }
                     addWilaya({
+                      id: newWilayaId.trim(),
                       nameFr: newWilayaNameFr.trim(),
                       nameAr: newWilayaNameAr.trim(),
                       fee: feeVal,
                     });
+                    setNewWilayaId("");
                     setNewWilayaNameFr("");
                     setNewWilayaNameAr("");
                     setNewWilayaFee("");
@@ -2704,7 +2745,7 @@ export const AdminDashboard: React.FC = () => {
                 <input
                   ref={bannerFileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.heic,.heif"
                   onChange={handleBannerFileInput}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
@@ -2826,7 +2867,7 @@ export const AdminDashboard: React.FC = () => {
                   <input
                     ref={editFileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     onChange={(e) => handleFileInput(e, true)}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
@@ -3050,7 +3091,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex-1 flex flex-col gap-2">
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,.heic,.heif"
                         id="editVariantImageUpload"
                         className="hidden"
                         onChange={(e) => handleVariantFileInput(e, true)}

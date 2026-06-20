@@ -71,7 +71,7 @@ INSERT INTO wilaya_fees (id, name_fr, name_ar, fee) VALUES
 (13, '13 - Tlemcen', '13 - تلمسان', 600),
 (14, '14 - Tiaret', '14 - تيارت', 600),
 (15, '15 - Tizi Ouzou', '15 - تيزي وزو', 500),
-(16, '16 - Alger', '16 - الجزائر العاصمة', 400),
+(16, '16 - Alger', '16 - الجزائر', 400),
 (17, '17 - Djelfa', '17 - الجلفة', 600),
 (18, '18 - Jijel', '18 - جيجل', 600),
 (19, '19 - Sétif', '19 - سطيف', 600),
@@ -88,7 +88,7 @@ INSERT INTO wilaya_fees (id, name_fr, name_ar, fee) VALUES
 (30, '30 - Ouargla', '30 - ورقلة', 800),
 (31, '31 - Oran', '31 - وهران', 500),
 (32, '32 - El Bayadh', '32 - البيض', 700),
-(33, '33 - Illizi', '33 - إليزي', 1000),
+(33, '33 - Illizi', '33 - إيليزي', 1000),
 (34, '34 - Bordj Bou Arréridj', '34 - برج بوعريريج', 500),
 (35, '35 - Boumerdès', '35 - بومرداس', 400),
 (36, '36 - El Tarf', '36 - الطارف', 600),
@@ -104,17 +104,30 @@ INSERT INTO wilaya_fees (id, name_fr, name_ar, fee) VALUES
 (46, '46 - Aïn Témouchent', '46 - عين تموشنت', 600),
 (47, '47 - Ghardaïa', '47 - غرداية', 800),
 (48, '48 - Relizane', '48 - غليزان', 500),
-(49, '49 - El M''Ghair', '49 - المغير', 800),
-(50, '50 - El Meniaa', '50 - المنيعة', 800),
+(49, '49 - Timimoun', '49 - تيميمون', 1000),
+(50, '50 - Bordj Badji Mokhtar', '50 - برج باجي مختار', 1200),
 (51, '51 - Ouled Djellal', '51 - أولاد جلال', 700),
-(52, '52 - Bordj Baji Mokhtar', '52 - برج باجي مختار', 1200),
-(53, '53 - Béni Abbès', '53 - بني عباس', 1000),
-(54, '54 - Timimoun', '54 - تيميمون', 1000),
+(52, '52 - Béni Abbès', '52 - بني عباس', 1000),
+(53, '53 - In Salah', '53 - عين صالح', 1200),
+(54, '54 - In Guezzam', '54 - عين قزام', 1200),
 (55, '55 - Touggourt', '55 - تقرت', 800),
 (56, '56 - Djanet', '56 - جانت', 1200),
-(57, '57 - In Salah', '57 - عين صالح', 1200),
-(58, '58 - In Guezzam', '58 - عين قزام', 1200)
-ON CONFLICT (id) DO NOTHING;
+(57, '57 - El M''Ghair', '57 - المغير', 800),
+(58, '58 - El Meniaa', '58 - المنيعة', 800),
+(59, '59 - Aflou', '59 - أفلو', 700),
+(60, '60 - Barika', '60 - بريكة', 600),
+(61, '61 - Ksar Chellala', '61 - قصر الشلالة', 600),
+(62, '62 - Messaad', '62 - مسعد', 600),
+(63, '63 - Aïn Oussera', '63 - عين وسارة', 600),
+(64, '64 - Bou Saâda', '64 - بوسعادة', 600),
+(65, '65 - El Abiodh Sidi Cheikh', '65 - الأبيض سيدي الشيخ', 700),
+(66, '66 - El Kantara', '66 - القنطرة', 700),
+(67, '67 - Bir El Ater', '67 - بئر العاتر', 600),
+(68, '68 - Ksar El Boukhari', '68 - قصر البخاري', 600),
+(69, '69 - El Aricha', '69 - العريشة', 700)
+ON CONFLICT (id) DO UPDATE SET
+  name_fr = EXCLUDED.name_fr,
+  name_ar = EXCLUDED.name_ar;
 
 -- Keep the identity sequence aligned with the seeded rows above.
 SELECT setval(
