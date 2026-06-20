@@ -178,14 +178,6 @@ CREATE TABLE IF NOT EXISTS contact_config (
 );
 
 -- ==========================================
--- 6. Safety Check: Add columns if table already existed without them
--- ==========================================
-ALTER TABLE sneakers ADD COLUMN IF NOT EXISTS colors JSONB DEFAULT '[]'::jsonb;
-ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS site_name TEXT DEFAULT 'SNKRS ALG';
-ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS primary_color TEXT DEFAULT '#00ffcc';
-ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.';
-
--- ==========================================
 -- 7. Initial Data Seed
 -- ==========================================
 INSERT INTO contact_config (id, whatsapp, email, site_name, primary_color, announcement)
@@ -268,6 +260,14 @@ DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE leads; EXCEPTION WHEN 
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE contact_config; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ==========================================
--- 11. Reload Schema Cache
+-- 11. Migrations / Safety Checks
+-- ==========================================
+ALTER TABLE sneakers ADD COLUMN IF NOT EXISTS colors JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS site_name TEXT DEFAULT 'SNKRS ALG';
+ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS primary_color TEXT DEFAULT '#00ffcc';
+ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.';
+
+-- ==========================================
+-- 12. Reload Schema Cache
 -- ==========================================
 NOTIFY pgrst, 'reload schema';
