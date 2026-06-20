@@ -721,14 +721,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setContactConfigState(config);
     const { error } = await supabase
       .from("contact_config")
-      .update({
+      .upsert({
+        id: 1,
         whatsapp: config.whatsapp,
         email: config.email,
         site_name: config.siteName,
         primary_color: config.primaryColor,
         announcement: config.announcement,
-      })
-      .eq("id", 1);
+      });
 
     if (error) {
       console.error("Failed to update contact config:", error);
