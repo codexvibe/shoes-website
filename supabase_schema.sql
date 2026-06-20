@@ -30,11 +30,11 @@ CREATE TABLE IF NOT EXISTS sneakers (
   name_ar TEXT NOT NULL,
   price INTEGER NOT NULL,
   category_slug TEXT REFERENCES categories(slug) ON DELETE SET NULL,
-  image TEXT,
+  image TEXT, -- Main sneaker image (URL or Base64 from PC upload)
   sizes INTEGER[] DEFAULT '{}',
   sizes_stock JSONB DEFAULT '{}'::jsonb,
   colorways TEXT[] DEFAULT '{}',
-  colors JSONB DEFAULT '[]'::jsonb,
+  colors JSONB DEFAULT '[]'::jsonb, -- Array of variant objects: {nameFr, nameAr, hex, image (URL or Base64)}
   desc_fr TEXT,
   desc_ar TEXT,
   featured BOOLEAN DEFAULT false,
