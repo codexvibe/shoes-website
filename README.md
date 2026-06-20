@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://image.thum.io/get/width/1200/crop/800/https://shoes-website-phi-two.vercel.app/" alt="Premium Sneaker Store Banner" width="100%" />
+  <img src="./public/preview.png" alt="Premium Sneaker Store Banner" width="100%" />
 
   # 👟 Premium Sneaker Storefront
 
