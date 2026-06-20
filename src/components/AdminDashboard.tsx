@@ -109,7 +109,7 @@ export const AdminDashboard: React.FC = () => {
   const [shoeSizes, setShoeSizes] = useState<number[]>([39, 40, 41, 42, 43, 44, 45]);
   
   // Colorways states
-  const presetColors = ["Black", "White", "Neon Lime", "Electric Orange", "Red", "Grey", "Blue", "Gold", "Terracotta"];
+  const presetColors = ["Black", "White", "Neon Lime", "Electric Orange", "Red", "Grey", "Blue", "Gold", "Terracotta", "Multi"];
   const [selectedColors, setSelectedColors] = useState<string[]>(["Black"]);
   const [customColor, setCustomColor] = useState("");
   

@@ -54,7 +54,31 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
     );
   }
 
-  const hasColors = shoe.colors && shoe.colors.length > 0;
+  const COLOR_MAP: Record<string, string> = {
+    "Black": "#000000",
+    "White": "#FFFFFF",
+    "Neon Lime": "#a3e635",
+    "Electric Orange": "#ea580c",
+    "Red": "#ef4444",
+    "Grey": "#9ca3af",
+    "Blue": "#3b82f6",
+    "Gold": "#fbbf24",
+    "Terracotta": "#c84b31",
+    "Multi": "linear-gradient(45deg, red, orange, yellow, green, blue, purple)",
+    "Multicolor": "linear-gradient(45deg, red, orange, yellow, green, blue, purple)",
+  };
+
+  // Convert old string colorways to SneakerColor objects if colors is empty
+  const computedColors: SneakerColor[] = shoe?.colors?.length 
+    ? shoe.colors 
+    : (shoe?.colorways?.map(c => ({
+        nameFr: c,
+        nameAr: c,
+        hex: COLOR_MAP[c] || "#cccccc",
+        image: ""
+      })) || []);
+
+  const hasColors = computedColors.length > 0;
 
   const handleColorSelect = (color: SneakerColor) => {
     if (selectedColor?.hex === color.hex && selectedColor?.nameFr === color.nameFr) return;
@@ -208,7 +232,7 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
               </div>
               
               <div className={`flex flex-wrap gap-4 ${isAr ? "justify-end" : ""}`}>
-                {shoe.colors!.map((color, idx) => {
+                {computedColors.map((color, idx) => {
                   const isSelected = selectedColor?.hex === color.hex && selectedColor?.nameFr === color.nameFr;
                   return (
                     <button
@@ -230,7 +254,7 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
                       ) : (
                         <div
                           className="absolute inset-0 rounded-2xl shadow-inner"
-                          style={{ backgroundColor: color.hex }}
+                          style={{ background: color.hex }}
                         />
                       )}
                       
