@@ -7,17 +7,6 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ==========================================
--- DANGER ZONE: DROP OLD TABLES
--- If you want to completely wipe your database and start fresh,
--- uncomment the following 5 lines. WARNING: THIS DELETES ALL YOUR DATA!
--- ==========================================
--- DROP TABLE IF EXISTS leads CASCADE;
--- DROP TABLE IF EXISTS sneakers CASCADE;
--- DROP TABLE IF EXISTS categories CASCADE;
--- DROP TABLE IF EXISTS contact_config CASCADE;
--- DROP TABLE IF EXISTS wilaya_fees CASCADE;
-
--- ==========================================
 -- 1. Categories Table
 -- ==========================================
 CREATE TABLE IF NOT EXISTS categories (
@@ -177,9 +166,8 @@ CREATE TABLE IF NOT EXISTS contact_config (
   announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.'
 );
 
-
 -- ==========================================
--- 8. Row Level Security (RLS) Policies
+-- 6. Row Level Security (RLS) Policies
 -- ==========================================
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sneakers ENABLE ROW LEVEL SECURITY;
@@ -229,7 +217,7 @@ DROP POLICY IF EXISTS "Contact config updatable by admins" ON contact_config;
 CREATE POLICY "Contact config updatable by admins" ON contact_config FOR UPDATE USING (auth.role() = 'authenticated');
 
 -- ==========================================
--- 9. Triggers
+-- 7. Triggers
 -- ==========================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -246,7 +234,7 @@ FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
 -- ==========================================
--- 10. Enable Realtime
+-- 8. Enable Realtime
 -- ==========================================
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE categories; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE sneakers; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -254,7 +242,7 @@ DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE leads; EXCEPTION WHEN 
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE contact_config; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ==========================================
--- 11. Migrations / Safety Checks
+-- 9. Migrations / Safety Checks
 -- ==========================================
 ALTER TABLE sneakers ADD COLUMN IF NOT EXISTS colors JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS site_name TEXT DEFAULT 'SNKRS ALG';
@@ -262,13 +250,13 @@ ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS primary_color TEXT DEFAULT '
 ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.';
 
 -- ==========================================
--- 12. Initial Data Seed
+-- 10. Initial Data Seed
 -- ==========================================
 INSERT INTO contact_config (id, whatsapp, email, site_name, primary_color, announcement)
 VALUES (1, '+213000000000', 'contact@sneakersobsidian.com', 'SNKRS ALG', '#00ffcc', 'Welcome to SNKRS ALG! Free shipping on 2+ items.')
 ON CONFLICT (id) DO NOTHING;
 
 -- ==========================================
--- 13. Reload Schema Cache
+-- 11. Reload Schema Cache
 -- ==========================================
 NOTIFY pgrst, 'reload schema';
