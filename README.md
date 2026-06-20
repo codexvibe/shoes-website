@@ -5,6 +5,8 @@
 
   **A modern, blazing-fast, and bilingual (French & Arabic) e-commerce platform built for limited-edition sneakers and streetwear.**
   
+  ### 🌐 [Live Demo: shoes-website-phi-two.vercel.app](https://shoes-website-phi-two.vercel.app)
+  
   [![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
   [![React](https://img.shields.io/badge/React-19.2-blue?style=for-the-badge&logo=react)](https://react.dev/)
   [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
