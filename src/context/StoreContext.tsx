@@ -355,6 +355,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase]);
 
+  // Inject dynamic primary color into CSS variables
+  useEffect(() => {
+    if (typeof document !== "undefined" && contactConfig.primaryColor) {
+      document.documentElement.style.setProperty('--color-neon-lime', contactConfig.primaryColor);
+      // Optional: also update orange if they want it globally, but for now just the primary lime.
+    }
+  }, [contactConfig.primaryColor]);
+
   // ── Categories ──
 
   const addCategory = async (newCat: Omit<Category, "id">) => {

@@ -43,12 +43,12 @@ export default function Storefront() {
                   <ShieldCheck size={22} />
                 </div>
                 <h4 className={`text-lg font-bold text-white mb-2 ${isAr ? 'font-cairo' : 'font-outfit uppercase'}`}>
-                  {isAr ? "منتجات أصلية 100%" : "Authentic Products"}
+                  {isAr ? "منتجات أصلية 100%" : "Produits Authentiques"}
                 </h4>
                 <p className={`text-xs text-neutral-400 leading-relaxed ${isAr ? 'font-cairo' : 'font-outfit'}`}>
                   {isAr 
                     ? "جميع الأحذية المعروضة أصلية ومستوردة من قنوات معتمدة مباشرة لضمان أعلى جودة." 
-                    : "Every item in our showcase is guaranteed authentic and inspected directly before list registration."}
+                    : "Chaque article de notre vitrine est garanti authentique et inspecté minutieusement avant d'être listé."}
                 </p>
               </div>
 
@@ -58,12 +58,12 @@ export default function Storefront() {
                   <Phone size={22} />
                 </div>
                 <h4 className={`text-lg font-bold text-white mb-2 ${isAr ? 'font-cairo' : 'font-outfit uppercase'}`}>
-                  {isAr ? "طلب مباشر وسهل" : "Direct Ordering"}
+                  {isAr ? "طلب مباشر وسهل" : "Commande Directe"}
                 </h4>
                 <p className={`text-xs text-neutral-400 leading-relaxed ${isAr ? 'font-cairo' : 'font-outfit'}`}>
                   {isAr 
                     ? "لا توجد حاجة لبطاقة ائتمان. اضغط على المنتج واطلب مباشرة لتوصيله لباب منزلك." 
-                    : "Order directly on the site. Payments are handled locally upon pickup or delivery."}
+                    : "Commandez directement sur le site. Les paiements se font à la livraison ou sur place en magasin."}
                 </p>
               </div>
 
@@ -73,12 +73,12 @@ export default function Storefront() {
                   <Clock size={22} />
                 </div>
                 <h4 className={`text-lg font-bold text-white mb-2 ${isAr ? 'font-cairo' : 'font-outfit uppercase'}`}>
-                  {isAr ? "دعم سريع وسلس" : "Express Response"}
+                  {isAr ? "دعم سريع وسلس" : "Réponse Express"}
                 </h4>
                 <p className={`text-xs text-neutral-400 leading-relaxed ${isAr ? 'font-cairo' : 'font-outfit'}`}>
                   {isAr 
                     ? "فريقنا متواجد للرد على استفسارات المقاسات وتأكيد الطلبات عبر قنوات الواتساب طوال اليوم." 
-                    : "We reply promptly to sizing availability queries and pickup alignments within minutes."}
+                    : "Nous répondons rapidement à vos questions sur les tailles et organisons la livraison en quelques minutes."}
                 </p>
               </div>
 

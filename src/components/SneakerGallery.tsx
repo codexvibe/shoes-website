@@ -66,11 +66,11 @@ export const SneakerGallery: React.FC = () => {
             <div className="inline-flex items-center gap-1.5 rounded-full bg-neon-lime/10 px-3 py-1 text-xs font-bold text-neon-lime mb-3">
               <Sparkles size={12} />
               <span className={isAr ? 'font-cairo' : 'font-outfit uppercase tracking-widest'}>
-                {isAr ? "معرض المنتجات" : "OUR SHOWCASE"}
+                {isAr ? "معرض المنتجات" : "NOTRE VITRINE"}
               </span>
             </div>
             <h2 className={`text-3xl sm:text-5xl font-black text-white ${isAr ? 'font-cairo' : 'font-outfit uppercase'}`}>
-              {isAr ? "كتالوج السنيكرز الممتاز" : "THE GRAIL COLLECTION"}
+              {isAr ? "كتالوج السنيكرز الممتاز" : "LA COLLECTION GRAAL"}
             </h2>
           </div>
 
@@ -118,17 +118,17 @@ export const SneakerGallery: React.FC = () => {
                   <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5 font-outfit">
                     {shoe.isHotDrop && (
                       <span className="rounded bg-neon-orange px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-md">
-                        {isAr ? "دوب حار" : "HOT DROP"}
+                        {isAr ? "دوب حار" : "SÉLECTION HOT"}
                       </span>
                     )}
                     {shoe.isNewArrival && (
                       <span className="rounded bg-cyan-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-md">
-                        {isAr ? "وصل حديثاً" : "NEW ARRIVAL"}
+                        {isAr ? "وصل حديثاً" : "NOUVEL ARRIVAGE"}
                       </span>
                     )}
                     {shoe.featured && !shoe.isHotDrop && !shoe.isNewArrival && (
                       <span className="rounded bg-yellow-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-black shadow-md">
-                        {isAr ? "مميز" : "FEATURED"}
+                        {isAr ? "مميز" : "À LA UNE"}
                       </span>
                     )}
                   </div>
@@ -183,7 +183,7 @@ export const SneakerGallery: React.FC = () => {
                           isAr ? 'font-cairo' : 'font-outfit uppercase tracking-widest'
                         }`}
                       >
-                        {isAr ? "عرض التفاصيل" : "View Details"}
+                        {isAr ? "عرض التفاصيل" : "Voir les Détails"}
                       </Link>
                     </div>
 
@@ -197,12 +197,12 @@ export const SneakerGallery: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-16 text-center rounded-3xl border border-neutral-800/60 bg-neutral-900/10 p-8">
             <ShieldAlert size={48} className="text-neon-orange mb-4" />
             <h4 className={`text-xl font-bold text-white ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-              {isAr ? "لا توجد منتجات متوفرة" : "No Sneakers Available"}
+              {isAr ? "لا توجد منتجات متوفرة" : "Aucune paire disponible"}
             </h4>
             <p className={`text-sm text-neutral-500 mt-2 ${isAr ? 'font-cairo' : 'font-outfit'}`}>
               {isAr 
                 ? "لم يتم العثور على أي أحذية رياضية في هذه الفئة حالياً." 
-                : "No items match your active filters. Try another category."}
+                : "Aucun article ne correspond à vos filtres. Essayez une autre catégorie."}
             </p>
           </div>
         )}

@@ -56,10 +56,10 @@ export const Hero: React.FC = () => {
             {/* Tagline */}
             <div className={`inline-flex items-center gap-2 self-center lg:self-start rounded-full border border-neutral-800 bg-neutral-900/60 px-4 py-1.5 text-xs text-neutral-400 mb-6 ${isAr ? 'font-cairo' : 'font-outfit uppercase tracking-wider'}`}>
               <Flame size={14} className="text-neon-lime animate-bounce" />
-              <span>{isAr ? "ثقافة السنيكرز الممتازة" : "PREMIUM SNEAKER CULTURE"}</span>
+              <span>{isAr ? "ثقافة السنيكرز الممتازة" : "CULTURE SNEAKER PREMIUM"}</span>
               <span className="h-1 w-1 rounded-full bg-neutral-600"></span>
               <Sparkles size={14} className="text-neon-orange" />
-              <span>{isAr ? "مجموعة 2026" : "NEW SEASON 2026"}</span>
+              <span>{isAr ? "مجموعة 2026" : "NOUVELLE SAISON 2026"}</span>
             </div>
 
             {/* Bold Heading */}
@@ -71,8 +71,8 @@ export const Hero: React.FC = () => {
                 </span>
               ) : (
                 <span className="font-outfit uppercase block font-black">
-                  MOVE WITHOUT <br />
-                  <span className="text-neon-lime text-glow-lime">LIMITS</span>
+                  BOUGEZ SANS <br />
+                  <span className="text-neon-lime text-glow-lime">LIMITES</span>
                 </span>
               )}
             </h1>
@@ -125,7 +125,7 @@ export const Hero: React.FC = () => {
                 <div>
                   <div className="text-[10px] text-neutral-500 uppercase tracking-widest font-outfit">Rating</div>
                   <div className={`text-xs font-bold text-white ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-                    {isAr ? "خفيف ومريح" : "Ultra Light weight"}
+                    {isAr ? "خفيف ومريح" : "Ultra Léger"}
                   </div>
                 </div>
               </div>
@@ -137,7 +137,7 @@ export const Hero: React.FC = () => {
                 <div>
                   <div className="text-[10px] text-neutral-500 uppercase tracking-widest font-outfit">Trending</div>
                   <div className={`text-xs font-bold text-white ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-                    {isAr ? "الأكثر طلبًا" : "Top Seller 2026"}
+                    {isAr ? "الأكثر طلبًا" : "Meilleure Vente"}
                   </div>
                 </div>
               </div>

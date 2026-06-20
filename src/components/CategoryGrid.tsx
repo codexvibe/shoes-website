@@ -82,11 +82,11 @@ export const CategoryGrid: React.FC = () => {
           <div className="inline-flex items-center gap-2 bg-neon-lime/[0.07] border border-neon-lime/20 rounded-full px-4 py-1.5 mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-neon-lime animate-pulse"></span>
             <span className={`text-[10px] font-black text-neon-lime tracking-widest ${isAr ? "font-cairo" : "font-outfit uppercase"}`}>
-              {isAr ? "الفئات الرياضية" : "EXPLORE CATEGORIES"}
+              {isAr ? "الفئات الرياضية" : "EXPLORER LES CATÉGORIES"}
             </span>
           </div>
           <h3 className={`text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight ${isAr ? "font-cairo" : "font-outfit uppercase"}`}>
-            {isAr ? "اختر أسلوب حركتك" : "CHOOSE YOUR VIBE"}
+            {isAr ? "اختر أسلوب حركتك" : "CHOISISSEZ VOTRE STYLE"}
           </h3>
           <p className={`mt-4 text-sm sm:text-base text-neutral-500 max-w-lg mx-auto ${isAr ? "font-cairo" : "font-outfit"}`}>
             {isAr ? "اكتشف المجموعة المناسبة لنمط حياتك" : "Découvrez la collection qui correspond à votre style de vie"}

@@ -33,7 +33,7 @@ export const Footer: React.FC = () => {
             <p className={`text-xs text-neutral-500 leading-relaxed max-w-sm mb-6 text-center md:text-left md:rtl:text-right ${isAr ? 'font-cairo' : 'font-outfit'}`}>
               {isAr 
                 ? "منصتك المحلية الرائدة لاستعراض أحدث وأفخر الأحذية الرياضية العصرية في السوق بلمسات تصميمية فائقة الأناقة والجاذبية." 
-                : "Your premier local showcase destination for elite sneakers and basketball trainers. Designed with obsidian dark styles."}
+                : "Votre destination locale de choix pour les sneakers d'élite. Conçu avec un style sombre et élégant."}
             </p>
             
             {/* Social / Direct order links */}
@@ -60,17 +60,17 @@ export const Footer: React.FC = () => {
           {/* Column 2: Quick Links (3 cols) */}
           <div className="md:col-span-3 flex flex-col items-center md:items-start md:rtl:items-end">
             <h5 className={`text-xs font-black text-white uppercase tracking-widest mb-4 ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-              {isAr ? "روابط سريعة" : "Store Links"}
+              {isAr ? "روابط سريعة" : "Liens Rapides"}
             </h5>
             <ul className="space-y-2.5 text-center md:text-left md:rtl:text-right">
               <li>
                 <Link href="/#collection" className={`text-xs hover:text-white transition-colors ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-                  {isAr ? "المجموعة الكاملة" : "Full Collection"}
+                  {isAr ? "المجموعة الكاملة" : "Collection Complète"}
                 </Link>
               </li>
               <li>
                 <Link href="/#categories" className={`text-xs hover:text-white transition-colors ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-                  {isAr ? "فئات المنتجات" : "Categories"}
+                  {isAr ? "فئات المنتجات" : "Catégories"}
                 </Link>
               </li>
             </ul>
@@ -79,18 +79,18 @@ export const Footer: React.FC = () => {
           {/* Column 3: Showcase Policy (4 cols) */}
           <div className="md:col-span-4 flex flex-col items-center md:items-start md:rtl:items-end">
             <h5 className={`text-xs font-black text-white uppercase tracking-widest mb-4 ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-              {isAr ? "سياسة المعرض" : "Showcase Notice"}
+              {isAr ? "سياسة المعرض" : "Politique du Magasin"}
             </h5>
             <div className={`text-xs text-neutral-500 leading-relaxed text-center md:text-left md:rtl:text-right ${isAr ? 'font-cairo' : 'font-outfit'}`}>
               <p className="mb-2">
                 {isAr 
                   ? "ملاحظة: هذا الموقع يتيح لك الطلب المباشر للمنتجات." 
-                  : "NOTICE: This platform allows you to place direct orders."}
+                  : "REMARQUE : Cette plateforme vous permet de passer des commandes directes."}
               </p>
               <p>
                 {isAr
                   ? "الدفع يتم عند الاستلام بعد التنسيق المباشر للطلب."
-                  : "Order directly online or via WhatsApp. Payments are handled locally upon pickup or delivery setup."}
+                  : "Commandez directement en ligne ou via WhatsApp. Le paiement s'effectue à la livraison."}
               </p>
             </div>
           </div>
