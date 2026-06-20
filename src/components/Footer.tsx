@@ -27,8 +27,8 @@ export const Footer: React.FC = () => {
           {/* Column 1: Brand Info (5 cols) */}
           <div className="md:col-span-5 flex flex-col items-center md:items-start md:rtl:items-end">
             <span className={`text-xl font-black uppercase tracking-wider text-white mb-4 ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-              {isAr ? "أوبسيديان" : "Obsidian"}{" "}
-              <span className="text-neon-lime">{isAr ? "سنيكرز" : "SNKRS"}</span>
+              {(contactConfig.siteName || "SNKRS ALG").split(" ")[0]}{" "}
+              <span className="text-neon-lime">{(contactConfig.siteName || "SNKRS ALG").split(" ").slice(1).join(" ")}</span>
             </span>
             <p className={`text-xs text-neutral-500 leading-relaxed max-w-sm mb-6 text-center md:text-left md:rtl:text-right ${isAr ? 'font-cairo' : 'font-outfit'}`}>
               {isAr 
@@ -100,7 +100,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Copyright */}
         <div className="border-t border-neutral-900 pt-8 text-center flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-[10px] text-neutral-600 font-mono">
-            OBSIDIAN SNKRS SHOWCASE PLATFORM &copy; 2026.
+            {(contactConfig.siteName || "SNKRS ALG").toUpperCase()} SHOWCASE PLATFORM &copy; {new Date().getFullYear()}.
           </p>
           <p className={`text-[10px] text-neutral-600 ${isAr ? 'font-cairo' : 'font-outfit'}`}>
             {isAr ? "صنع بحب للثقافة الرياضية" : "Built with precision for premium culture spaces"}

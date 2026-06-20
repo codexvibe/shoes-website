@@ -26,7 +26,8 @@ import {
   Truck,
   ArrowRightLeft,
   Edit,
-  X
+  X,
+  Palette
 } from "lucide-react";
 import { Sneaker, Lead, WilayaFee, SneakerColor } from "../data/mockData";
 
@@ -61,7 +62,7 @@ export const AdminDashboard: React.FC = () => {
   const isAr = language === "ar";
 
   // Dashboard Active Tab
-  const [activeTab, setActiveTab] = useState<"quicksale" | "catalog" | "inventory" | "crm" | "categories" | "shipping" | "marketing">("catalog");
+  const [activeTab, setActiveTab] = useState<"quicksale" | "catalog" | "inventory" | "crm" | "categories" | "shipping" | "marketing" | "appearance">("catalog");
 
   // Preset Image Gallery
   const presetImages = [
@@ -168,6 +169,7 @@ export const AdminDashboard: React.FC = () => {
   const [crmNotes, setCrmNotes] = useState("");
   const [crmError, setCrmError] = useState<string | null>(null);
   const [crmSuccess, setCrmSuccess] = useState(false);
+  const [showCrmForm, setShowCrmForm] = useState(false);
 
   // --- TAB 4: CATEGORY STATES ---
   const [catNameFr, setCatNameFr] = useState("");
@@ -199,6 +201,9 @@ export const AdminDashboard: React.FC = () => {
   // General settings state
   const [whatsapp, setWhatsapp] = useState(contactConfig.whatsapp);
   const [email, setEmail] = useState(contactConfig.email);
+  const [siteName, setSiteName] = useState(contactConfig.siteName);
+  const [primaryColor, setPrimaryColor] = useState(contactConfig.primaryColor);
+  const [announcement, setAnnouncement] = useState(contactConfig.announcement);
   const [showSettingsSaved, setShowSettingsSaved] = useState(false);
 
   // Initializations
@@ -762,7 +767,7 @@ export const AdminDashboard: React.FC = () => {
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
-    setContactConfig({ whatsapp, email });
+    setContactConfig({ whatsapp, email, siteName, primaryColor, announcement });
     setShowSettingsSaved(true);
     setTimeout(() => setShowSettingsSaved(false), 3000);
   };
@@ -872,7 +877,8 @@ export const AdminDashboard: React.FC = () => {
           { id: "crm", nameFr: "CRM Lead Board", nameAr: "تتبع الطلبات (CRM)", icon: ListTodo },
           { id: "categories", nameFr: "Categories Setup", nameAr: "إعداد الفئات", icon: Tag },
           { id: "shipping", nameFr: "Wilaya Logistics", nameAr: "تكاليف الولايات", icon: Truck },
-          { id: "marketing", nameFr: "Hero & Marketing", nameAr: "التسويق والبنر", icon: Sparkles }
+          { id: "marketing", nameFr: "Hero & Marketing", nameAr: "التسويق والبنر", icon: Sparkles },
+          { id: "appearance", nameFr: "Store Appearance", nameAr: "مظهر المتجر", icon: Palette }
         ].map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
@@ -1787,17 +1793,24 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === "crm" && (
         <div className="space-y-8 animate-fadeIn">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-6 rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8">
-              <h2 className="text-lg font-bold text-white mb-5 uppercase tracking-wider flex items-center gap-2">
-                <Plus size={18} className="text-cyan-400" />
-                Add Direct Order Lead Manually
-              </h2>
+            <div className={`lg:col-span-12 rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md transition-all duration-500 ${showCrmForm ? 'p-6 sm:p-8' : 'p-4'}`}>
+              <div 
+                className="flex items-center justify-between cursor-pointer group"
+                onClick={() => setShowCrmForm(!showCrmForm)}
+              >
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <Plus size={16} className="text-cyan-400 group-hover:scale-125 transition-transform" />
+                  Add Direct Order Lead Manually
+                </h2>
+                <ChevronRight size={18} className={`text-neutral-500 transition-transform duration-300 ${showCrmForm ? "rotate-90" : ""}`} />
+              </div>
 
-              <form onSubmit={handleLeadSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Customer Name *</label>
-                    <input
+              {showCrmForm && (
+                <form onSubmit={handleLeadSubmit} className="space-y-4 mt-6 animate-fadeIn">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Customer Name *</label>
+                      <input
                       type="text"
                       value={crmName}
                       onChange={(e) => setCrmName(e.target.value)}
@@ -1899,37 +1912,26 @@ export const AdminDashboard: React.FC = () => {
                   Record Order Lead
                 </button>
               </form>
+              )}
             </div>
 
             {/* CRM Stats Box */}
-            <div className="lg:col-span-6 rounded-3xl border border-neutral-800 bg-[#0c0c0e]/50 p-6 sm:p-8 flex flex-col justify-between">
-              <div>
-                <h3 className="text-base font-bold text-white mb-4 uppercase tracking-widest font-outfit">Lead Statistics (Mini CRM)</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-xs text-neutral-400 border-b border-neutral-900 pb-2">
-                    <span>Pending Requests (To Do):</span>
-                    <span className="font-mono text-neon-orange font-bold">{leads.filter(l => l.status === "todo").length} leads</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs text-neutral-400 border-b border-neutral-900 pb-2">
-                    <span>Active Deliveries (In Progress):</span>
-                    <span className="font-mono text-cyan-400 font-bold">{leads.filter(l => l.status === "progress").length} leads</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs text-neutral-400 border-b border-neutral-900 pb-2">
-                    <span>Completed Deliveries (Delivered):</span>
-                    <span className="font-mono text-neon-lime font-bold">{leads.filter(l => l.status === "delivered").length} leads</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs text-neutral-400">
-                    <span>Total Registered Orders:</span>
-                    <span className="font-mono text-white font-black">{leads.length} entries</span>
-                  </div>
-                </div>
+            <div className="lg:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-asphalt/40 border border-neutral-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+                <span className="text-2xl font-black text-neon-orange mb-1">{leads.filter(l => l.status === "todo").length}</span>
+                <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Pending (To Do)</span>
               </div>
-
-              <div className="border border-neutral-800 bg-neutral-950/80 rounded-2xl p-4.5 mt-6">
-                <span className="text-[10px] text-neutral-500 font-bold block uppercase tracking-wider font-outfit">CRM Operational Guidelines</span>
-                <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">
-                  Direct customer submissions generated from public WhatsApp or email redirection triggers can be manually cataloged here in this console workspace. Log customer coordinates to track Wilaya shipping progress and ensure successful payment on delivery.
-                </p>
+              <div className="bg-asphalt/40 border border-neutral-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+                <span className="text-2xl font-black text-cyan-400 mb-1">{leads.filter(l => l.status === "progress").length}</span>
+                <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">In Progress</span>
+              </div>
+              <div className="bg-asphalt/40 border border-neutral-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+                <span className="text-2xl font-black text-neon-lime mb-1">{leads.filter(l => l.status === "delivered").length}</span>
+                <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Delivered</span>
+              </div>
+              <div className="bg-asphalt/40 border border-neutral-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+                <span className="text-2xl font-black text-white mb-1">{leads.length}</span>
+                <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Total Orders</span>
               </div>
             </div>
           </div>
@@ -1950,33 +1952,41 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="space-y-4 flex-1 overflow-y-auto max-h-[600px] scrollbar-thin">
                 {leads.filter(l => l.status === "todo").map(lead => (
-                  <div key={lead.id} className="rounded-2xl border border-neutral-800 bg-[#0d0d10] p-4.5 space-y-3 shadow-md hover:border-neutral-700/60 transition-all group">
+                  <div key={lead.id} className="glass-card rounded-2xl p-4.5 space-y-3 shadow-lg border-neutral-800 group hover:-translate-y-1 z-10 hover:z-20">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <h4 className="font-bold text-white text-sm font-outfit">{lead.customerName}</h4>
-                        <a href={`tel:${lead.phoneNumber}`} className="text-[10px] font-mono text-neutral-400 hover:text-cyan-400 flex items-center gap-1 mt-1 transition-colors">
+                        <a href={`tel:${lead.phoneNumber}`} className="text-[10px] font-mono text-neutral-400 hover:text-neon-orange flex items-center gap-1 mt-1 transition-colors">
                           <Phone size={10} />
                           {lead.phoneNumber}
                         </a>
                       </div>
                       <button 
                         onClick={() => deleteLead(lead.id)}
-                        className="text-neutral-600 hover:text-red-500 p-1 rounded-lg hover:bg-neutral-900 cursor-pointer transition-colors"
+                        className="text-neutral-600 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-500/10 cursor-pointer transition-colors"
                       >
                         <Trash2 size={12} />
                       </button>
                     </div>
 
-                    <div className="flex flex-col gap-2 p-2 rounded-xl bg-neutral-950 border border-neutral-850 max-h-32 overflow-y-auto scrollbar-thin">
+                    <div className="flex flex-col gap-2 p-2.5 rounded-xl bg-obsidian/60 border border-neutral-800 max-h-32 overflow-y-auto scrollbar-thin">
                       {lead.items.map((item, idx) => (
                         <div key={idx} className="flex gap-2 items-center">
-                          <div className="h-8 w-8 rounded overflow-hidden flex-shrink-0 bg-neutral-900">
+                          <div className="h-10 w-10 rounded border border-neutral-800 overflow-hidden flex-shrink-0 bg-neutral-900">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={getShoeImage(item.sneakerId)} alt="Shoe" className="h-full w-full object-cover" />
+                            <img src={item.color?.image || getShoeImage(item.sneakerId)} alt="Shoe" className="h-full w-full object-cover" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-[10px] font-bold text-white truncate">{item.quantity}x {getShoeTitle(item.sneakerId)}</div>
-                            <div className="text-[9px] text-neutral-500 font-mono mt-0.5">Size {item.size}</div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[9px] text-neutral-500 font-mono">Size {item.size}</span>
+                              {item.color && (
+                                <div className="flex items-center gap-1">
+                                  <span className="w-2 h-2 rounded-full border border-neutral-700" style={{ backgroundColor: item.color.hex }}></span>
+                                  <span className="text-[8px] text-neutral-400 font-bold uppercase">{isAr ? item.color.nameAr : item.color.nameFr}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -2142,7 +2152,7 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="space-y-4 flex-1 overflow-y-auto max-h-[600px] scrollbar-thin">
                 {leads.filter(l => l.status === "delivered").map(lead => (
-                  <div key={lead.id} className="rounded-2xl border border-neutral-850 bg-[#0a0a0c]/85 p-4.5 space-y-3 opacity-70 group hover:opacity-100 transition-all">
+                  <div key={lead.id} className="glass-card opacity-80 hover:opacity-100 rounded-2xl p-4.5 space-y-3 shadow-lg border-neon-lime/20 group hover:-translate-y-1 z-10 hover:z-20 transition-all">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <h4 className="font-bold text-white text-sm font-outfit">{lead.customerName}</h4>
@@ -2153,22 +2163,30 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <button 
                         onClick={() => deleteLead(lead.id)}
-                        className="text-neutral-700 hover:text-red-500 p-1 rounded-lg hover:bg-neutral-900 cursor-pointer transition-colors"
+                        className="text-neutral-700 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-500/10 cursor-pointer transition-colors"
                       >
                         <Trash2 size={12} />
                       </button>
                     </div>
 
-                    <div className="flex flex-col gap-2 p-2 rounded-xl bg-neutral-950 border border-neutral-900 max-h-32 overflow-y-auto scrollbar-thin">
+                    <div className="flex flex-col gap-2 p-2.5 rounded-xl bg-obsidian/60 border border-neutral-800 max-h-32 overflow-y-auto scrollbar-thin">
                       {lead.items.map((item, idx) => (
                         <div key={idx} className="flex gap-2 items-center">
-                          <div className="h-8 w-8 rounded overflow-hidden flex-shrink-0 bg-neutral-900 opacity-60">
+                          <div className="h-10 w-10 rounded border border-neutral-800 overflow-hidden flex-shrink-0 bg-neutral-900">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={getShoeImage(item.sneakerId)} alt="Shoe" className="h-full w-full object-cover" />
+                            <img src={item.color?.image || getShoeImage(item.sneakerId)} alt="Shoe" className="h-full w-full object-cover" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-[10px] font-bold text-neutral-400 truncate">{item.quantity}x {getShoeTitle(item.sneakerId)}</div>
-                            <div className="text-[9px] text-neutral-500 font-mono mt-0.5">Size {item.size}</div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[9px] text-neutral-500 font-mono">Size {item.size}</span>
+                              {item.color && (
+                                <div className="flex items-center gap-1">
+                                  <span className="w-2 h-2 rounded-full border border-neutral-700 opacity-60" style={{ backgroundColor: item.color.hex }}></span>
+                                  <span className="text-[8px] text-neutral-500 font-bold uppercase">{isAr ? item.color.nameAr : item.color.nameFr}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -3279,6 +3297,113 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* TAB 8: APPEARANCE SETTINGS */}
+      {activeTab === "appearance" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 animate-fadeIn">
+          <div className="rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8">
+            <h2 className="text-lg font-bold text-white mb-6 uppercase tracking-wider flex items-center gap-2 border-b border-neutral-900 pb-4">
+              <Palette size={18} className="text-neon-lime" />
+              {isAr ? "مظهر المتجر والإعدادات" : "Store Appearance & Settings"}
+            </h2>
+
+            <form onSubmit={handleSaveSettings} className="space-y-6">
+              {showSettingsSaved && (
+                <div className="bg-neon-lime/10 border border-neon-lime/30 text-neon-lime text-xs font-bold p-3 rounded-xl flex items-center justify-center gap-2">
+                  <Check size={14} /> {isAr ? "تم حفظ الإعدادات بنجاح!" : "Settings Saved Successfully!"}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
+                  {isAr ? "اسم المتجر" : "Store Name"}
+                </label>
+                <input
+                  type="text"
+                  value={siteName}
+                  onChange={(e) => setSiteName(e.target.value)}
+                  placeholder="SNKRS ALG"
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
+                  {isAr ? "اللون الرئيسي" : "Primary Accent Color (HEX)"}
+                </label>
+                <div className="flex gap-4 items-center">
+                  <input
+                    type="color"
+                    value={primaryColor}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    className="h-10 w-20 rounded cursor-pointer bg-neutral-950 border border-neutral-800 p-1"
+                  />
+                  <input
+                    type="text"
+                    value={primaryColor}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    className="flex-1 bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
+                  {isAr ? "شريط الإعلانات" : "Announcement Banner Text"}
+                </label>
+                <textarea
+                  value={announcement}
+                  onChange={(e) => setAnnouncement(e.target.value)}
+                  rows={2}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-lime/60 transition-all resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
+                    WhatsApp
+                  </label>
+                  <input
+                    type="text"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-4 bg-neon-lime hover:bg-white text-obsidian text-sm font-black rounded-xl cursor-pointer transition-all hover:scale-[1.01] neon-glow-lime uppercase tracking-wider flex items-center justify-center gap-2"
+              >
+                <Settings size={18} />
+                {isAr ? "حفظ مظهر المتجر" : "Save Appearance Settings"}
+              </button>
+            </form>
+          </div>
+          
+          <div className="rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8 flex flex-col items-center justify-center text-center">
+             <Palette size={48} className="text-neon-lime opacity-20 mb-4" />
+             <h3 className="text-lg font-bold text-white mb-2">Live Theme Customization</h3>
+             <p className="text-sm text-neutral-400 mb-6 max-w-sm">Changes made here will instantly reflect across the entire store for all users using Supabase Realtime.</p>
+             <div className="w-full p-4 border border-neutral-800 rounded-xl bg-neutral-950">
+               <div className="text-xs font-bold text-neutral-500 mb-2 uppercase tracking-widest">Preview Color</div>
+               <div className="w-full h-12 rounded-lg" style={{ backgroundColor: primaryColor, boxShadow: `0 0 20px ${primaryColor}40` }}></div>
+             </div>
           </div>
         </div>
       )}

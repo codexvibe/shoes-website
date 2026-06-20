@@ -9,6 +9,9 @@ export type Language = "fr" | "ar";
 interface ContactConfig {
   whatsapp: string;
   email: string;
+  siteName: string;
+  primaryColor: string;
+  announcement: string;
 }
 
 interface DbCategoryRow {
@@ -178,6 +181,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [contactConfig, setContactConfigState] = useState<ContactConfig>({
     whatsapp: "+213000000000",
     email: "contact@sneakersobsidian.com",
+    siteName: "SNKRS ALG",
+    primaryColor: "#00ffcc",
+    announcement: "Welcome to SNKRS ALG! Free shipping on 2+ items.",
   });
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -274,6 +280,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setContactConfigState({
           whatsapp: configData.whatsapp,
           email: configData.email,
+          siteName: configData.site_name || "SNKRS ALG",
+          primaryColor: configData.primary_color || "#00ffcc",
+          announcement: configData.announcement || "Welcome to SNKRS ALG! Free shipping on 2+ items.",
         });
         if (configData.hero_banner) {
           setHeroBannerState(configData.hero_banner);
@@ -715,6 +724,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       .update({
         whatsapp: config.whatsapp,
         email: config.email,
+        site_name: config.siteName,
+        primary_color: config.primaryColor,
+        announcement: config.announcement,
       })
       .eq("id", 1);
 

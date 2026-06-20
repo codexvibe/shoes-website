@@ -7,7 +7,7 @@ import { Globe, Menu, X, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 
 export const Navbar: React.FC = () => {
-  const { language, setLanguage, cart, setIsCartOpen } = useStore();
+  const { language, setLanguage, cart, setIsCartOpen, contactConfig } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   
@@ -15,6 +15,11 @@ export const Navbar: React.FC = () => {
   
   const isAr = language === "ar";
   const isAdminPage = pathname?.includes("/admin");
+
+  // Split site name into two parts for styling (first word white, rest accent)
+  const siteNameParts = (contactConfig.siteName || "SNKRS ALG").split(" ");
+  const nameFirst = siteNameParts[0] || "";
+  const nameRest = siteNameParts.slice(1).join(" ");
 
   const toggleLanguage = () => {
     setLanguage(isAr ? "fr" : "ar");
@@ -48,9 +53,9 @@ export const Navbar: React.FC = () => {
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-neon-lime"></span>
               </span>
               <span className={`text-xl font-black uppercase tracking-wider text-white group-hover:text-neon-lime transition-colors duration-300 ${isAr ? 'font-cairo' : 'font-outfit'}`}>
-                {isAr ? "أوبسيديان" : "Obsidian"}{" "}
+                {nameFirst}{" "}
                 <span className="text-neon-lime group-hover:text-white transition-colors duration-300">
-                  {isAr ? "سنيكرز" : "SNKRS"}
+                  {nameRest}
                 </span>
               </span>
             </Link>

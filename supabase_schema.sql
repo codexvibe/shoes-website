@@ -154,18 +154,20 @@ CREATE TABLE IF NOT EXISTS leads (
 );
 
 -- ==========================================
--- 5. Settings / Contact Config Table
+-- 5. Contact & Global Settings Config
 -- ==========================================
 CREATE TABLE IF NOT EXISTS contact_config (
   id INTEGER PRIMARY KEY DEFAULT 1,
-  whatsapp TEXT NOT NULL,
-  email TEXT NOT NULL,
-  hero_banner TEXT
+  whatsapp TEXT DEFAULT '+213000000000',
+  email TEXT DEFAULT 'contact@sneakersobsidian.com',
+  hero_banner TEXT,
+  site_name TEXT DEFAULT 'SNKRS ALG',
+  primary_color TEXT DEFAULT '#00ffcc',
+  announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.'
 );
 
--- Insert initial contact config
-INSERT INTO contact_config (id, whatsapp, email)
-VALUES (1, '+213000000000', 'contact@sneakersobsidian.com')
+INSERT INTO contact_config (id, whatsapp, email, site_name, primary_color, announcement)
+VALUES (1, '+213000000000', 'contact@sneakersobsidian.com', 'SNKRS ALG', '#00ffcc', 'Welcome to SNKRS ALG! Free shipping on 2+ items.')
 ON CONFLICT (id) DO NOTHING;
 
 -- ==========================================
@@ -289,6 +291,24 @@ END $$;
 DO $$
 BEGIN
   ALTER TABLE sneakers ADD COLUMN colors JSONB DEFAULT '[]'::jsonb;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER TABLE contact_config ADD COLUMN site_name TEXT DEFAULT 'SNKRS ALG';
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER TABLE contact_config ADD COLUMN primary_color TEXT DEFAULT '#00ffcc';
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER TABLE contact_config ADD COLUMN announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.';
 EXCEPTION WHEN duplicate_column THEN NULL;
 END $$;
 
