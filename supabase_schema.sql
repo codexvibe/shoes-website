@@ -177,12 +177,6 @@ CREATE TABLE IF NOT EXISTS contact_config (
   announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.'
 );
 
--- ==========================================
--- 7. Initial Data Seed
--- ==========================================
-INSERT INTO contact_config (id, whatsapp, email, site_name, primary_color, announcement)
-VALUES (1, '+213000000000', 'contact@sneakersobsidian.com', 'SNKRS ALG', '#00ffcc', 'Welcome to SNKRS ALG! Free shipping on 2+ items.')
-ON CONFLICT (id) DO NOTHING;
 
 -- ==========================================
 -- 8. Row Level Security (RLS) Policies
@@ -268,6 +262,13 @@ ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS primary_color TEXT DEFAULT '
 ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.';
 
 -- ==========================================
--- 12. Reload Schema Cache
+-- 12. Initial Data Seed
+-- ==========================================
+INSERT INTO contact_config (id, whatsapp, email, site_name, primary_color, announcement)
+VALUES (1, '+213000000000', 'contact@sneakersobsidian.com', 'SNKRS ALG', '#00ffcc', 'Welcome to SNKRS ALG! Free shipping on 2+ items.')
+ON CONFLICT (id) DO NOTHING;
+
+-- ==========================================
+-- 13. Reload Schema Cache
 -- ==========================================
 NOTIFY pgrst, 'reload schema';
