@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://images.unsplash.com/photo-1552346154-21d32810baa3?q=80&w=2000&auto=format&fit=crop" alt="Premium Sneaker Store Banner" width="100%" />
+  <img src="https://image.thum.io/get/width/1200/crop/800/https://shoes-website-phi-two.vercel.app/" alt="Premium Sneaker Store Banner" width="100%" />
 
   # 👟 Premium Sneaker Storefront
 
@@ -20,15 +20,7 @@
 
 This project is a fully-featured, high-performance E-commerce storefront tailored specifically for sneakerheads. Designed with a dark "obsidian and neon" aesthetic, it delivers a premium, immersive shopping experience. The application provides seamless language switching between French and Arabic (with full RTL support).
 
-### 📸 Showcase
 
-| Storefront Hero | Product Gallery |
-| :---: | :---: |
-| <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=700" alt="Hero Section" width="400" /> | <img src="https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=700" alt="Gallery" width="400" /> |
-| **Bilingual Interface** | **Admin Dashboard** |
-| <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=700" alt="Bilingual" width="400" /> | <img src="https://images.unsplash.com/photo-1551150441-3f3828204ef0?auto=format&fit=crop&q=80&w=700" alt="Admin" width="400" /> |
-
-*(Note: Replace these placeholder images with actual application screenshots if desired!)*
 
 ## ✨ Key Features
 
