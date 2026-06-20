@@ -241,6 +241,52 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleVariantFileInput = (e: React.ChangeEvent<HTMLInputElement>, isEdit = false) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (!file.type.startsWith("image/")) {
+        const msg = isAr ? "يرجى اختيار ملف صورة صالح." : "Veuillez choisir un fichier image valide.";
+        alert(msg);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          const img = document.createElement("img");
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+            const maxDim = 800;
+            
+            if (width > height && width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+              if (isEdit) {
+                setEditVariantImage(compressedBase64);
+              } else {
+                setVariantImage(compressedBase64);
+              }
+            }
+          };
+          img.src = event.target.result as string;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleFile = (file: File, isEdit = false) => {
     if (!file.type.startsWith("image/")) {
       const msg = isAr ? "يرجى اختيار ملف صورة صالح." : "Veuillez choisir un fichier image valide.";
@@ -1349,12 +1395,24 @@ export const AdminDashboard: React.FC = () => {
                       />
                       <div className="flex-1 flex flex-col gap-2">
                         <input
-                          type="text"
-                          value={variantImage}
-                          onChange={(e) => setVariantImage(e.target.value)}
-                          placeholder={isAr ? "رابط صورة هذا اللون" : "Image URL for this color"}
-                          className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                          type="file"
+                          accept="image/*"
+                          id="variantImageUpload"
+                          className="hidden"
+                          onChange={(e) => handleVariantFileInput(e, false)}
                         />
+                        <button
+                          type="button"
+                          onClick={() => document.getElementById("variantImageUpload")?.click()}
+                          className="w-full py-2 bg-neutral-900 hover:bg-neutral-800 text-xs font-bold text-white rounded-lg border border-neutral-700 transition-all flex items-center justify-center gap-2 cursor-pointer font-outfit"
+                        >
+                          {variantImage ? (
+                            <img src={variantImage} alt="Preview" className="h-4 w-4 object-cover rounded" />
+                          ) : (
+                            <UploadCloud size={14} className="text-neon-orange" />
+                          )}
+                          {variantImage ? (isAr ? "تم اختيار الصورة (تغيير)" : "Image Selected (Change)") : (isAr ? "رفع من الجهاز" : "UPLOAD FROM PC")}
+                        </button>
                         <button
                           type="button"
                           onClick={() => setShowVariantGallery(!showVariantGallery)}
@@ -2991,12 +3049,24 @@ export const AdminDashboard: React.FC = () => {
                     />
                     <div className="flex-1 flex flex-col gap-2">
                       <input
-                        type="text"
-                        value={editVariantImage}
-                        onChange={(e) => setEditVariantImage(e.target.value)}
-                        placeholder="Image URL for this color"
-                        className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-outfit"
+                        type="file"
+                        accept="image/*"
+                        id="editVariantImageUpload"
+                        className="hidden"
+                        onChange={(e) => handleVariantFileInput(e, true)}
                       />
+                      <button
+                        type="button"
+                        onClick={() => document.getElementById("editVariantImageUpload")?.click()}
+                        className="w-full py-2 bg-neutral-900 hover:bg-neutral-800 text-xs font-bold text-white rounded-lg border border-neutral-700 transition-all flex items-center justify-center gap-2 cursor-pointer font-outfit"
+                      >
+                        {editVariantImage ? (
+                          <img src={editVariantImage} alt="Preview" className="h-4 w-4 object-cover rounded" />
+                        ) : (
+                          <UploadCloud size={14} className="text-neon-orange" />
+                        )}
+                        {editVariantImage ? "Image Selected (Change)" : "UPLOAD FROM PC"}
+                      </button>
                       <button
                         type="button"
                         onClick={() => setShowEditVariantGallery(!showEditVariantGallery)}
