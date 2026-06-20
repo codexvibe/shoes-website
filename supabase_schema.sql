@@ -205,6 +205,7 @@ CREATE POLICY "Leads are updatable by admins only" ON leads FOR UPDATE USING (au
 CREATE POLICY "Leads are deletable by admins only" ON leads FOR DELETE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Contact config viewable by everyone" ON contact_config FOR SELECT USING (true);
+CREATE POLICY "Contact config insertable by admins" ON contact_config FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 CREATE POLICY "Contact config updatable by admins" ON contact_config FOR UPDATE USING (auth.role() = 'authenticated');
 
 -- ==========================================
