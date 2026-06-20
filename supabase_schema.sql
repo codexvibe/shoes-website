@@ -166,9 +166,7 @@ CREATE TABLE IF NOT EXISTS contact_config (
   announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.'
 );
 
-INSERT INTO contact_config (id, whatsapp, email, site_name, primary_color, announcement)
-VALUES (1, '+213000000000', 'contact@sneakersobsidian.com', 'SNKRS ALG', '#00ffcc', 'Welcome to SNKRS ALG! Free shipping on 2+ items.')
-ON CONFLICT (id) DO NOTHING;
+
 
 -- ==========================================
 -- 6. Row Level Security (RLS) Policies
@@ -313,7 +311,14 @@ EXCEPTION WHEN duplicate_column THEN NULL;
 END $$;
 
 -- ==========================================
--- 10. Reload Schema Cache
+-- 10. Initial Data Seed (After Migrations)
+-- ==========================================
+INSERT INTO contact_config (id, whatsapp, email, site_name, primary_color, announcement)
+VALUES (1, '+213000000000', 'contact@sneakersobsidian.com', 'SNKRS ALG', '#00ffcc', 'Welcome to SNKRS ALG! Free shipping on 2+ items.')
+ON CONFLICT (id) DO NOTHING;
+
+-- ==========================================
+-- 11. Reload Schema Cache
 -- ==========================================
 -- Run this if you just modified the schema directly in SQL Editor
 NOTIFY pgrst, 'reload schema';
