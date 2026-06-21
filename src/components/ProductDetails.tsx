@@ -25,6 +25,9 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
 
   const displayedImage = selectedColor?.image || shoe?.image || "";
 
+  const activeSizes = selectedColor?.sizes?.length ? selectedColor.sizes : (shoe?.sizes || []);
+  const activeSizesStock = (selectedColor && Object.keys(selectedColor.sizesStock || {}).length > 0) ? selectedColor.sizesStock : (shoe?.sizesStock || {});
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
