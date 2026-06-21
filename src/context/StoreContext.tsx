@@ -853,7 +853,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsCartOpen,
       }}
     >
-      {children}
+      {loading ? (
+        <div className="fixed inset-0 bg-obsidian flex flex-col items-center justify-center z-[9999]">
+          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border border-neutral-800/40 flex items-center justify-center animate-[spin_3s_linear_infinite]">
+            <div className="absolute w-20 h-20 sm:w-28 sm:h-28 rounded-full border border-dashed border-neutral-800/80"></div>
+            <div className="absolute w-3 h-3 rounded-full bg-blue-500 top-0 shadow-[0_0_15px_rgba(59,130,246,0.8)]"></div>
+            <div className="absolute w-3 h-3 rounded-full bg-white bottom-0 shadow-[0_0_15px_rgba(255,255,255,0.8)]"></div>
+          </div>
+          <div className="mt-8 text-neutral-500 text-xs font-bold tracking-[0.3em] uppercase animate-pulse font-outfit">
+            LOADING SNKRS...
+          </div>
+        </div>
+      ) : (
+        children
+      )}
     </StoreContext.Provider>
   );
 };
