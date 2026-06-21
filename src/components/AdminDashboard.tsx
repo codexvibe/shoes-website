@@ -2626,61 +2626,8 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="lg:col-span-5">
-            <div className="rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8">
-              <h2 className="text-lg font-bold text-white mb-4 uppercase tracking-wider flex items-center gap-2 border-b border-neutral-900 pb-4">
-                <Settings size={18} className="text-neon-orange" />
-                Contact Redirections
-              </h2>
-
-              <form onSubmit={handleSaveSettings} className="space-y-4 mt-2">
-                <div>
-                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">WhatsApp Number</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-3.5 text-neutral-500" size={14} />
-                    <input
-                      type="text"
-                      value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
-                      placeholder="+213550123456"
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-9 pr-4 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-orange/60 transition-all font-mono"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Owner Email Address</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-3.5 text-neutral-500" size={14} />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="owner@sneakersdz.com"
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-9 pr-4 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-orange/60 transition-all font-mono"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {showSettingsSaved && (
-                  <div className="text-[10px] text-neon-orange bg-neon-orange/5 border border-neon-orange/20 rounded-lg p-2.5 flex items-center gap-1.5">
-                    <Check size={12} />
-                    <span>Redirection settings saved successfully!</span>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  className="w-full py-3 rounded-xl border border-neutral-800 hover:border-neon-orange/45 text-xs text-neutral-300 hover:text-neon-orange transition-all cursor-pointer font-outfit uppercase tracking-widest font-black"
-                >
-                  Save Settings
-                </button>
-              </form>
-            </div>
-
             {/* Wilaya Stats Card */}
-            <div className="rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8 mt-6">
+            <div className="rounded-3xl border border-neutral-800 bg-asphalt/40 backdrop-blur-md p-6 sm:p-8">
               <h2 className="text-lg font-bold text-white mb-4 uppercase tracking-wider flex items-center gap-2 border-b border-neutral-900 pb-4">
                 <TrendingUp size={18} className="text-neon-lime" />
                 Delivery Stats
