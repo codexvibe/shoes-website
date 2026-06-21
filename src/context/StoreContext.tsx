@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useLayoutEffect } from "react";
 import { Category, Sneaker, Lead, WilayaFee, INITIAL_WILAYAS, CartItem } from "../data/mockData";
 import { getSupabaseClient } from "../lib/supabaseClient";
 
@@ -299,6 +299,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (configData.hero_shoe) {
           setHeroShoeState(configData.hero_shoe);
         }
+        // Apply primary color immediately during load to prevent flash
+        if (typeof document !== "undefined" && configData.primary_color) {
+          document.documentElement.style.setProperty('--color-neon-lime', configData.primary_color);
+        }
       }
     } catch (err) {
       console.error("Failed to load from Supabase:", err);
@@ -306,6 +310,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setLoading(false);
     }
   }, [supabase]);
+
+  // Apply primary color synchronously on every change via useLayoutEffect
+  useLayoutEffect(() => {
+    if (typeof document !== "undefined" && contactConfig.primaryColor) {
+      document.documentElement.style.setProperty('--color-neon-lime', contactConfig.primaryColor);
+    }
+  }, [contactConfig.primaryColor]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -372,14 +383,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase]);
-
-  // Inject dynamic primary color into CSS variables
-  useEffect(() => {
-    if (typeof document !== "undefined" && contactConfig.primaryColor) {
-      document.documentElement.style.setProperty('--color-neon-lime', contactConfig.primaryColor);
-      // Optional: also update orange if they want it globally, but for now just the primary lime.
-    }
-  }, [contactConfig.primaryColor]);
 
   // ── Categories ──
 
