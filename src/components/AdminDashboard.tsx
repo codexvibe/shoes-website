@@ -258,11 +258,14 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const processFileIfHeic = async (file: File | Blob): Promise<File | Blob> => {
-    if ((file as File).name?.toLowerCase().endsWith(".heic") || file.type === "image/heic") {
+    const fileName = (file as File).name?.toLowerCase() || "";
+    if (fileName.endsWith(".heic") || fileName.endsWith(".heif") || file.type === "image/heic" || file.type === "image/heif") {
       try {
         const heic2any = (await import("heic2any")).default;
         const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
-        return Array.isArray(converted) ? converted[0] : converted;
+        const blob = Array.isArray(converted) ? converted[0] : converted;
+        const newFileName = fileName ? fileName.replace(/\.hei[cf]$/i, ".jpg") : "converted.jpg";
+        return new File([blob], newFileName, { type: "image/jpeg" });
       } catch (error) {
         console.error("HEIC conversion failed", error);
       }
@@ -2596,11 +2599,13 @@ export const AdminDashboard: React.FC = () => {
                           <input
                             type="file"
                             id="catImageUpload"
-                            accept="image/*"
+                            accept="image/*,.heic,.heif"
                             className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
+                            onChange={async (e) => {
+                              const rawFile = e.target.files?.[0];
+                              if (rawFile) {
+                                const file = await processFileIfHeic(rawFile);
+                                if (!file.type.startsWith("image/")) return;
                                 const reader = new FileReader();
                                 reader.onloadend = () => {
                                   setCatImage(reader.result as string);
