@@ -305,12 +305,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (supabase) {
         supabase.auth.getSession().then(({ data: { session } }) => {
           setIsAdmin(!!session);
+          if (session) {
+            loadFromSupabase();
+          }
         });
 
         const {
           data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
           setIsAdmin(!!session);
+          if (session) {
+            loadFromSupabase();
+          }
         });
         
         authListener = subscription;

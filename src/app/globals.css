@@ -14,11 +14,11 @@
   @keyframes neon-pulse {
     0%, 100% {
       opacity: 1;
-      filter: drop-shadow(0 0 8px rgba(132, 204, 22, 0.6));
+      filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-neon-lime) 60%, transparent));
     }
     50% {
       opacity: 0.8;
-      filter: drop-shadow(0 0 2px rgba(132, 204, 22, 0.2));
+      filter: drop-shadow(0 0 2px color-mix(in srgb, var(--color-neon-lime) 20%, transparent));
     }
   }
 
@@ -63,8 +63,8 @@ body {
 }
 
 .glass-card:hover {
-  border-color: rgba(132, 204, 22, 0.4);
-  box-shadow: 0 10px 30px -10px rgba(132, 204, 22, 0.15);
+  border-color: color-mix(in srgb, var(--color-neon-lime) 40%, transparent);
+  box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--color-neon-lime) 15%, transparent);
 }
 
 /* Custom Scrollbar for premium dark mode */
@@ -88,7 +88,11 @@ body {
 
 /* Custom glow utility */
 .neon-glow-lime {
-  box-shadow: 0 0 15px rgba(132, 204, 22, 0.3);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--color-neon-lime) 30%, transparent);
+}
+
+.text-glow-lime {
+  text-shadow: 0 0 20px color-mix(in srgb, var(--color-neon-lime) 50%, transparent);
 }
 
 .neon-glow-orange {

@@ -42,7 +42,13 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-neutral-800/70 bg-obsidian/75 backdrop-blur-md transition-all duration-300">
+    <>
+      {contactConfig.announcement && (
+        <div className={`w-full bg-neon-lime text-obsidian text-center py-1.5 px-4 text-xs sm:text-sm font-black uppercase tracking-widest ${isAr ? 'font-cairo' : 'font-outfit'}`}>
+          {contactConfig.announcement}
+        </div>
+      )}
+      <nav className="sticky top-0 z-50 w-full border-b border-neutral-800/70 bg-obsidian/75 backdrop-blur-md transition-all duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           {/* Logo Section */}
@@ -154,6 +160,7 @@ export const Navbar: React.FC = () => {
         </div>
       )}
     </nav>
+    </>
   );
 };
 

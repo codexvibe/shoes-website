@@ -515,7 +515,7 @@ export const CartDrawer: React.FC = () => {
                   }`}
                 >
                   <MapPin size={12} />
-                  {isAr ? "ولاية التوصيل" : "WILAYA DE LIVRAISON"}
+                  {isAr ? "ولاية التوصيل (المنزل أو المكتب - سعر ثابت)" : "WILAYA DE LIVRAISON (À Domicile ou Bureau - Prix Fixe)"}
                 </label>
                 <div className="relative">
                   <button

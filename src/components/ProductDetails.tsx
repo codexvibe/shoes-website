@@ -234,33 +234,38 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
                       key={idx}
                       onClick={() => handleColorSelect(color)}
                       title={isAr ? color.nameAr : color.nameFr}
-                      className={`relative w-16 h-16 rounded-2xl transition-all duration-300 cursor-pointer flex items-center justify-center group ${
+                      className={`flex flex-col items-center gap-2 group cursor-pointer transition-all`}
+                    >
+                      <div className={`relative w-16 h-16 rounded-2xl transition-all duration-300 flex items-center justify-center ${
                         isSelected
                           ? "ring-2 ring-white ring-offset-4 ring-offset-obsidian scale-110 z-10"
-                          : "ring-1 ring-white/10 hover:ring-white/50 hover:scale-105"
-                      }`}
-                    >
-                      {/* If the color has a specific image, we can show a miniature of it, otherwise just the color */}
-                      {color.image ? (
-                        <div className="absolute inset-0 rounded-2xl overflow-hidden bg-neutral-900">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={color.image} alt="swatch" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      ) : (
-                        <div
-                          className="absolute inset-0 rounded-2xl shadow-inner"
-                          style={{ background: color.hex }}
-                        />
-                      )}
-                      
-                      {/* Overlay border for aesthetic */}
-                      <div className="absolute inset-0 rounded-2xl border border-white/10" />
+                          : "ring-1 ring-white/10 group-hover:ring-white/50 group-hover:scale-105"
+                      }`}>
+                        {/* If the color has a specific image, we can show a miniature of it, otherwise just the color */}
+                        {color.image ? (
+                          <div className="absolute inset-0 rounded-2xl overflow-hidden bg-neutral-900">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={color.image} alt="swatch" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        ) : (
+                          <div
+                            className="absolute inset-0 rounded-2xl shadow-inner"
+                            style={{ background: color.hex }}
+                          />
+                        )}
+                        
+                        {/* Overlay border for aesthetic */}
+                        <div className="absolute inset-0 rounded-2xl border border-white/10" />
 
-                      {isSelected && (
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        </div>
-                      )}
+                        {isSelected && (
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg z-20">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </div>
+                        )}
+                      </div>
+                      <span className={`text-xs font-bold transition-colors ${isSelected ? "text-white" : "text-neutral-500 group-hover:text-neutral-300"} ${isAr ? "font-cairo" : "font-outfit"}`}>
+                        {isAr ? color.nameAr : color.nameFr}
+                      </span>
                     </button>
                   );
                 })}
@@ -303,7 +308,7 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
           <div className={`flex flex-col sm:flex-row gap-4 mb-12 ${isAr ? 'sm:flex-row-reverse' : ''}`}>
             <button
               onClick={handleAddToCart}
-              className={`flex-1 flex items-center justify-center gap-3 bg-neon-lime hover:bg-white text-obsidian px-8 py-5 rounded-2xl font-black transition-all shadow-[0_0_30px_rgba(163,230,53,0.2)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] hover:scale-[1.02] active:scale-[0.98] ${isAr ? "font-cairo text-xl" : "font-outfit uppercase tracking-widest text-sm"}`}
+              className={`flex-1 flex items-center justify-center gap-3 bg-neon-lime hover:bg-white text-obsidian px-8 py-5 rounded-2xl font-black transition-all neon-glow-lime hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] hover:scale-[1.02] active:scale-[0.98] ${isAr ? "font-cairo text-xl" : "font-outfit uppercase tracking-widest text-sm"}`}
             >
               <ShoppingCart size={22} />
               {isAr ? "أضف إلى السلة" : "ADD TO CART"}
