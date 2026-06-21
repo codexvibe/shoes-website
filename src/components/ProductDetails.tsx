@@ -63,15 +63,7 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
     "Multicolor": "linear-gradient(45deg, red, orange, yellow, green, blue, purple)",
   };
 
-  // Convert old string colorways to SneakerColor objects if colors is empty
-  const computedColors: SneakerColor[] = shoe?.colors?.length 
-    ? shoe.colors 
-    : (shoe?.colorways?.map(c => ({
-        nameFr: c,
-        nameAr: c,
-        hex: COLOR_MAP[c] || "#cccccc",
-        image: ""
-      })) || []);
+  const computedColors: SneakerColor[] = shoe?.colors || [];
 
   const hasColors = computedColors.length > 0;
 

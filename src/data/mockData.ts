@@ -25,7 +25,7 @@ export interface Sneaker {
   image: string;
   sizes: number[];
   sizesStock: Record<number, number>; // size -> quantity
-  colorways: string[]; // Deprecated, use colors instead
+
   colors?: SneakerColor[];
   descFr: string;
   descAr: string;

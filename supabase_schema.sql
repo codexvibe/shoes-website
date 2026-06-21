@@ -51,7 +51,7 @@ CREATE TABLE sneakers (
   image TEXT, 
   sizes INTEGER[] DEFAULT '{}',
   sizes_stock JSONB DEFAULT '{}'::jsonb,
-  colorways TEXT[] DEFAULT '{}',
+
   colors JSONB DEFAULT '[]'::jsonb,
   desc_fr TEXT,
   desc_ar TEXT,
@@ -184,6 +184,7 @@ CREATE TABLE contact_config (
   whatsapp TEXT DEFAULT '+213000000000',
   email TEXT DEFAULT 'contact@sneakersobsidian.com',
   hero_banner TEXT,
+  hero_shoe TEXT,
   site_name TEXT DEFAULT 'SNKRS ALG',
   primary_color TEXT DEFAULT '#00ffcc',
   announcement TEXT DEFAULT 'Welcome to SNKRS ALG! Free shipping on 2+ items.'
@@ -254,6 +255,11 @@ VALUES (1, '+213000000000', 'contact@sneakersobsidian.com', 'SNKRS ALG', '#00ffc
 ON CONFLICT (id) DO NOTHING;
 
 -- ==========================================
--- 10. Force Reload Schema Cache
+-- 10. Migrations (safe to re-run)
+-- ==========================================
+ALTER TABLE contact_config ADD COLUMN IF NOT EXISTS hero_shoe TEXT;
+
+-- ==========================================
+-- 11. Force Reload Schema Cache
 -- ==========================================
 NOTIFY pgrst, 'reload schema';

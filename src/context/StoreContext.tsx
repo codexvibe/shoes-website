@@ -34,7 +34,7 @@ interface DbSneakerRow {
   image?: string | null;
   sizes?: number[] | null;
   sizes_stock?: Sneaker["sizesStock"] | null;
-  colorways?: string[] | null;
+
   colors?: any | null;
   desc_fr?: string | null;
   desc_ar?: string | null;
@@ -93,6 +93,8 @@ interface StoreContextType {
   resetWilayas: () => Promise<void>;
   heroBanner: string | null;
   setHeroBanner: (image: string | null) => void;
+  heroShoe: string | null;
+  setHeroShoe: (image: string | null) => void;
   isAdmin: boolean;
   loginAdmin: (email: string, password: string) => Promise<boolean>;
   logoutAdmin: () => Promise<void>;
@@ -135,7 +137,7 @@ function dbSneakerToFrontend(row: DbSneakerRow): Sneaker {
     image: row.image || "",
     sizes: row.sizes || [],
     sizesStock: row.sizes_stock || {},
-    colorways: row.colorways || [],
+
     colors: row.colors || [],
     descFr: row.desc_fr || "",
     descAr: row.desc_ar || "",
@@ -183,6 +185,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [leads, setLeads] = useState<Lead[]>([]);
   const [wilayaFees, setWilayaFees] = useState<WilayaFee[]>(INITIAL_WILAYAS);
   const [heroBanner, setHeroBannerState] = useState<string | null>(null);
+  const [heroShoe, setHeroShoeState] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [contactConfig, setContactConfigState] = useState<ContactConfig>({
     whatsapp: "+213000000000",
@@ -292,6 +295,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         });
         if (configData.hero_banner) {
           setHeroBannerState(configData.hero_banner);
+        }
+        if (configData.hero_shoe) {
+          setHeroShoeState(configData.hero_shoe);
         }
       }
     } catch (err) {
@@ -431,7 +437,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         image: newShoe.image || null,
         sizes: newShoe.sizes,
         sizes_stock: newShoe.sizesStock,
-        colorways: newShoe.colorways,
+
         colors: newShoe.colors || [],
         desc_fr: newShoe.descFr,
         desc_ar: newShoe.descAr,
@@ -479,7 +485,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         image: updatedShoe.image || null,
         sizes: updatedShoe.sizes,
         sizes_stock: updatedShoe.sizesStock,
-        colorways: updatedShoe.colorways,
+
         colors: updatedShoe.colors || [],
         desc_fr: updatedShoe.descFr,
         desc_ar: updatedShoe.descAr,
@@ -742,6 +748,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const setHeroShoe = async (image: string | null) => {
+    if (!supabase) return;
+    setHeroShoeState(image);
+    const { error } = await supabase
+      .from("contact_config")
+      .update({ hero_shoe: image })
+      .eq("id", 1);
+
+    if (error) {
+      console.error("Failed to update hero shoe:", error);
+    }
+  };
+
   const setContactConfig = async (config: ContactConfig) => {
     if (!supabase) return;
     setContactConfigState(config);
@@ -817,6 +836,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         resetWilayas,
         heroBanner,
         setHeroBanner,
+        heroShoe,
+        setHeroShoe,
         isAdmin,
         loginAdmin,
         logoutAdmin,

@@ -6,7 +6,7 @@ import { ArrowRight, ArrowLeft, Flame, Sparkles } from "lucide-react";
 import Image from "next/image";
 
 export const Hero: React.FC = () => {
-  const { heroBanner, language } = useStore();
+  const { heroBanner, heroShoe, language } = useStore();
   const isAr = language === "ar";
   
   const t = (key: string) => {
@@ -112,7 +112,7 @@ export const Hero: React.FC = () => {
             <div className="relative z-10 w-[300px] h-[300px] sm:w-[440px] sm:h-[440px] transition-all duration-500 hover:rotate-3 hover:scale-105 flex items-center justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=700"
+                src={heroShoe || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=700"}
                 alt="Featured Sneakers"
                 className="object-contain max-w-full max-h-full drop-shadow-[0_25px_35px_rgba(132,204,22,0.35)] select-none pointer-events-none"
               />

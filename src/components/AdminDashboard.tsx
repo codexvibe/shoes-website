@@ -53,6 +53,8 @@ export const AdminDashboard: React.FC = () => {
     resetWilayas,
     heroBanner,
     setHeroBanner,
+    heroShoe,
+    setHeroShoe,
     language, 
     logoutAdmin,
     contactConfig,
@@ -141,6 +143,11 @@ export const AdminDashboard: React.FC = () => {
   const [editHotDrop, setEditHotDrop] = useState(false);
   const [editNewArrival, setEditNewArrival] = useState(false);
   const [editSizes, setEditSizes] = useState<number[]>([]);
+
+  // Inventory Filter state
+  const [inventoryFilter, setInventoryFilter] = useState<"all" | "low" | "high">("all");
+
+
   const [editShoeVariantColors, setEditShoeVariantColors] = useState<SneakerColor[]>([]);
   const [editVariantNameFr, setEditVariantNameFr] = useState("");
   const [editVariantNameAr, setEditVariantNameAr] = useState("");
@@ -192,6 +199,11 @@ export const AdminDashboard: React.FC = () => {
   const [bannerDragActive, setBannerDragActive] = useState(false);
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
   const [bannerSuccess, setBannerSuccess] = useState(false);
+
+  // Hero Shoe Image states
+  const [heroShoeDragActive, setHeroShoeDragActive] = useState(false);
+  const heroShoeFileInputRef = useRef<HTMLInputElement>(null);
+  const [heroShoeSuccess, setHeroShoeSuccess] = useState(false);
 
   // General settings state
   const [whatsapp, setWhatsapp] = useState(contactConfig.whatsapp);
@@ -445,7 +457,7 @@ export const AdminDashboard: React.FC = () => {
       image: shoeImage,
       sizes: shoeSizes,
       sizesStock: initialStock,
-      colorways: [],
+
       colors: shoeVariantColors,
       descFr: shoeDescFr,
       descAr: shoeDescAr,
@@ -527,7 +539,7 @@ export const AdminDashboard: React.FC = () => {
       image: editImage,
       sizes: editSizes,
       sizesStock: updatedStock,
-      colorways: [],
+
       colors: editShoeVariantColors,
       descFr: editDescFr,
       descAr: editDescAr,
@@ -728,6 +740,70 @@ export const AdminDashboard: React.FC = () => {
             setHeroBanner(compressedBase64);
             setBannerSuccess(true);
             setTimeout(() => setBannerSuccess(false), 3000);
+          }
+        };
+        img.src = event.target.result as string;
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Hero Shoe drag drop handlers
+  const handleHeroShoeDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setHeroShoeDragActive(true);
+    } else if (e.type === "dragleave") {
+      setHeroShoeDragActive(false);
+    }
+  };
+
+  const handleHeroShoeDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setHeroShoeDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleHeroShoeFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleHeroShoeFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleHeroShoeFile(e.target.files[0]);
+    }
+  };
+
+  const handleHeroShoeFile = async (rawFile: File) => {
+    const file = await processFileIfHeic(rawFile);
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        const img = document.createElement("img");
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1200;
+          
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedBase64 = canvas.toDataURL("image/png", 0.9);
+            setHeroShoe(compressedBase64);
+            setHeroShoeSuccess(true);
+            setTimeout(() => setHeroShoeSuccess(false), 3000);
           }
         };
         img.src = event.target.result as string;
@@ -1581,7 +1657,9 @@ export const AdminDashboard: React.FC = () => {
                               </div>
                               <div>
                                 <div className="font-bold text-white">{shoe.nameFr}</div>
-                                <div className="text-[9px] text-neutral-500 font-mono mt-0.5">{(shoe.colorways || ["Default"]).join(" | ")}</div>
+                                <div className="text-[9px] text-neutral-500 font-mono mt-0.5">
+                                  {shoe.colors?.map(c => c.nameFr).join(" | ")}
+                                </div>
                               </div>
                             </div>
                           </td>
@@ -1645,7 +1723,33 @@ export const AdminDashboard: React.FC = () => {
                 [INSTRUCTIONS] Use ARROW KEYS (← ↑ ↓ →) or TAB/SHIFT+TAB to navigate stock quantity inputs in real-time. Quantities update instantly.
               </p>
             </div>
-            <span className="rounded-md bg-neon-lime/10 border border-neon-lime/20 px-2.5 py-1 text-[9px] font-mono text-neon-lime tracking-widest">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setInventoryFilter("all")}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                  inventoryFilter === "all" ? "bg-white text-obsidian" : "bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white"
+                }`}
+              >
+                All Models
+              </button>
+              <button
+                onClick={() => setInventoryFilter("high")}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                  inventoryFilter === "high" ? "bg-neon-lime text-obsidian border border-neon-lime" : "bg-neutral-900 border border-neutral-800 text-neon-lime/70 hover:text-neon-lime hover:border-neon-lime/50"
+                }`}
+              >
+                High Stock
+              </button>
+              <button
+                onClick={() => setInventoryFilter("low")}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                  inventoryFilter === "low" ? "bg-neon-orange text-obsidian border border-neon-orange" : "bg-neutral-900 border border-neutral-800 text-neon-orange/70 hover:text-neon-orange hover:border-neon-orange/50"
+                }`}
+              >
+                Low / Out of Stock
+              </button>
+            </div>
+            <span className="rounded-md bg-neon-lime/10 border border-neon-lime/20 px-2.5 py-1 text-[9px] font-mono text-neon-lime tracking-widest hidden sm:inline-block">
               SCANNER_FREE_V2.1
             </span>
           </div>
@@ -1662,7 +1766,15 @@ export const AdminDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-900/50">
-                {sneakers.map((shoe, shoeIndex) => {
+                {sneakers.filter(shoe => {
+                  if (inventoryFilter === "all") return true;
+                  const stocks = Object.values(shoe.sizesStock);
+                  const totalStock = stocks.reduce((a, b) => a + b, 0);
+                  const isLowStock = stocks.some(v => v > 0 && v <= 3) || totalStock === 0;
+                  if (inventoryFilter === "low") return isLowStock;
+                  if (inventoryFilter === "high") return !isLowStock && totalStock > 0;
+                  return true;
+                }).map((shoe, shoeIndex) => {
                   let totalQuantity = 0;
                   inventorySizes.forEach((sz) => {
                     totalQuantity += (shoe.sizesStock[sz] || 0);
@@ -2762,6 +2874,94 @@ export const AdminDashboard: React.FC = () => {
               <p className="text-[11px] text-neutral-400 leading-normal">
                 If active, the public storefront landing page will automatically replace its default geometric sneaker space backdrop with your custom banner. Perfect for running limited-time discount drops or promoting new collections.
               </p>
+            </div>
+
+            {/* ── Hero Slide Shoe Image ── */}
+            <div className="border-t border-neutral-800 pt-6">
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
+                Hero Slide — Product Shoe Image
+              </label>
+              <p className="text-[10px] text-neutral-500 mb-3 font-outfit">
+                This image appears as the main shoe showcase on the right side of the hero section. Use a transparent-background PNG for best results.
+              </p>
+
+              <div
+                onDragEnter={handleHeroShoeDrag}
+                onDragOver={handleHeroShoeDrag}
+                onDragLeave={handleHeroShoeDrag}
+                onDrop={handleHeroShoeDrop}
+                className={`h-48 w-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center p-4 cursor-pointer transition-all duration-300 relative ${
+                  heroShoeDragActive
+                    ? "border-neon-orange bg-neon-orange/5"
+                    : heroShoe
+                    ? "border-neutral-800 bg-neutral-950"
+                    : "border-neutral-800 bg-neutral-900/20 hover:border-neutral-700"
+                }`}
+              >
+                <input
+                  ref={heroShoeFileInputRef}
+                  type="file"
+                  accept="image/*,.heic,.heif"
+                  onChange={handleHeroShoeFileInput}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+
+                {heroShoe ? (
+                  <div className="relative h-full w-full flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={heroShoe}
+                      alt="Hero shoe preview"
+                      className="max-h-full max-w-full object-contain rounded-xl"
+                    />
+                    <div className="absolute inset-0 bg-obsidian/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-all rounded-xl">
+                      <UploadCloud className="text-white" size={24} />
+                      <span className="text-[10px] text-white font-bold ml-1 font-outfit">REPLACE SHOE IMAGE</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center">
+                    <UploadCloud className="text-neutral-500 animate-bounce mb-2" size={24} />
+                    <p className="text-xs font-bold text-white uppercase font-outfit">
+                      Upload Hero Shoe Image
+                    </p>
+                    <p className="text-[9px] text-neutral-600 mt-1 uppercase font-mono">
+                      Recommended: 700×700 PNG with transparent background
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {heroShoeSuccess && (
+                <div className="text-xs text-neon-orange border border-neon-orange/20 bg-neon-orange/5 rounded-xl p-3 flex items-center gap-1.5 mt-3">
+                  <Check size={14} />
+                  <span>Hero shoe image updated!</span>
+                </div>
+              )}
+
+              <div className="flex gap-4 mt-3">
+                {heroShoe && (
+                  <button
+                    onClick={() => {
+                      setHeroShoe(null);
+                      setHeroShoeSuccess(false);
+                    }}
+                    className="flex-1 py-3 border border-red-500/30 hover:border-red-500 text-red-500 hover:bg-red-500/5 text-xs font-bold uppercase rounded-xl cursor-pointer transition-all"
+                  >
+                    Remove Custom Shoe Image
+                  </button>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-2 mt-4">
+                <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest font-outfit">Shoe Image Status</span>
+                <div className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${heroShoe ? "bg-neon-orange animate-pulse" : "bg-neutral-700"}`}></div>
+                  <span className="text-xs text-neutral-400 font-mono">
+                    {heroShoe ? "CUSTOM SHOE IMAGE ACTIVE" : "DEFAULT UNSPLASH IMAGE ACTIVE"}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
