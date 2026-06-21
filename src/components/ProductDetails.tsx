@@ -319,8 +319,8 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
                     const sizePart = selectedSize ? (isAr ? `، المقاس ${selectedSize}` : `, Taille ${selectedSize}`) : "";
                     const colorPart = selectedColor ? (isAr ? `، اللون ${selectedColor.nameAr}` : `, Couleur ${selectedColor.nameFr}`) : "";
                     const msg = isAr
-                      ? `مرحباً SNKRS ALG! 👋\nأريد طلب هذا الحذاء:\n\n👟 *${shoe.nameAr}*\n${colorPart}\n${sizePart}\n💰 *السعر:* ${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج\n\nالرجاء تأكيد توفر المنتج، شكراً!`
-                      : `Bonjour SNKRS ALG! 👋\nJe souhaite commander cette paire :\n\n👟 *${shoe.nameFr}*\n${colorPart}\n${sizePart}\n💰 *Prix:* ${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA\n\nMerci de me confirmer la disponibilité !`;
+                      ? `مرحباً ${contactConfig.siteName}! 👋\nأريد طلب هذا الحذاء:\n\n👟 *${shoe.nameAr}*\n${colorPart}\n${sizePart}\n💰 *السعر:* ${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج\n\nالرجاء تأكيد توفر المنتج، شكراً!`
+                      : `Bonjour ${contactConfig.siteName}! 👋\nJe souhaite commander cette paire :\n\n👟 *${shoe.nameFr}*\n${colorPart}\n${sizePart}\n💰 *Prix:* ${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA\n\nMerci de me confirmer la disponibilité !`;
                     return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
                   })()}
                   target="_blank"
