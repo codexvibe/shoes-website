@@ -95,6 +95,9 @@ export const AdminDashboard: React.FC = () => {
   const qsSearchInputRef = useRef<HTMLInputElement>(null);
 
   // --- TAB 1: SNEAKER CATALOG & UPLOADER STATES ---
+  const [addFormTab, setAddFormTab] = useState<"basic" | "colors" | "details">("basic");
+  const [editFormTab, setEditFormTab] = useState<"basic" | "colors" | "details">("basic");
+  
   const [shoeNameFr, setShoeNameFr] = useState("");
   const [shoeNameAr, setShoeNameAr] = useState("");
   const [shoePrice, setShoePrice] = useState("");
@@ -1257,9 +1260,35 @@ export const AdminDashboard: React.FC = () => {
                 {isAr ? "إضافة منتج جديد" : "Ajouter un produit"}
               </h2>
 
+              <div className="flex bg-neutral-900/50 p-1.5 rounded-xl mb-6">
+                <button 
+                  type="button" 
+                  onClick={() => setAddFormTab("basic")} 
+                  className={`flex-1 text-[10px] font-bold uppercase tracking-widest py-2.5 rounded-lg transition-all ${addFormTab === 'basic' ? 'bg-neutral-800 text-white shadow-sm border border-neutral-700' : 'text-neutral-500 hover:text-neutral-300'}`}
+                >
+                  {isAr ? "1. معلومات أساسية" : "1. Basic Info"}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setAddFormTab("colors")} 
+                  className={`flex-1 text-[10px] font-bold uppercase tracking-widest py-2.5 rounded-lg transition-all ${addFormTab === 'colors' ? 'bg-neutral-800 text-white shadow-sm border border-neutral-700' : 'text-neutral-500 hover:text-neutral-300'}`}
+                >
+                  {isAr ? "2. الألوان والصور" : "2. Colors"}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setAddFormTab("details")} 
+                  className={`flex-1 text-[10px] font-bold uppercase tracking-widest py-2.5 rounded-lg transition-all ${addFormTab === 'details' ? 'bg-neutral-800 text-white shadow-sm border border-neutral-700' : 'text-neutral-500 hover:text-neutral-300'}`}
+                >
+                  {isAr ? "3. التفاصيل والمخزون" : "3. Details"}
+                </button>
+              </div>
+
               <form onSubmit={handleSneakerSubmit} className="space-y-5">
                 
-                {/* Drag & Drop File Zone */}
+                {/* ════ TAB: BASIC INFO ════ */}
+                <div className={addFormTab === "basic" ? "space-y-5 animate-fadeIn" : "hidden"}>
+                  {/* Drag & Drop File Zone */}
                 <div>
                   <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
                     Image du Produit *
@@ -1453,8 +1482,11 @@ export const AdminDashboard: React.FC = () => {
                     )}
                   </div>
                 </div>
+                </div>
 
-                {/* Main Color (Required) */}
+                {/* ════ TAB: COLORS ════ */}
+                <div className={addFormTab === "colors" ? "space-y-5 animate-fadeIn" : "hidden"}>
+                  {/* Main Color (Required) */}
                 <div className="bg-neutral-950/80 border border-neutral-800 rounded-xl p-4 mt-4">
                   <label className={`block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-3 ${isAr ? 'text-right font-cairo' : 'font-outfit'}`}>
                     {isAr ? "اللون الرئيسي (المطابق للصورة أعلاه) *" : "Main Color (Matching Image Above) *"}
@@ -1664,8 +1696,11 @@ export const AdminDashboard: React.FC = () => {
                     </button>
                   </div>
                 </div>
+                </div>
 
-                {/* Sizes */}
+                {/* ════ TAB: DETAILS ════ */}
+                <div className={addFormTab === "details" ? "space-y-5 animate-fadeIn" : "hidden"}>
+                  {/* Sizes */}
                 <div>
                   <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Sizes Selector</label>
                   <div className="flex flex-wrap gap-1.5">
@@ -1767,27 +1802,33 @@ export const AdminDashboard: React.FC = () => {
                     </button>
                   </div>
                 </div>
+                </div>
 
-                {shoeFormError && (
-                  <div className="text-xs text-red-400 border border-red-500/20 bg-red-500/5 rounded-xl p-3 flex items-center gap-1.5">
-                    <AlertTriangle size={14} />
-                    <span>{shoeFormError}</span>
+                {/* Status & Submit Footer */}
+                <div className="pt-6 mt-4 border-t border-neutral-900 flex justify-end gap-3 sticky bottom-0 bg-asphalt/95 backdrop-blur-md pb-4 pt-4 -mx-6 px-6 -mb-6 rounded-b-3xl z-10 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.5)]">
+                  <div className="flex-1">
+                    {shoeFormError && (
+                      <div className="text-[10px] text-red-400 border border-red-500/20 bg-red-500/5 rounded-xl p-2 flex items-center gap-1.5 h-full">
+                        <AlertTriangle size={12} />
+                        <span>{shoeFormError}</span>
+                      </div>
+                    )}
+
+                    {shoeFormSuccess && (
+                      <div className="text-[10px] text-neon-lime border border-neon-lime/20 bg-neon-lime/5 rounded-xl p-2 flex items-center gap-1.5 h-full">
+                        <Check size={12} />
+                        <span>Product registered successfully!</span>
+                      </div>
+                    )}
                   </div>
-                )}
-
-                {shoeFormSuccess && (
-                  <div className="text-xs text-neon-lime border border-neon-lime/20 bg-neon-lime/5 rounded-xl p-3 flex items-center gap-1.5">
-                    <Check size={14} />
-                    <span>Product registered successfully in catalog!</span>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  className="w-full py-3.5 rounded-xl bg-neon-lime hover:bg-white text-obsidian font-black text-xs uppercase tracking-wider transition-all hover:scale-[1.01] neon-glow-lime cursor-pointer font-outfit"
-                >
-                  {isAr ? "نشر الحذاء الرياضي" : "Publish to Showroom"}
-                </button>
+                  
+                  <button
+                    type="submit"
+                    className="w-40 py-2.5 rounded-xl bg-neon-lime hover:bg-white text-obsidian font-black text-xs uppercase tracking-wider transition-all hover:scale-[1.01] neon-glow-lime cursor-pointer font-outfit"
+                  >
+                    {isAr ? "إضافة المنتج" : "Save Product"}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
@@ -3208,21 +3249,44 @@ export const AdminDashboard: React.FC = () => {
             </button>
 
             {/* Modal Header */}
-            <div className="mb-6 flex items-center gap-3">
+            <div className="mb-6 flex items-center gap-3 border-b border-neutral-900 pb-4">
               <div className="p-3 bg-neon-lime/10 text-neon-lime rounded-xl">
-                <Package size={22} />
+                <Edit size={22} />
               </div>
               <div>
                 <h3 className="text-xl font-extrabold text-white font-outfit uppercase">
                   Modify Sneaker Details
                 </h3>
-                <p className="text-xs text-neutral-500 mt-0.5">
-                  Update name, pricing, sizes, description and promotion status.
-                </p>
               </div>
             </div>
 
+            <div className="flex bg-neutral-900/50 p-1.5 rounded-xl mb-6">
+              <button 
+                type="button" 
+                onClick={() => setEditFormTab("basic")} 
+                className={`flex-1 text-[10px] font-bold uppercase tracking-widest py-2.5 rounded-lg transition-all ${editFormTab === 'basic' ? 'bg-neutral-800 text-white shadow-sm border border-neutral-700' : 'text-neutral-500 hover:text-neutral-300'}`}
+              >
+                {isAr ? "1. معلومات أساسية" : "1. Basic Info"}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setEditFormTab("colors")} 
+                className={`flex-1 text-[10px] font-bold uppercase tracking-widest py-2.5 rounded-lg transition-all ${editFormTab === 'colors' ? 'bg-neutral-800 text-white shadow-sm border border-neutral-700' : 'text-neutral-500 hover:text-neutral-300'}`}
+              >
+                {isAr ? "2. الألوان والصور" : "2. Colors"}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setEditFormTab("details")} 
+                className={`flex-1 text-[10px] font-bold uppercase tracking-widest py-2.5 rounded-lg transition-all ${editFormTab === 'details' ? 'bg-neutral-800 text-white shadow-sm border border-neutral-700' : 'text-neutral-500 hover:text-neutral-300'}`}
+              >
+                {isAr ? "3. التفاصيل والمخزون" : "3. Details"}
+              </button>
+            </div>
+
             <form onSubmit={handleEditSubmit} className="space-y-5">
+              {/* ════ TAB: BASIC INFO ════ */}
+              <div className={editFormTab === "basic" ? "space-y-5 animate-fadeIn" : "hidden"}>
               {/* Image Drag & Drop */}
               <div>
                 <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
@@ -3360,7 +3424,10 @@ export const AdminDashboard: React.FC = () => {
                   </select>
                 </div>
               </div>
+              </div>
 
+              {/* ════ TAB: COLORS ════ */}
+              <div className={editFormTab === "colors" ? "space-y-5 animate-fadeIn" : "hidden"}>
               {/* Main Color (Required) */}
               <div className="bg-neutral-950/80 border border-neutral-800 rounded-xl p-4 mt-4">
                 <label className={`block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-3 ${isAr ? 'text-right font-cairo' : 'font-outfit'}`}>
@@ -3562,7 +3629,10 @@ export const AdminDashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
+              </div>
 
+              {/* ════ TAB: DETAILS ════ */}
+              <div className={editFormTab === "details" ? "space-y-5 animate-fadeIn" : "hidden"}>
               {/* Sizes */}
               <div>
                 <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Sizes Setup</label>
@@ -3656,22 +3726,24 @@ export const AdminDashboard: React.FC = () => {
                     {editNewArrival ? "NEW ARRIVAL ACTIVE" : "TOGGLE NEW ARRIVAL"}
                   </button>
                 </div>
+                </div>
+              </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-4 pt-4 border-t border-neutral-900">
+              <div className="pt-6 mt-4 border-t border-neutral-900 flex justify-end gap-3 sticky bottom-0 bg-[#0d0d11]/95 backdrop-blur-md pb-4 pt-4 -mx-6 px-6 -mb-6 rounded-b-3xl z-10 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.5)]">
                 <button
                   type="button"
                   onClick={() => setEditingShoe(null)}
-                  className="flex-1 py-3 bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-xs font-bold text-neutral-400 hover:text-white rounded-xl cursor-pointer transition-all uppercase tracking-wider"
+                  className="w-40 py-2.5 bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-xs font-bold text-neutral-400 hover:text-white rounded-xl cursor-pointer transition-all uppercase tracking-wider font-outfit"
                 >
-                  Discard Changes
+                  Discard
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-neon-lime hover:bg-white text-obsidian text-xs font-black rounded-xl cursor-pointer transition-all hover:scale-[1.01] neon-glow-lime uppercase tracking-wider"
+                  className="w-40 py-2.5 bg-neon-lime hover:bg-white text-obsidian text-xs font-black rounded-xl cursor-pointer transition-all hover:scale-[1.01] neon-glow-lime uppercase tracking-wider font-outfit"
                 >
-                  Save Modifications
+                  Save Modifs
                 </button>
               </div>
             </form>
