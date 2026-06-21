@@ -434,7 +434,7 @@ export const CartDrawer: React.FC = () => {
                                 {shoe && (
                                   <div className="w-8 h-8 rounded-lg bg-neutral-900 overflow-hidden flex-shrink-0">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={shoe.image} alt="" className="w-full h-full object-cover" />
+                                    <img src={item.color?.image || shoe.image} alt="" className="w-full h-full object-cover" />
                                   </div>
                                 )}
                                 <span className="text-white text-xs font-semibold line-clamp-1">

@@ -41,6 +41,7 @@ export const AdminDashboard: React.FC = () => {
     deleteSneaker,
     updateSneaker,
     updateStock,
+    updateColorStock,
     leads,
     addLead,
     updateLeadStatus,
@@ -122,6 +123,10 @@ export const AdminDashboard: React.FC = () => {
   const [variantHex, setVariantHex] = useState("#FFFFFF");
   const [variantImage, setVariantImage] = useState("");
 
+  const [shoeBaseColorNameFr, setShoeBaseColorNameFr] = useState("");
+  const [shoeBaseColorNameAr, setShoeBaseColorNameAr] = useState("");
+  const [shoeBaseColorHex, setShoeBaseColorHex] = useState("#FFFFFF");
+
   // Dropzone State
   const [dragActive, setDragActive] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
@@ -143,6 +148,11 @@ export const AdminDashboard: React.FC = () => {
   const [editHotDrop, setEditHotDrop] = useState(false);
   const [editNewArrival, setEditNewArrival] = useState(false);
   const [editSizes, setEditSizes] = useState<number[]>([]);
+  const [editShoeVariantColors, setEditShoeVariantColors] = useState<SneakerColor[]>([]);
+
+  const [editBaseColorNameFr, setEditBaseColorNameFr] = useState("");
+  const [editBaseColorNameAr, setEditBaseColorNameAr] = useState("");
+  const [editBaseColorHex, setEditBaseColorHex] = useState("#FFFFFF");
 
   // Inventory Filter state
   const [inventoryFilter, setInventoryFilter] = useState<"all" | "low" | "high">("all");
@@ -363,40 +373,69 @@ export const AdminDashboard: React.FC = () => {
   };
 
 
+  const inventoryRows = React.useMemo(() => {
+    const rows: { type: "shoe" | "color", shoe: Sneaker, color?: SneakerColor, colorIndex?: number }[] = [];
+    sneakers.forEach(shoe => {
+      if (shoe.colors && shoe.colors.length > 0) {
+        shoe.colors.forEach((color, colorIndex) => {
+          rows.push({ type: "color", shoe, color, colorIndex });
+        });
+      } else {
+        rows.push({ type: "shoe", shoe });
+      }
+    });
+
+    return rows.filter(row => {
+      if (inventoryFilter === "all") return true;
+      
+      const sizesStock = row.type === "color" && row.color 
+        ? (row.color.sizesStock || {}) 
+        : row.shoe.sizesStock;
+        
+      const stocks = Object.values(sizesStock);
+      const totalStock = stocks.reduce((a, b) => a + b, 0);
+      const isLowStock = stocks.some(v => v > 0 && v <= 3) || totalStock === 0;
+      
+      if (inventoryFilter === "low") return isLowStock;
+      if (inventoryFilter === "high") return !isLowStock && totalStock > 0;
+      return true;
+    });
+  }, [sneakers, inventoryFilter]);
+
   // Keyboard stock cell navigation
-  const handleGridKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, shoeIndex: number, size: number) => {
+  const handleGridKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, rowIndex: number, size: number) => {
     const sizeIndex = inventorySizes.indexOf(size);
     let targetId = "";
 
     switch (e.key) {
       case "ArrowUp":
-        if (shoeIndex > 0) {
-          targetId = `stock-${shoeIndex - 1}-${size}`;
+        if (rowIndex > 0) {
+          targetId = `stock-${rowIndex - 1}-${size}`;
         }
         break;
       case "ArrowDown":
-        if (shoeIndex < sneakers.length - 1) {
-          targetId = `stock-${shoeIndex + 1}-${size}`;
+        if (rowIndex < inventoryRows.length - 1) {
+          targetId = `stock-${rowIndex + 1}-${size}`;
         }
         break;
       case "ArrowLeft":
         if (sizeIndex > 0) {
           const prevSize = inventorySizes[sizeIndex - 1];
-          targetId = `stock-${shoeIndex}-${prevSize}`;
+          targetId = `stock-${rowIndex}-${prevSize}`;
         }
         break;
       case "ArrowRight":
         if (sizeIndex < inventorySizes.length - 1) {
           const nextSize = inventorySizes[sizeIndex + 1];
-          targetId = `stock-${shoeIndex}-${nextSize}`;
+          targetId = `stock-${rowIndex}-${nextSize}`;
         }
         break;
       case "Enter":
         if (sizeIndex < inventorySizes.length - 1) {
           const nextSize = inventorySizes[sizeIndex + 1];
-          targetId = `stock-${shoeIndex}-${nextSize}`;
-        } else if (shoeIndex < sneakers.length - 1) {
-          targetId = `stock-${shoeIndex + 1}-${inventorySizes[0]}`;
+          targetId = `stock-${rowIndex}-${nextSize}`;
+        } else if (rowIndex < inventoryRows.length - 1) {
+          targetId = `stock-${rowIndex + 1}-${inventorySizes[0]}`;
         }
         break;
       default:
@@ -419,8 +458,8 @@ export const AdminDashboard: React.FC = () => {
     setShoeFormError(null);
     setShoeFormSuccess(false);
 
-    if (!shoeNameFr || !shoeNameAr || !shoePrice || !shoeCategory || !shoeImage || !shoeDescFr || !shoeDescAr) {
-      setShoeFormError(isAr ? "يرجى ملء جميع الحقول المطلوبة." : "Veuillez remplir tous les champs obligatoires.");
+    if (!shoeNameFr || !shoeNameAr || !shoePrice || !shoeCategory || !shoeImage || !shoeDescFr || !shoeDescAr || !shoeBaseColorNameFr || !shoeBaseColorNameAr) {
+      setShoeFormError(isAr ? "يرجى ملء جميع الحقول المطلوبة بما في ذلك اللون الرئيسي." : "Veuillez remplir tous les champs obligatoires y compris la couleur principale.");
       return;
     }
 
@@ -448,6 +487,18 @@ export const AdminDashboard: React.FC = () => {
       }
     });
 
+    const finalColors = [...shoeVariantColors];
+    if (shoeBaseColorNameFr || shoeBaseColorNameAr) {
+      finalColors.unshift({
+        nameFr: shoeBaseColorNameFr || "Original",
+        nameAr: shoeBaseColorNameAr || "الأصلي",
+        hex: shoeBaseColorHex,
+        image: shoeImage,
+        sizes: shoeSizes,
+        sizesStock: initialStock
+      });
+    }
+
     addSneaker({
       slug: uniqueSlug,
       nameFr: shoeNameFr,
@@ -458,7 +509,7 @@ export const AdminDashboard: React.FC = () => {
       sizes: shoeSizes,
       sizesStock: initialStock,
 
-      colors: shoeVariantColors,
+      colors: finalColors,
       descFr: shoeDescFr,
       descAr: shoeDescAr,
       featured: shoeFeatured,
@@ -477,6 +528,9 @@ export const AdminDashboard: React.FC = () => {
     setShoeNewArrival(false);
     setShoeSizes([39, 40, 41, 42, 43, 44, 45]);
     setShoeVariantColors([]);
+    setShoeBaseColorNameFr("");
+    setShoeBaseColorNameAr("");
+    setShoeBaseColorHex("#FFFFFF");
     setShoeImageError(false);
     setShoeFormSuccess(true);
     setTimeout(() => setShoeFormSuccess(false), 3000);
@@ -496,7 +550,19 @@ export const AdminDashboard: React.FC = () => {
     setEditHotDrop(!!shoe.isHotDrop);
     setEditNewArrival(!!shoe.isNewArrival);
     setEditSizes(Array.isArray(shoe.sizes) ? shoe.sizes : [39, 40, 41, 42, 43, 44, 45]);
-    setEditShoeVariantColors(shoe.colors || []);
+    
+    if (shoe.colors && shoe.colors.length > 0) {
+      setEditBaseColorNameFr(shoe.colors[0].nameFr);
+      setEditBaseColorNameAr(shoe.colors[0].nameAr);
+      setEditBaseColorHex(shoe.colors[0].hex);
+      setEditShoeVariantColors(shoe.colors.slice(1));
+    } else {
+      setEditBaseColorNameFr("");
+      setEditBaseColorNameAr("");
+      setEditBaseColorHex("#FFFFFF");
+      setEditShoeVariantColors([]);
+    }
+    
     setEditImageError(false);
     setEditShowGallery(false);
   };
@@ -504,8 +570,8 @@ export const AdminDashboard: React.FC = () => {
   // Edit sneaker submission
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editNameFr || !editNameAr || !editPrice || !editCategory || !editImage || !editDescFr || !editDescAr) {
-      alert("Please fill all required fields");
+    if (!editNameFr || !editNameAr || !editPrice || !editCategory || !editImage || !editDescFr || !editDescAr || !editBaseColorNameFr || !editBaseColorNameAr) {
+      alert("Please fill all required fields, including the base color.");
       return;
     }
     const priceNum = parseFloat(editPrice.replace(/[^0-9.]/g, ""));
@@ -530,6 +596,18 @@ export const AdminDashboard: React.FC = () => {
       }
     });
 
+    const finalColors = [...editShoeVariantColors];
+    if (editBaseColorNameFr || editBaseColorNameAr) {
+      finalColors.unshift({
+        nameFr: editBaseColorNameFr || "Original",
+        nameAr: editBaseColorNameAr || "الأصلي",
+        hex: editBaseColorHex,
+        image: editImage,
+        sizes: editSizes,
+        sizesStock: editingShoe.colors?.[0]?.sizesStock || updatedStock
+      });
+    }
+
     updateSneaker(editingShoe.id, {
       slug: editingShoe.slug,
       nameFr: editNameFr,
@@ -540,7 +618,7 @@ export const AdminDashboard: React.FC = () => {
       sizes: editSizes,
       sizesStock: updatedStock,
 
-      colors: editShoeVariantColors,
+      colors: finalColors,
       descFr: editDescFr,
       descAr: editDescAr,
       featured: editFeatured,
@@ -1354,6 +1432,50 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Main Color (Required) */}
+                <div className="bg-neutral-950/80 border border-neutral-800 rounded-xl p-4 mt-4">
+                  <label className={`block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-3 ${isAr ? 'text-right font-cairo' : 'font-outfit'}`}>
+                    {isAr ? "اللون الرئيسي (المطابق للصورة أعلاه) *" : "Main Color (Matching Image Above) *"}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="col-span-1">
+                      <input
+                        type="text"
+                        value={shoeBaseColorNameFr}
+                        onChange={(e) => setShoeBaseColorNameFr(e.target.value)}
+                        placeholder={isAr ? "اسم اللون (FR) *" : "Color Name (FR) *"}
+                        className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
+                        required
+                      />
+                    </div>
+                    <div className="col-span-1">
+                      <input
+                        type="text"
+                        dir="rtl"
+                        value={shoeBaseColorNameAr}
+                        onChange={(e) => setShoeBaseColorNameAr(e.target.value)}
+                        placeholder={isAr ? "اسم اللون (AR) *" : "Color Name (AR) *"}
+                        className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-cairo text-right"
+                        required
+                      />
+                    </div>
+                    <div className="col-span-1 flex gap-2">
+                      <input
+                        type="color"
+                        value={shoeBaseColorHex}
+                        onChange={(e) => setShoeBaseColorHex(e.target.value)}
+                        className="w-12 h-[42px] rounded-lg border border-neutral-800 cursor-pointer bg-neutral-900 p-0.5"
+                      />
+                      <input
+                        type="text"
+                        value={shoeBaseColorHex}
+                        onChange={(e) => setShoeBaseColorHex(e.target.value)}
+                        className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white focus:outline-none focus:border-neon-lime/60 font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
 
                 {/* ══════ COLOR VARIANTS (Image per Color) ══════ */}
                 <div>
@@ -1766,30 +1888,39 @@ export const AdminDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-900/50">
-                {sneakers.filter(shoe => {
-                  if (inventoryFilter === "all") return true;
-                  const stocks = Object.values(shoe.sizesStock);
-                  const totalStock = stocks.reduce((a, b) => a + b, 0);
-                  const isLowStock = stocks.some(v => v > 0 && v <= 3) || totalStock === 0;
-                  if (inventoryFilter === "low") return isLowStock;
-                  if (inventoryFilter === "high") return !isLowStock && totalStock > 0;
-                  return true;
-                }).map((shoe, shoeIndex) => {
+                {inventoryRows.map((row, rowIndex) => {
+                  const isColor = row.type === "color";
+                  const { shoe } = row;
+                  const color = isColor ? row.color : undefined;
+
+                  const sizesStock = isColor && color ? (color.sizesStock || {}) : shoe.sizesStock;
                   let totalQuantity = 0;
                   inventorySizes.forEach((sz) => {
-                    totalQuantity += (shoe.sizesStock[sz] || 0);
+                    totalQuantity += (sizesStock[sz] || 0);
                   });
 
+                  const rowKey = isColor ? `${shoe.id}-${row.colorIndex}` : shoe.id;
+                  const nameFr = isColor && color ? `${shoe.nameFr} (${color.nameFr})` : shoe.nameFr;
+                  const image = isColor && color && color.image ? color.image : shoe.image;
+
                   return (
-                    <tr key={shoe.id} className="hover:bg-neutral-900/10 transition-colors">
+                    <tr key={rowKey} className="hover:bg-neutral-900/10 transition-colors">
                       <td className="py-4 px-2">
                         <div className="flex items-center gap-2.5">
                           <div className="h-8 w-8 rounded-lg overflow-hidden bg-neutral-950 border border-neutral-850 flex-shrink-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={shoe.image} alt={shoe.nameFr} className="h-full w-full object-cover" />
+                            <img src={image} alt={nameFr} className="h-full w-full object-cover" />
                           </div>
                           <div>
-                            <div className="font-bold text-white text-xs">{shoe.nameFr}</div>
+                            <div className="font-bold text-white text-xs flex items-center gap-2">
+                              {nameFr}
+                              {isColor && color && (
+                                <span 
+                                  className="w-2.5 h-2.5 rounded-full inline-block border border-white/20" 
+                                  style={{ backgroundColor: color.hex }}
+                                />
+                              )}
+                            </div>
                             <div className="text-[8px] text-neutral-500 font-mono mt-0.5">{(shoe.categorySlug || "").replace("-", " ")}</div>
                           </div>
                         </div>
@@ -1797,8 +1928,8 @@ export const AdminDashboard: React.FC = () => {
 
                       {/* Stock Inputs */}
                       {inventorySizes.map((sz) => {
-                        const cellId = `stock-${shoeIndex}-${sz}`;
-                        const qty = shoe.sizesStock[sz] !== undefined ? shoe.sizesStock[sz] : 0;
+                        const cellId = `stock-${rowIndex}-${sz}`;
+                        const qty = sizesStock[sz] !== undefined ? sizesStock[sz] : 0;
                         return (
                           <td key={sz} className="py-4 px-2 text-center">
                             <input
@@ -1809,9 +1940,14 @@ export const AdminDashboard: React.FC = () => {
                               value={qty}
                               onChange={(e) => {
                                 const val = parseInt(e.target.value);
-                                updateStock(shoe.id, sz, isNaN(val) ? 0 : val);
+                                const newQty = isNaN(val) ? 0 : val;
+                                if (isColor && row.colorIndex !== undefined) {
+                                  updateColorStock(shoe.id, row.colorIndex, sz, newQty);
+                                } else {
+                                  updateStock(shoe.id, sz, newQty);
+                                }
                               }}
-                              onKeyDown={(e) => handleGridKeyDown(e, shoeIndex, sz)}
+                              onKeyDown={(e) => handleGridKeyDown(e, rowIndex, sz)}
                               className="w-14 bg-neutral-950 border border-neutral-850 focus:border-neon-lime/60 rounded-lg py-1 px-1.5 text-center text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-neon-lime/20 transition-all font-bold"
                             />
                           </td>
@@ -3134,6 +3270,50 @@ export const AdminDashboard: React.FC = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              {/* Main Color (Required) */}
+              <div className="bg-neutral-950/80 border border-neutral-800 rounded-xl p-4 mt-4">
+                <label className={`block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-3 ${isAr ? 'text-right font-cairo' : 'font-outfit'}`}>
+                  {isAr ? "اللون الرئيسي (المطابق للصورة أعلاه) *" : "Main Color (Matching Image Above) *"}
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="col-span-1">
+                    <input
+                      type="text"
+                      value={editBaseColorNameFr}
+                      onChange={(e) => setEditBaseColorNameFr(e.target.value)}
+                      placeholder={isAr ? "اسم اللون (FR) *" : "Color Name (FR) *"}
+                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
+                      required
+                    />
+                  </div>
+                  <div className="col-span-1">
+                    <input
+                      type="text"
+                      dir="rtl"
+                      value={editBaseColorNameAr}
+                      onChange={(e) => setEditBaseColorNameAr(e.target.value)}
+                      placeholder={isAr ? "اسم اللون (AR) *" : "Color Name (AR) *"}
+                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-cairo text-right"
+                      required
+                    />
+                  </div>
+                  <div className="col-span-1 flex gap-2">
+                    <input
+                      type="color"
+                      value={editBaseColorHex}
+                      onChange={(e) => setEditBaseColorHex(e.target.value)}
+                      className="w-12 h-[42px] rounded-lg border border-neutral-800 cursor-pointer bg-neutral-900 p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={editBaseColorHex}
+                      onChange={(e) => setEditBaseColorHex(e.target.value)}
+                      className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white focus:outline-none focus:border-neon-lime/60 font-mono"
+                    />
+                  </div>
                 </div>
               </div>
 

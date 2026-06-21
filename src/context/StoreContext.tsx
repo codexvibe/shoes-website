@@ -81,6 +81,7 @@ interface StoreContextType {
   deleteSneaker: (id: string) => void;
   updateSneaker: (id: string, sneaker: Omit<Sneaker, "id">) => void;
   updateStock: (shoeId: string, size: number, quantity: number) => void;
+  updateColorStock: (shoeId: string, colorIndex: number, size: number, quantity: number) => void;
   leads: Lead[];
   addLead: (lead: Omit<Lead, "id" | "createdAt">) => void;
   updateLeadStatus: (id: string, status: Lead["status"]) => void;
@@ -537,6 +538,47 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
+  const updateColorStock = async (shoeId: string, colorIndex: number, size: number, quantity: number) => {
+    if (!supabase) return;
+    const shoe = sneakers.find((s) => s.id === shoeId);
+    if (!shoe || !shoe.colors || !shoe.colors[colorIndex]) return;
+
+    const newColors = [...shoe.colors];
+    const targetColor = newColors[colorIndex];
+    
+    // Auto-vivify sizes and sizesStock if they don't exist
+    const currentSizes = targetColor.sizes || [];
+    const currentSizesStock = targetColor.sizesStock || {};
+
+    const newStock = { ...currentSizesStock, [size]: quantity };
+    const newSizes = currentSizes.includes(size)
+      ? currentSizes
+      : [...currentSizes, size].sort((a, b) => a - b);
+
+    newColors[colorIndex] = {
+      ...targetColor,
+      sizes: newSizes,
+      sizesStock: newStock,
+    };
+
+    const { error } = await supabase
+      .from("sneakers")
+      .update({
+        colors: newColors,
+      })
+      .eq("id", shoeId);
+
+    if (error) {
+      console.error("Failed to update color stock:", error);
+      return;
+    }
+    setSneakers((prev) =>
+      prev.map((s) =>
+        s.id === shoeId ? { ...s, colors: newColors } : s
+      )
+    );
+  };
+
   // ── Cart ──
 
   const addToCart = (item: CartItem) => {
@@ -827,6 +869,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteSneaker,
         updateSneaker,
         updateStock,
+        updateColorStock,
         leads,
         addLead,
         updateLeadStatus,

@@ -13,6 +13,8 @@ export interface SneakerColor {
   nameAr: string;
   hex: string;
   image: string;
+  sizes?: number[];
+  sizesStock?: Record<number, number>;
 }
 
 export interface Sneaker {

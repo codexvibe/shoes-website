@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useStore } from "../context/StoreContext";
 import { SneakerColor } from "../data/mockData";
-import { ShoppingCart, Heart, ShieldCheck, Truck, RotateCcw, MessageCircle, ArrowLeft, Star, ChevronRight } from "lucide-react";
+import { ShoppingCart, Heart, ShieldCheck, Truck, RotateCcw, MessageCircle, ArrowLeft, Star, ChevronRight, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -11,12 +11,17 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
   const router = useRouter();
   const { sneakers, language, contactConfig, addToCart, loading } = useStore();
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
-  const [selectedColor, setSelectedColor] = useState<SneakerColor | null>(null);
+  const [selectedColorIndex, setSelectedColorIndex] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number>(1);
   const [isFav, setIsFav] = useState(false);
   const [imageTransition, setImageTransition] = useState(false);
 
   const isAr = language === "ar";
   const shoe = sneakers.find((s) => String(s.id) === id || s.slug === id);
+
+  const computedColors: SneakerColor[] = shoe?.colors || [];
+  const hasColors = computedColors.length > 0;
+  const selectedColor = hasColors ? computedColors[selectedColorIndex] : null;
 
   const displayedImage = selectedColor?.image || shoe?.image || "";
 
@@ -63,19 +68,15 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
     "Multicolor": "linear-gradient(45deg, red, orange, yellow, green, blue, purple)",
   };
 
-  const computedColors: SneakerColor[] = shoe?.colors || [];
-
-  const hasColors = computedColors.length > 0;
-
-  const handleColorSelect = (color: SneakerColor) => {
-    if (selectedColor?.hex === color.hex && selectedColor?.nameFr === color.nameFr) return;
+  const handleColorSelect = (index: number) => {
+    if (selectedColorIndex === index) return;
     
     // Quick fade out
     setImageTransition(true);
     
     // Swap image and fade in
     setTimeout(() => {
-      setSelectedColor(color);
+      setSelectedColorIndex(index);
       setImageTransition(false);
     }, 150);
   };
@@ -94,7 +95,7 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
       id: `${shoe.id}_${selectedSize}${colorSuffix}`,
       sneakerId: shoe.id,
       size: selectedSize,
-      quantity: 1,
+      quantity: quantity,
       color: selectedColor || undefined,
     });
   };
@@ -211,20 +212,22 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
                 <h3 className={`text-sm font-bold text-white uppercase tracking-widest ${isAr ? "font-cairo" : "font-outfit"}`}>
                   {isAr ? "اللون المتاح" : "Available Colors"}
                 </h3>
-                {selectedColor && (
-                  <span className={`text-xs text-neutral-400 font-bold bg-neutral-900 px-3 py-1 rounded-full ${isAr ? "font-cairo" : "font-outfit"}`}>
-                    {isAr ? selectedColor.nameAr : selectedColor.nameFr}
-                  </span>
-                )}
+                <span className={`text-xs text-neutral-400 font-bold bg-neutral-900 px-3 py-1 rounded-full ${isAr ? "font-cairo" : "font-outfit"}`}>
+                  {selectedColor 
+                    ? (isAr ? selectedColor.nameAr : selectedColor.nameFr)
+                    : (isAr ? "الصورة الأصلية" : "Original")
+                  }
+                </span>
               </div>
               
               <div className={`flex flex-wrap gap-4 ${isAr ? "justify-end" : ""}`}>
+                {/* Color variant swatches */}
                 {computedColors.map((color, idx) => {
-                  const isSelected = selectedColor?.hex === color.hex && selectedColor?.nameFr === color.nameFr;
+                  const isSelected = selectedColorIndex === idx;
                   return (
                     <button
                       key={idx}
-                      onClick={() => handleColorSelect(color)}
+                      onClick={() => handleColorSelect(idx)}
                       title={isAr ? color.nameAr : color.nameFr}
                       className={`flex flex-col items-center gap-2 group cursor-pointer transition-all`}
                     >
@@ -277,8 +280,8 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
             </div>
             
             <div className={`flex flex-wrap gap-3 ${isAr ? "justify-end" : ""}`}>
-              {shoe.sizes.filter(sz => (shoe.sizesStock?.[sz] || 0) > 0).length > 0 ? (
-                shoe.sizes.filter(sz => (shoe.sizesStock?.[sz] || 0) > 0).map((sz) => {
+              {activeSizes.filter(sz => (activeSizesStock?.[sz] || 0) > 0).length > 0 ? (
+                activeSizes.filter(sz => (activeSizesStock?.[sz] || 0) > 0).map((sz) => {
                   const isSelected = selectedSize === sz;
                   return (
                     <button
@@ -302,10 +305,28 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
             </div>
           </div>
 
-          {/* ═══════ CTA BUTTONS ═══════ */}
+          {/* ═══════ QUANTITY & CTA BUTTONS ═══════ */}
           <div className={`flex flex-col sm:flex-row gap-4 mb-12 ${isAr ? 'sm:flex-row-reverse' : ''}`}>
-            {shoe.sizes.filter(sz => (shoe.sizesStock?.[sz] || 0) > 0).length > 0 ? (
+            {activeSizes.filter(sz => (activeSizesStock?.[sz] || 0) > 0).length > 0 ? (
               <>
+                <div className="flex items-center justify-between bg-neutral-900 border border-neutral-800 rounded-2xl px-4 py-2 sm:py-0 w-full sm:w-auto h-[64px] sm:h-auto sm:self-stretch">
+                  <button 
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition-colors cursor-pointer"
+                  >
+                    <Minus size={18} />
+                  </button>
+                  <span className="font-mono text-lg font-black text-white w-12 text-center">
+                    {quantity}
+                  </span>
+                  <button 
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition-colors cursor-pointer"
+                  >
+                    <Plus size={18} />
+                  </button>
+                </div>
+                
                 <button
                   onClick={handleAddToCart}
                   className={`flex-1 flex items-center justify-center gap-3 bg-neon-lime hover:bg-white text-obsidian px-8 py-5 rounded-2xl font-black transition-all neon-glow-lime hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] hover:scale-[1.02] active:scale-[0.98] ${isAr ? "font-cairo text-xl" : "font-outfit uppercase tracking-widest text-sm"}`}
@@ -319,8 +340,8 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
                     const sizePart = selectedSize ? (isAr ? `، المقاس ${selectedSize}` : `, Taille ${selectedSize}`) : "";
                     const colorPart = selectedColor ? (isAr ? `، اللون ${selectedColor.nameAr}` : `, Couleur ${selectedColor.nameFr}`) : "";
                     const msg = isAr
-                      ? `مرحباً ${contactConfig.siteName}! 👋\nأريد طلب هذا الحذاء:\n\n👟 *${shoe.nameAr}*\n${colorPart}\n${sizePart}\n💰 *السعر:* ${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج\n\nالرجاء تأكيد توفر المنتج، شكراً!`
-                      : `Bonjour ${contactConfig.siteName}! 👋\nJe souhaite commander cette paire :\n\n👟 *${shoe.nameFr}*\n${colorPart}\n${sizePart}\n💰 *Prix:* ${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA\n\nMerci de me confirmer la disponibilité !`;
+                      ? `مرحباً ${contactConfig.siteName}! 👋\nأريد طلب هذا الحذاء:\n\n👟 *${shoe.nameAr}*\n${colorPart}\n${sizePart}\n📦 *الكمية:* ${quantity}\n💰 *السعر الإجمالي:* ${Math.round((Number(shoe.price) || 0) * quantity).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج\n\nالرجاء تأكيد توفر المنتج، شكراً!`
+                      : `Bonjour ${contactConfig.siteName}! 👋\nJe souhaite commander cette paire :\n\n👟 *${shoe.nameFr}*\n${colorPart}\n${sizePart}\n📦 *Quantité:* ${quantity}\n💰 *Prix Total:* ${Math.round((Number(shoe.price) || 0) * quantity).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA\n\nMerci de me confirmer la disponibilité !`;
                     return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
                   })()}
                   target="_blank"
