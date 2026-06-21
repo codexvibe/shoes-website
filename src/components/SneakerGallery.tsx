@@ -116,20 +116,28 @@ export const SneakerGallery: React.FC = () => {
                   
                   {/* Card Badge Top */}
                   <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5 font-outfit">
-                    {shoe.isHotDrop && (
-                      <span className="rounded bg-neon-orange px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-md">
-                        {isAr ? "دوب حار" : "SÉLECTION HOT"}
+                    {!shoe.sizes.some(sz => (shoe.sizesStock?.[sz] || 0) > 0) ? (
+                      <span className="rounded bg-red-600 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-md">
+                        {isAr ? "نفدت الكمية" : "OUT OF STOCK"}
                       </span>
-                    )}
-                    {shoe.isNewArrival && (
-                      <span className="rounded bg-cyan-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-md">
-                        {isAr ? "وصل حديثاً" : "NOUVEL ARRIVAGE"}
-                      </span>
-                    )}
-                    {shoe.featured && !shoe.isHotDrop && !shoe.isNewArrival && (
-                      <span className="rounded bg-yellow-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-black shadow-md">
-                        {isAr ? "مميز" : "À LA UNE"}
-                      </span>
+                    ) : (
+                      <>
+                        {shoe.isHotDrop && (
+                          <span className="rounded bg-neon-orange px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-md">
+                            {isAr ? "دوب حار" : "SÉLECTION HOT"}
+                          </span>
+                        )}
+                        {shoe.isNewArrival && (
+                          <span className="rounded bg-cyan-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-md">
+                            {isAr ? "وصل حديثاً" : "NOUVEL ARRIVAGE"}
+                          </span>
+                        )}
+                        {shoe.featured && !shoe.isHotDrop && !shoe.isNewArrival && (
+                          <span className="rounded bg-yellow-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-black shadow-md">
+                            {isAr ? "مميز" : "À LA UNE"}
+                          </span>
+                        )}
+                      </>
                     )}
                   </div>
 

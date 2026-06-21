@@ -277,51 +277,65 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
             </div>
             
             <div className={`flex flex-wrap gap-3 ${isAr ? "justify-end" : ""}`}>
-              {shoe.sizes.map((sz) => {
-                const isSelected = selectedSize === sz;
-                return (
-                  <button
-                    key={sz}
-                    onClick={() => setSelectedSize(sz)}
-                    className={`w-16 h-16 rounded-2xl text-base transition-all flex items-center justify-center cursor-pointer font-mono ${
-                      isSelected
-                        ? "bg-white text-obsidian font-black shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105"
-                        : "bg-neutral-900 text-white border border-white/10 hover:border-white/40 hover:bg-neutral-800"
-                    }`}
-                  >
-                    {sz}
-                  </button>
-                );
-              })}
+              {shoe.sizes.filter(sz => (shoe.sizesStock?.[sz] || 0) > 0).length > 0 ? (
+                shoe.sizes.filter(sz => (shoe.sizesStock?.[sz] || 0) > 0).map((sz) => {
+                  const isSelected = selectedSize === sz;
+                  return (
+                    <button
+                      key={sz}
+                      onClick={() => setSelectedSize(sz)}
+                      className={`w-16 h-16 rounded-2xl text-base transition-all flex items-center justify-center cursor-pointer font-mono ${
+                        isSelected
+                          ? "bg-white text-obsidian font-black shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105"
+                          : "bg-neutral-900 text-white border border-white/10 hover:border-white/40 hover:bg-neutral-800"
+                      }`}
+                    >
+                      {sz}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="w-full text-center py-4 text-red-500 font-bold uppercase tracking-widest border border-red-500/20 bg-red-500/5 rounded-xl">
+                  {isAr ? "نفدت الكمية" : "Out of Stock"}
+                </div>
+              )}
             </div>
           </div>
 
           {/* ═══════ CTA BUTTONS ═══════ */}
           <div className={`flex flex-col sm:flex-row gap-4 mb-12 ${isAr ? 'sm:flex-row-reverse' : ''}`}>
-            <button
-              onClick={handleAddToCart}
-              className={`flex-1 flex items-center justify-center gap-3 bg-neon-lime hover:bg-white text-obsidian px-8 py-5 rounded-2xl font-black transition-all neon-glow-lime hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] hover:scale-[1.02] active:scale-[0.98] ${isAr ? "font-cairo text-xl" : "font-outfit uppercase tracking-widest text-sm"}`}
-            >
-              <ShoppingCart size={22} />
-              {isAr ? "أضف إلى السلة" : "ADD TO CART"}
-            </button>
-            <a
-              href={(() => {
-                const phone = contactConfig.whatsapp.replace(/\+/g, "");
-                const sizePart = selectedSize ? (isAr ? `، المقاس ${selectedSize}` : `, Taille ${selectedSize}`) : "";
-                const colorPart = selectedColor ? (isAr ? `، اللون ${selectedColor.nameAr}` : `, Couleur ${selectedColor.nameFr}`) : "";
-                const msg = isAr
-                  ? `مرحباً، أريد شراء ${shoe.nameAr}${colorPart}${sizePart}، السعر ${Math.round(Number(shoe.price) || 0)} د.ج`
-                  : `Bonjour, je veux acheter la ${shoe.nameFr}${colorPart}${sizePart}, Prix ${Math.round(Number(shoe.price) || 0)} DA`;
-                return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-              })()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex-1 flex items-center justify-center gap-3 bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/20 hover:border-[#25D366] text-[#25D366] px-8 py-5 rounded-2xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] ${isAr ? "font-cairo text-xl" : "font-outfit uppercase tracking-widest text-sm"}`}
-            >
-              <MessageCircle size={22} />
-              {isAr ? "طلب عبر واتساب" : "ORDER VIA WHATSAPP"}
-            </a>
+            {shoe.sizes.filter(sz => (shoe.sizesStock?.[sz] || 0) > 0).length > 0 ? (
+              <>
+                <button
+                  onClick={handleAddToCart}
+                  className={`flex-1 flex items-center justify-center gap-3 bg-neon-lime hover:bg-white text-obsidian px-8 py-5 rounded-2xl font-black transition-all neon-glow-lime hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] hover:scale-[1.02] active:scale-[0.98] ${isAr ? "font-cairo text-xl" : "font-outfit uppercase tracking-widest text-sm"}`}
+                >
+                  <ShoppingCart size={22} />
+                  {isAr ? "أضف إلى السلة" : "ADD TO CART"}
+                </button>
+                <a
+                  href={(() => {
+                    const phone = contactConfig.whatsapp.replace(/\+/g, "");
+                    const sizePart = selectedSize ? (isAr ? `، المقاس ${selectedSize}` : `, Taille ${selectedSize}`) : "";
+                    const colorPart = selectedColor ? (isAr ? `، اللون ${selectedColor.nameAr}` : `, Couleur ${selectedColor.nameFr}`) : "";
+                    const msg = isAr
+                      ? `مرحباً، أريد شراء ${shoe.nameAr}${colorPart}${sizePart}، السعر ${Math.round(Number(shoe.price) || 0)} د.ج`
+                      : `Bonjour, je veux acheter la ${shoe.nameFr}${colorPart}${sizePart}, Prix ${Math.round(Number(shoe.price) || 0)} DA`;
+                    return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+                  })()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex-1 flex items-center justify-center gap-3 bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/20 hover:border-[#25D366] text-[#25D366] px-8 py-5 rounded-2xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] ${isAr ? "font-cairo text-xl" : "font-outfit uppercase tracking-widest text-sm"}`}
+                >
+                  <MessageCircle size={22} />
+                  {isAr ? "طلب عبر واتساب" : "ORDER VIA WHATSAPP"}
+                </a>
+              </>
+            ) : (
+              <button disabled className={`flex-1 flex items-center justify-center gap-3 bg-neutral-800 text-neutral-500 px-8 py-5 rounded-2xl font-black cursor-not-allowed ${isAr ? "font-cairo text-xl" : "font-outfit uppercase tracking-widest text-sm"}`}>
+                {isAr ? "نفدت الكمية" : "OUT OF STOCK"}
+              </button>
+            )}
           </div>
 
           {/* ═══════ PRO INFO SECTION ═══════ */}
