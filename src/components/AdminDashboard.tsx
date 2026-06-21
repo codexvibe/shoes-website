@@ -3457,7 +3457,7 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
                     WhatsApp
@@ -3466,17 +3466,6 @@ export const AdminDashboard: React.FC = () => {
                     type="text"
                     value={whatsapp}
                     onChange={(e) => setWhatsapp(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
                   />
                 </div>
