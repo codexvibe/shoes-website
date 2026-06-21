@@ -27,9 +27,10 @@ import {
   ArrowRightLeft,
   Edit,
   X,
-  Palette
+  Palette,
+  Search
 } from "lucide-react";
-import { Sneaker, Lead, WilayaFee, SneakerColor } from "../data/mockData";
+import { Sneaker, Lead, WilayaFee, SneakerColor, CartItem } from "../data/mockData";
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -159,6 +160,7 @@ export const AdminDashboard: React.FC = () => {
 
   // Inventory Filter state
   const [inventoryFilter, setInventoryFilter] = useState<"all" | "low" | "high">("all");
+  const [inventorySearch, setInventorySearch] = useState("");
 
 
   const [editVariantNameFr, setEditVariantNameFr] = useState("");
@@ -377,9 +379,15 @@ export const AdminDashboard: React.FC = () => {
 
 
   const inventoryRows = React.useMemo(() => {
-    const rows: { type: "shoe" | "color", shoe: Sneaker, color?: SneakerColor, colorIndex?: number }[] = [];
+    const rows: { type: "shoe" | "color" | "header", shoe: Sneaker, color?: SneakerColor, colorIndex?: number }[] = [];
+    const searchLower = inventorySearch.toLowerCase();
     sneakers.forEach(shoe => {
+      // Apply search filter
+      if (searchLower && !shoe.nameFr.toLowerCase().includes(searchLower) && !shoe.nameAr.includes(inventorySearch)) {
+        return;
+      }
       if (shoe.colors && shoe.colors.length > 0) {
+        rows.push({ type: "header", shoe });
         shoe.colors.forEach((color, colorIndex) => {
           rows.push({ type: "color", shoe, color, colorIndex });
         });
@@ -389,6 +397,7 @@ export const AdminDashboard: React.FC = () => {
     });
 
     return rows.filter(row => {
+      if (row.type === "header") return true;
       if (inventoryFilter === "all") return true;
       
       const sizesStock = row.type === "color" && row.color 
@@ -403,7 +412,7 @@ export const AdminDashboard: React.FC = () => {
       if (inventoryFilter === "high") return !isLowStock && totalStock > 0;
       return true;
     });
-  }, [sneakers, inventoryFilter]);
+  }, [sneakers, inventoryFilter, inventorySearch]);
 
   // Keyboard stock cell navigation
   const handleGridKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, rowIndex: number, size: number) => {
@@ -929,6 +938,11 @@ export const AdminDashboard: React.FC = () => {
   const getShoePriceVal = (id: string) => {
     const s = sneakers.find(x => x.id === id);
     return s ? s.price : 0;
+  };
+
+  const getItemPriceVal = (item: CartItem) => {
+    if (item.color?.price) return item.color.price;
+    return getShoePriceVal(item.sneakerId);
   };
 
   return (
@@ -1897,6 +1911,16 @@ export const AdminDashboard: React.FC = () => {
                 Low / Out of Stock
               </button>
             </div>
+            <div className="relative w-full sm:w-64">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
+              <input
+                type="text"
+                value={inventorySearch}
+                onChange={(e) => setInventorySearch(e.target.value)}
+                placeholder="Search shoe model..."
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
+              />
+            </div>
             <span className="rounded-md bg-neon-lime/10 border border-neon-lime/20 px-2.5 py-1 text-[9px] font-mono text-neon-lime tracking-widest hidden sm:inline-block">
               SCANNER_FREE_V2.1
             </span>
@@ -1915,6 +1939,34 @@ export const AdminDashboard: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-neutral-900/50">
                 {inventoryRows.map((row, rowIndex) => {
+                  if (row.type === "header") {
+                    const { shoe } = row;
+                    // Calculate total stock across all colors
+                    let headerTotal = 0;
+                    (shoe.colors || []).forEach(c => {
+                      inventorySizes.forEach(sz => { headerTotal += (c.sizesStock?.[sz] || 0); });
+                    });
+                    return (
+                      <tr key={`header-${shoe.id}`} className="bg-neutral-900/30 border-t-2 border-neutral-700/50">
+                        <td className="py-3 px-2" colSpan={inventorySizes.length + 1}>
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-xl overflow-hidden bg-neutral-950 border border-neutral-700 flex-shrink-0">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={shoe.image} alt={shoe.nameFr} className="h-full w-full object-cover" />
+                            </div>
+                            <div>
+                              <div className="font-black text-white text-sm uppercase tracking-wide font-outfit">{shoe.nameFr}</div>
+                              <div className="text-[9px] text-neutral-500 font-mono">{(shoe.categorySlug || "").replace("-", " ")} • {(shoe.colors || []).length} colors</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-2 text-center font-mono text-xs font-black text-white">
+                          {headerTotal}
+                        </td>
+                      </tr>
+                    );
+                  }
+
                   const isColor = row.type === "color";
                   const { shoe } = row;
                   const color = isColor ? row.color : undefined;
@@ -1926,11 +1978,11 @@ export const AdminDashboard: React.FC = () => {
                   });
 
                   const rowKey = isColor ? `${shoe.id}-${row.colorIndex}` : shoe.id;
-                  const nameFr = isColor && color ? `${shoe.nameFr} (${color.nameFr})` : shoe.nameFr;
+                  const nameFr = isColor && color ? `↳ ${color.nameFr}` : shoe.nameFr;
                   const image = isColor && color && color.image ? color.image : shoe.image;
 
                   return (
-                    <tr key={rowKey} className="hover:bg-neutral-900/10 transition-colors">
+                    <tr key={rowKey} className={`hover:bg-neutral-900/10 transition-colors ${isColor ? "bg-neutral-950/30" : ""}`}>
                       <td className="py-4 px-2">
                         <div className="flex items-center gap-2.5">
                           <div className="h-8 w-8 rounded-lg overflow-hidden bg-neutral-950 border border-neutral-850 flex-shrink-0">
@@ -2198,7 +2250,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex justify-between items-center text-[10px] text-neutral-400 font-mono mt-2">
                       <span>Dest: {getWilayaName(lead.wilayaId)}</span>
                       <span className="font-bold text-neon-lime">
-                        {formatPrice(lead.items.reduce((sum, item) => sum + (getShoePriceVal(item.sneakerId) * item.quantity), 0) + getWilayaFeeVal(lead.wilayaId))}
+                        {formatPrice(lead.items.reduce((sum, item) => sum + (getItemPriceVal(item) * item.quantity), 0) + getWilayaFeeVal(lead.wilayaId))}
                       </span>
                     </div>
 
@@ -2212,7 +2264,7 @@ export const AdminDashboard: React.FC = () => {
                       <a
                         href={(() => {
                           const phone = lead.phoneNumber.replace(/\+/g, "");
-                          const itemsTotal = lead.items.reduce((sum, item) => sum + (getShoePriceVal(item.sneakerId) * item.quantity), 0);
+                          const itemsTotal = lead.items.reduce((sum, item) => sum + (getItemPriceVal(item) * item.quantity), 0);
                           const totalStr = formatPrice(itemsTotal + getWilayaFeeVal(lead.wilayaId));
                           const itemsSummaryFr = lead.items.map(i => `${i.quantity}x ${getShoeTitle(i.sneakerId)} (Taille ${i.size})`).join(", ");
                           const itemsSummaryAr = lead.items.map(i => `${i.quantity}x ${getShoeTitle(i.sneakerId)} (مقاس ${i.size})`).join("، ");
@@ -2290,7 +2342,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex justify-between items-center text-[10px] text-neutral-400 font-mono mt-2">
                       <span>Dest: {getWilayaName(lead.wilayaId)}</span>
                       <span className="font-bold text-neon-lime">
-                        {formatPrice(lead.items.reduce((sum, item) => sum + (getShoePriceVal(item.sneakerId) * item.quantity), 0) + getWilayaFeeVal(lead.wilayaId))}
+                        {formatPrice(lead.items.reduce((sum, item) => sum + (getItemPriceVal(item) * item.quantity), 0) + getWilayaFeeVal(lead.wilayaId))}
                       </span>
                     </div>
 
@@ -2398,7 +2450,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex justify-between items-center text-[10px] text-neutral-500 font-mono mt-2">
                       <span>Dest: {getWilayaName(lead.wilayaId)}</span>
                       <span className="font-bold text-neon-lime">
-                        {formatPrice(lead.items.reduce((sum, item) => sum + (getShoePriceVal(item.sneakerId) * item.quantity), 0) + getWilayaFeeVal(lead.wilayaId))}
+                        {formatPrice(lead.items.reduce((sum, item) => sum + (getItemPriceVal(item) * item.quantity), 0) + getWilayaFeeVal(lead.wilayaId))}
                       </span>
                     </div>
 
