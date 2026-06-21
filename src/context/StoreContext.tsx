@@ -583,7 +583,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addToCart = (item: CartItem) => {
     setCart((prev) => {
-      const existing = prev.find((i) => i.sneakerId === item.sneakerId && i.size === item.size);
+      const existing = prev.find((i) => i.id === item.id);
       if (existing) {
         return prev.map((i) =>
           i.id === existing.id ? { ...i, quantity: i.quantity + item.quantity } : i
@@ -900,14 +900,29 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }}
     >
       {loading ? (
-        <div className="fixed inset-0 bg-obsidian flex flex-col items-center justify-center z-[9999]">
-          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border border-neutral-800/40 flex items-center justify-center animate-[spin_3s_linear_infinite]">
-            <div className="absolute w-20 h-20 sm:w-28 sm:h-28 rounded-full border border-dashed border-neutral-800/80"></div>
-            <div className="absolute w-3 h-3 rounded-full bg-blue-500 top-0 shadow-[0_0_15px_rgba(59,130,246,0.8)]"></div>
-            <div className="absolute w-3 h-3 rounded-full bg-white bottom-0 shadow-[0_0_15px_rgba(255,255,255,0.8)]"></div>
+        <div className="fixed inset-0 bg-obsidian flex flex-col items-center justify-center z-[9999] transition-all duration-500">
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-cyan-500/20 blur-[60px] rounded-full animate-pulse"></div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src="/logo.png" 
+              alt="Welcome to Shoes" 
+              className="relative w-40 h-40 sm:w-56 sm:h-56 object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.4)] animate-[pulse_2s_ease-in-out_infinite]"
+            />
           </div>
-          <div className="mt-8 text-neutral-500 text-xs font-bold tracking-[0.3em] uppercase animate-pulse font-outfit">
-            LOADING SNKRS...
+          
+          <div className="flex flex-col items-center gap-4">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-widest uppercase font-outfit text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 drop-shadow-sm">
+              {language === 'ar' ? 'مرحباً بك في المتجر' : 'WELCOME TO THE STORE'}
+            </h1>
+            <div className="flex items-center gap-2 mt-2">
+              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-[bounce_1s_infinite_-0.3s]"></div>
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-[bounce_1s_infinite_-0.15s]"></div>
+              <div className="w-2 h-2 rounded-full bg-white animate-[bounce_1s_infinite]"></div>
+            </div>
+            <div className="mt-4 text-neutral-500 text-xs font-bold tracking-[0.4em] uppercase font-mono">
+              LOADING SNEAKERS...
+            </div>
           </div>
         </div>
       ) : (

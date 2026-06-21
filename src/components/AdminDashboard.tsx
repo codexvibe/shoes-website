@@ -122,10 +122,12 @@ export const AdminDashboard: React.FC = () => {
   const [variantNameAr, setVariantNameAr] = useState("");
   const [variantHex, setVariantHex] = useState("#FFFFFF");
   const [variantImage, setVariantImage] = useState("");
+  const [variantPrice, setVariantPrice] = useState("");
 
   const [shoeBaseColorNameFr, setShoeBaseColorNameFr] = useState("");
   const [shoeBaseColorNameAr, setShoeBaseColorNameAr] = useState("");
   const [shoeBaseColorHex, setShoeBaseColorHex] = useState("#FFFFFF");
+  const [shoeBaseColorPrice, setShoeBaseColorPrice] = useState("");
 
   // Dropzone State
   const [dragActive, setDragActive] = useState(false);
@@ -153,6 +155,7 @@ export const AdminDashboard: React.FC = () => {
   const [editBaseColorNameFr, setEditBaseColorNameFr] = useState("");
   const [editBaseColorNameAr, setEditBaseColorNameAr] = useState("");
   const [editBaseColorHex, setEditBaseColorHex] = useState("#FFFFFF");
+  const [editBaseColorPrice, setEditBaseColorPrice] = useState("");
 
   // Inventory Filter state
   const [inventoryFilter, setInventoryFilter] = useState<"all" | "low" | "high">("all");
@@ -162,6 +165,7 @@ export const AdminDashboard: React.FC = () => {
   const [editVariantNameAr, setEditVariantNameAr] = useState("");
   const [editVariantHex, setEditVariantHex] = useState("#FFFFFF");
   const [editVariantImage, setEditVariantImage] = useState("");
+  const [editVariantPrice, setEditVariantPrice] = useState("");
   const [editShowGallery, setEditShowGallery] = useState(false);
   const [editDragActive, setEditDragActive] = useState(false);
   const [editImageError, setEditImageError] = useState(false);
@@ -494,7 +498,8 @@ export const AdminDashboard: React.FC = () => {
         hex: shoeBaseColorHex,
         image: shoeImage,
         sizes: shoeSizes,
-        sizesStock: initialStock
+        sizesStock: initialStock,
+        price: shoeBaseColorPrice ? parseFloat(shoeBaseColorPrice) : undefined
       });
     }
 
@@ -530,6 +535,7 @@ export const AdminDashboard: React.FC = () => {
     setShoeBaseColorNameFr("");
     setShoeBaseColorNameAr("");
     setShoeBaseColorHex("#FFFFFF");
+    setShoeBaseColorPrice("");
     setShoeImageError(false);
     setShoeFormSuccess(true);
     setTimeout(() => setShoeFormSuccess(false), 3000);
@@ -554,11 +560,13 @@ export const AdminDashboard: React.FC = () => {
       setEditBaseColorNameFr(shoe.colors[0].nameFr);
       setEditBaseColorNameAr(shoe.colors[0].nameAr);
       setEditBaseColorHex(shoe.colors[0].hex);
+      setEditBaseColorPrice(shoe.colors[0].price ? shoe.colors[0].price.toString() : "");
       setEditShoeVariantColors(shoe.colors.slice(1));
     } else {
       setEditBaseColorNameFr("");
       setEditBaseColorNameAr("");
       setEditBaseColorHex("#FFFFFF");
+      setEditBaseColorPrice("");
       setEditShoeVariantColors([]);
     }
     
@@ -603,7 +611,8 @@ export const AdminDashboard: React.FC = () => {
         hex: editBaseColorHex,
         image: editImage,
         sizes: editSizes,
-        sizesStock: editingShoe.colors?.[0]?.sizesStock || updatedStock
+        sizesStock: editingShoe.colors?.[0]?.sizesStock || updatedStock,
+        price: editBaseColorPrice ? parseFloat(editBaseColorPrice) : undefined
       });
     }
 
@@ -1472,6 +1481,15 @@ export const AdminDashboard: React.FC = () => {
                         className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white focus:outline-none focus:border-neon-lime/60 font-mono"
                       />
                     </div>
+                    <div className="col-span-1 sm:col-span-3">
+                      <input
+                        type="number"
+                        value={shoeBaseColorPrice}
+                        onChange={(e) => setShoeBaseColorPrice(e.target.value)}
+                        placeholder={isAr ? "السعر (اختياري، يترك فارغاً لاستخدام سعر المنتج)" : "Price (optional, leave blank to use product price)"}
+                        className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -1542,6 +1560,13 @@ export const AdminDashboard: React.FC = () => {
                         placeholder="#FFFFFF"
                         className="w-24 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-mono"
                       />
+                      <input
+                        type="number"
+                        value={variantPrice}
+                        onChange={(e) => setVariantPrice(e.target.value)}
+                        placeholder={isAr ? "السعر" : "Price"}
+                        className="w-24 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-orange/50 font-mono"
+                      />
                       <div className="flex-1 flex flex-col gap-2">
                         <input
                           type="file"
@@ -1607,11 +1632,13 @@ export const AdminDashboard: React.FC = () => {
                           nameAr: variantNameAr || variantNameFr,
                           hex: variantHex,
                           image: variantImage,
+                          price: variantPrice ? parseFloat(variantPrice) : undefined
                         }]);
                         setVariantNameFr("");
                         setVariantNameAr("");
                         setVariantHex("#FFFFFF");
                         setVariantImage("");
+                        setVariantPrice("");
                       }}
                       className="w-full flex items-center justify-center gap-2 bg-neon-orange/10 border border-neon-orange/30 text-neon-orange hover:bg-neon-orange/20 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer font-outfit"
                     >
@@ -3313,6 +3340,15 @@ export const AdminDashboard: React.FC = () => {
                       className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white focus:outline-none focus:border-neon-lime/60 font-mono"
                     />
                   </div>
+                  <div className="col-span-1 sm:col-span-3">
+                    <input
+                      type="number"
+                      value={editBaseColorPrice}
+                      onChange={(e) => setEditBaseColorPrice(e.target.value)}
+                      placeholder={isAr ? "السعر (اختياري، يترك فارغاً لاستخدام سعر المنتج)" : "Price (optional, leave blank to use product price)"}
+                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-3 text-xs text-white placeholder-neutral-700 focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -3446,11 +3482,13 @@ export const AdminDashboard: React.FC = () => {
                         nameAr: editVariantNameAr || editVariantNameFr,
                         hex: editVariantHex,
                         image: editVariantImage,
+                        price: editVariantPrice ? parseFloat(editVariantPrice) : undefined
                       }]);
                       setEditVariantNameFr("");
                       setEditVariantNameAr("");
                       setEditVariantHex("#FFFFFF");
                       setEditVariantImage("");
+                      setEditVariantPrice("");
                     }}
                     className="w-full flex items-center justify-center gap-2 bg-neon-orange/10 border border-neon-orange/30 text-neon-orange hover:bg-neon-orange/20 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer font-outfit"
                   >

@@ -192,14 +192,19 @@ export const ProductDetails: React.FC<{ id: string }> = ({ id }) => {
               {isAr ? shoe.nameAr : shoe.nameFr}
             </h1>
             
-            <div className={`mt-6 flex items-baseline gap-4 ${isAr ? "flex-row-reverse" : ""}`}>
-              <div className={`text-3xl sm:text-4xl font-black text-neon-lime ${isAr ? "font-cairo" : "font-outfit"}`}>
-                {isAr ? `${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج` : `${Math.round(Number(shoe.price) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA`}
-              </div>
-              <div className="text-lg text-neutral-500 line-through font-bold">
-                {isAr ? `${Math.round((Number(shoe.price) || 0) * 1.25).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج` : `${Math.round((Number(shoe.price) || 0) * 1.25).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA`}
-              </div>
-            </div>
+            {(() => {
+              const currentPrice = selectedColor?.price || shoe.price;
+              return (
+                <div className={`mt-6 flex items-baseline gap-4 ${isAr ? "flex-row-reverse" : ""}`}>
+                  <div className={`text-3xl sm:text-4xl font-black text-neon-lime ${isAr ? "font-cairo" : "font-outfit"}`}>
+                    {isAr ? `${Math.round(Number(currentPrice) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج` : `${Math.round(Number(currentPrice) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA`}
+                  </div>
+                  <div className="text-lg text-neutral-500 line-through font-bold">
+                    {isAr ? `${Math.round((Number(currentPrice) || 0) * 1.25).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج` : `${Math.round((Number(currentPrice) || 0) * 1.25).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} DA`}
+                  </div>
+                </div>
+              );
+            })()}
 
             <p className={`mt-8 text-neutral-400 leading-relaxed text-base sm:text-lg ${isAr ? "font-cairo text-right" : "font-outfit"}`}>
               {isAr ? shoe.descAr : shoe.descFr}

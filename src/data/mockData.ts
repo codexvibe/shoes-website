@@ -15,6 +15,7 @@ export interface SneakerColor {
   image: string;
   sizes?: number[];
   sizesStock?: Record<number, number>;
+  price?: number; // Optional per-color price overriding the main product price
 }
 
 export interface Sneaker {

@@ -57,7 +57,8 @@ export const CartDrawer: React.FC = () => {
 
   const subtotal = cart.reduce((total, item) => {
     const shoe = getSneakerDetails(item.sneakerId);
-    return total + (shoe?.price || 0) * item.quantity;
+    const itemPrice = item.color?.price || shoe?.price || 0;
+    return total + Number(itemPrice) * item.quantity;
   }, 0);
 
   const selectedWilaya = wilayaFees.find((w) => w.id === selectedWilayaId) || wilayaFees[0];
@@ -287,7 +288,7 @@ export const CartDrawer: React.FC = () => {
 
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-neon-orange font-bold text-xs font-outfit">
-                            {formatPrice(Number(shoe.price) * item.quantity)}
+                            {formatPrice(Number(item.color?.price || shoe.price) * item.quantity)}
                           </span>
 
                           <div className="flex items-center gap-2 bg-neutral-950 rounded-lg p-1 border border-neutral-800">
