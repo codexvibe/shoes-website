@@ -2055,8 +2055,8 @@ export const AdminDashboard: React.FC = () => {
                           const itemsSummaryFr = lead.items.map(i => `${i.quantity}x ${getShoeTitle(i.sneakerId)} (Taille ${i.size})`).join(", ");
                           const itemsSummaryAr = lead.items.map(i => `${i.quantity}x ${getShoeTitle(i.sneakerId)} (مقاس ${i.size})`).join("، ");
                           const msg = isAr
-                            ? `مرحبا ${lead.customerName}، نود تأكيد طلبك لـ ${itemsSummaryAr} إلى ${getWilayaName(lead.wilayaId)}. المبلغ الإجمالي: ${totalStr}.`
-                            : `Bonjour ${lead.customerName}, nous confirmons votre commande: ${itemsSummaryFr} vers ${getWilayaName(lead.wilayaId)}. Total: ${totalStr}.`;
+                            ? `مرحباً ${lead.customerName}! 👋\nنشكرك على طلبك من متجر SNKRS ALG.\n\n📦 *تفاصيل الطلب:*\n${itemsSummaryAr}\n\n📍 *التوصيل إلى:* ${getWilayaName(lead.wilayaId)}\n💰 *المبلغ الإجمالي:* ${totalStr}\n\nنحن هنا لإتمام طلبك. الرجاء تأكيد العنوان ورقم الهاتف للبدء في الشحن. 🚚`
+                            : `Bonjour ${lead.customerName}! 👋\nMerci pour votre commande chez SNKRS ALG.\n\n📦 *Détails de la commande :*\n${itemsSummaryFr}\n\n📍 *Livraison vers :* ${getWilayaName(lead.wilayaId)}\n💰 *Total :* ${totalStr}\n\nNous sommes là pour finaliser votre commande. Merci de confirmer votre adresse exacte pour l'expédition. 🚚`;
                           return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
                         })()}
                         target="_blank"

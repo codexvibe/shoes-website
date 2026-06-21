@@ -140,8 +140,8 @@ export const CartDrawer: React.FC = () => {
         ? `التوصيل إلى ${selectedWilaya.nameAr}`
         : `Livraison vers ${selectedWilaya.nameFr}`
       : "";
-    const textFr = `Bonjour, je souhaite passer la commande suivante :\n${cartSummaryText}\n\n${wilayaStr} (+${formatPrice(deliveryFee)}).\n*Total: ${formatPrice(grandTotal)}*.`;
-    const textAr = `مرحباً، أود تقديم الطلب التالي:\n${cartSummaryText}\n\n${wilayaStr} (+${formatPrice(deliveryFee)}).\n*الإجمالي: ${formatPrice(grandTotal)}*.`;
+    const textFr = `Bonjour SNKRS ALG ! 👋\nJe souhaite confirmer ma commande :\n\n📦 *Détails de la commande :*\n${cartSummaryText}\n\n📍 *Livraison vers :* ${wilayaStr} (+${formatPrice(deliveryFee)})\n💰 *Total à payer : ${formatPrice(grandTotal)}*\n\nMerci de valider ma commande !`;
+    const textAr = `مرحباً SNKRS ALG ! 👋\nأود تأكيد طلبي:\n\n📦 *تفاصيل الطلب:*\n${cartSummaryText}\n\n📍 *التوصيل إلى:* ${wilayaStr} (+${formatPrice(deliveryFee)})\n💰 *المجموع الإجمالي: ${formatPrice(grandTotal)}*\n\nالرجاء تأكيد الطلب، شكراً!`;
     const text = encodeURIComponent(isAr ? textAr : textFr);
     return `https://wa.me/${phone}?text=${text}`;
   };
