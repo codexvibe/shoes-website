@@ -3726,7 +3726,6 @@ export const AdminDashboard: React.FC = () => {
                     {editNewArrival ? "NEW ARRIVAL ACTIVE" : "TOGGLE NEW ARRIVAL"}
                   </button>
                 </div>
-                </div>
               </div>
               </div>
 
