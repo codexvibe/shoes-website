@@ -1522,7 +1522,10 @@ export const AdminDashboard: React.FC = () => {
                           <div className="w-7 h-7 rounded-full border-2 border-white/20 flex-shrink-0" style={{ backgroundColor: vc.hex }} />
                           <div className="flex-1 min-w-0">
                             <div className="text-xs font-bold text-white font-outfit truncate">{vc.nameFr}</div>
-                            <div className="text-[9px] text-neutral-500 font-mono truncate">{vc.nameAr} · {vc.hex}</div>
+                            <div className="text-[9px] text-neutral-500 font-mono truncate">
+                              {vc.nameAr} · {vc.hex}
+                              {vc.price ? <span className="text-neon-lime ml-1">· {vc.price} DA</span> : <span className="text-neutral-600 ml-1">· prix produit</span>}
+                            </div>
                           </div>
                           {vc.image && (
                             <div className="w-8 h-8 rounded-lg overflow-hidden border border-neutral-700 flex-shrink-0">
@@ -1999,7 +2002,14 @@ export const AdminDashboard: React.FC = () => {
                                 />
                               )}
                             </div>
-                            <div className="text-[8px] text-neutral-500 font-mono mt-0.5">{(shoe.categorySlug || "").replace("-", " ")}</div>
+                            <div className="text-[8px] text-neutral-500 font-mono mt-0.5">
+                              {(shoe.categorySlug || "").replace("-", " ")}
+                              {isColor && color && (
+                                <span className="ml-1.5 text-neon-lime">
+                                  {color.price ? `${color.price} DA` : `${shoe.price} DA`}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -3418,7 +3428,10 @@ export const AdminDashboard: React.FC = () => {
                         <div className="w-7 h-7 rounded-full border-2 border-white/20 flex-shrink-0" style={{ backgroundColor: vc.hex }} />
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-bold text-white font-outfit truncate">{vc.nameFr}</div>
-                          <div className="text-[9px] text-neutral-500 font-mono truncate">{vc.nameAr} · {vc.hex}</div>
+                          <div className="text-[9px] text-neutral-500 font-mono truncate">
+                            {vc.nameAr} · {vc.hex}
+                            {vc.price ? <span className="text-neon-lime ml-1">· {vc.price} DA</span> : <span className="text-neutral-600 ml-1">· prix produit</span>}
+                          </div>
                         </div>
                         {vc.image && (
                           <div className="w-8 h-8 rounded-lg overflow-hidden border border-neutral-700 flex-shrink-0">
