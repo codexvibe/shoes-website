@@ -47,13 +47,6 @@ export const Footer: React.FC = () => {
               >
                 <Phone size={16} />
               </a>
-              <a
-                href={`mailto:${contactConfig.email}`}
-                className="p-3 bg-neutral-900 border border-neutral-800 hover:border-neon-lime/40 text-neutral-400 hover:text-neon-lime rounded-xl transition-all"
-                title="Email"
-              >
-                <Mail size={16} />
-              </a>
             </div>
           </div>
 

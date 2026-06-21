@@ -75,18 +75,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
     return `https://wa.me/${phone}?text=${text}`;
   };
 
-  const getEmailLink = () => {
-    const subjectFr = `Nouvelle Commande Showcase`;
-    const subjectAr = `طلب شراء جديد`;
-    const wilayaStr = selectedWilaya ? `Wilaya: ${selectedWilaya.nameFr} (+${formatPrice(deliveryFee)})` : "";
-    
-    const bodyFr = `Bonjour,\n\nJe souhaite passer la commande suivante:\n${cartSummaryText}\n\n- ${wilayaStr}\n\n*Total de la commande: ${formatPrice(grandTotal)}*\n\nMerci de me recontacter pour finaliser l'achat.`;
-    const bodyAr = `مرحباً،\n\nأود طلب الآتي:\n${cartSummaryText}\n\n- ${wilayaStr}\n\n*الإجمالي: ${formatPrice(grandTotal)}*\n\nشكراً لكم.`;
 
-    const subject = encodeURIComponent(isAr ? subjectAr : subjectFr);
-    const body = encodeURIComponent(isAr ? bodyAr : bodyFr);
-    return `mailto:${contactConfig.email}?subject=${subject}&body=${body}`;
-  };
 
   const copyDetails = () => {
     const text = `Order Details:\n${cartSummaryText}\nDelivery: ${getWilayaName(selectedWilayaId)}\nTotal: ${formatPrice(grandTotal)}`;
@@ -361,7 +350,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-3">
             {/* WhatsApp CTA */}
             <a
               href={getWhatsAppLink()}
@@ -371,15 +360,6 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             >
               <MessageSquare size={14} fill="currentColor" />
               <span>WhatsApp</span>
-            </a>
-
-            {/* Email CTA */}
-            <a
-              href={getEmailLink()}
-              className={`flex items-center justify-center gap-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 py-3 font-bold transition-all cursor-pointer ${isAr ? 'font-cairo text-[11px]' : 'font-outfit text-xs'}`}
-            >
-              <Mail size={14} />
-              <span>Email</span>
             </a>
           </div>
 
