@@ -62,6 +62,8 @@ interface DbWilayaRow {
   name_fr: string;
   name_ar: string;
   fee: number;
+  fee_domicile?: number | null;
+  fee_bureau?: number | null;
 }
 
 type AuthSubscription = {
@@ -85,7 +87,7 @@ interface StoreContextType {
   updateLeadTracking: (id: string, updates: Partial<Pick<Lead, "trackingNumber" | "shippingProvider" | "shippedAt">>) => void;
   deleteLead: (id: string) => void;
   wilayaFees: WilayaFee[];
-  updateWilayaFee: (id: string, fee: number) => void;
+  updateWilayaFee: (id: string, fee: number, feeBureau?: number) => void;
   addWilaya: (wilaya: WilayaFee) => void;
   deleteWilaya: (id: string) => void;
   resetWilayas: () => Promise<void>;
@@ -160,11 +162,15 @@ function dbLeadToFrontend(row: DbLeadRow): Lead {
 }
 
 function dbWilayaToFrontend(row: DbWilayaRow): WilayaFee {
+  const feeDomicile = row.fee_domicile ?? row.fee;
+  const feeBureau = row.fee_bureau ?? Math.max(row.fee - 200, 200);
   return {
     id: String(row.id),
     nameFr: row.name_fr,
     nameAr: row.name_ar,
-    fee: row.fee,
+    fee: feeDomicile,
+    feeDomicile,
+    feeBureau,
   };
 }
 
@@ -638,11 +644,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // ── Wilaya Fees ──
 
-  const updateWilayaFee = async (id: string, fee: number) => {
+  const updateWilayaFee = async (id: string, fee: number, feeBureau?: number) => {
     if (!supabase) return;
+    const updatePayload: Record<string, number> = { fee, fee_domicile: fee };
+    if (feeBureau !== undefined) updatePayload.fee_bureau = feeBureau;
     const { error } = await supabase
       .from("wilaya_fees")
-      .update({ fee })
+      .update(updatePayload)
       .eq("id", id);
 
     if (error) {
@@ -650,7 +658,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
     setWilayaFees((prev) =>
-      prev.map((w) => (w.id === id ? { ...w, fee } : w))
+      prev.map((w) => (w.id === id ? { ...w, fee, feeDomicile: fee, ...(feeBureau !== undefined ? { feeBureau } : {}) } : w))
     );
   };
 
@@ -663,6 +671,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         name_fr: newWilaya.nameFr,
         name_ar: newWilaya.nameAr,
         fee: newWilaya.fee,
+        fee_domicile: newWilaya.feeDomicile,
+        fee_bureau: newWilaya.feeBureau,
       })
       .select()
       .single();
@@ -698,12 +708,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // 1. Delete all existing ones
       await supabase.from("wilaya_fees").delete().neq('id', -1);
       
-      // 2. Insert the fresh 69 wilayas
+      // 2. Insert the fresh 69 wilayas with dual pricing
       const formatted = INITIAL_WILAYAS.map(w => ({
         id: parseInt(w.id, 10),
         name_fr: w.nameFr,
         name_ar: w.nameAr,
-        fee: w.fee
+        fee: w.fee,
+        fee_domicile: w.feeDomicile,
+        fee_bureau: w.feeBureau
       }));
       const { error } = await supabase.from("wilaya_fees").insert(formatted);
       if (error) throw error;

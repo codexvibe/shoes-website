@@ -45,6 +45,7 @@ export const CartDrawer: React.FC = () => {
   const [customerName, setCustomerName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [orderError, setOrderError] = useState("");
+  const [deliveryType, setDeliveryType] = useState<"domicile" | "bureau">("domicile");
 
   const isAr = language === "ar";
 
@@ -60,7 +61,7 @@ export const CartDrawer: React.FC = () => {
   }, 0);
 
   const selectedWilaya = wilayaFees.find((w) => w.id === selectedWilayaId) || wilayaFees[0];
-  const deliveryFee = selectedWilaya ? selectedWilaya.fee : 0;
+  const deliveryFee = selectedWilaya ? (deliveryType === "bureau" ? selectedWilaya.feeBureau : selectedWilaya.feeDomicile) : 0;
   const grandTotal = subtotal + deliveryFee;
 
   const filteredWilayas = wilayaFees.filter(
@@ -515,8 +516,36 @@ export const CartDrawer: React.FC = () => {
                   }`}
                 >
                   <MapPin size={12} />
-                  {isAr ? "ولاية التوصيل (المنزل أو المكتب - سعر ثابت)" : "WILAYA DE LIVRAISON (À Domicile ou Bureau - Prix Fixe)"}
+                  {isAr ? "ولاية التوصيل" : "WILAYA DE LIVRAISON"}
                 </label>
+
+                {/* Delivery Type Toggle */}
+                <div className="flex rounded-xl border border-neutral-800 overflow-hidden mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryType("domicile")}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold transition-all cursor-pointer ${
+                      deliveryType === "domicile"
+                        ? "bg-neon-lime/15 text-neon-lime border-r border-neon-lime/30"
+                        : "bg-neutral-950/80 text-neutral-500 border-r border-neutral-800 hover:text-white"
+                    } ${isAr ? "font-cairo" : "font-outfit uppercase tracking-wider"}`}
+                  >
+                    🏠
+                    <span>{isAr ? "إلى المنزل" : "À Domicile"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryType("bureau")}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold transition-all cursor-pointer ${
+                      deliveryType === "bureau"
+                        ? "bg-neon-orange/15 text-neon-orange"
+                        : "bg-neutral-950/80 text-neutral-500 hover:text-white"
+                    } ${isAr ? "font-cairo" : "font-outfit uppercase tracking-wider"}`}
+                  >
+                    🏢
+                    <span>{isAr ? "إلى المكتب" : "Au Bureau"}</span>
+                  </button>
+                </div>
                 <div className="relative">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -565,7 +594,7 @@ export const CartDrawer: React.FC = () => {
                               {isAr ? w.nameAr : w.nameFr}
                             </span>
                             <span className="text-neutral-500 text-xs font-mono">
-                              +{formatPrice(w.fee)}
+                              +{formatPrice(deliveryType === "bureau" ? w.feeBureau : w.feeDomicile)}
                             </span>
                           </button>
                         ))}

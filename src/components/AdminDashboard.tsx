@@ -182,15 +182,16 @@ export const AdminDashboard: React.FC = () => {
   const [catFormSuccess, setCatFormSuccess] = useState(false);
   const [showAdvancedCatOptions, setShowAdvancedCatOptions] = useState(false);
 
-  // --- TAB 5: WILAYA FEES STATES ---
   const [wilayaEditId, setWilayaEditId] = useState<string | null>(null);
   const [wilayaEditFee, setWilayaEditFee] = useState<string>("");
+  const [wilayaEditFeeBureau, setWilayaEditFeeBureau] = useState<string>("");
   const [wilayaSearch, setWilayaSearch] = useState("");
   const [showAddWilaya, setShowAddWilaya] = useState(false);
   const [newWilayaId, setNewWilayaId] = useState("");
   const [newWilayaNameFr, setNewWilayaNameFr] = useState("");
   const [newWilayaNameAr, setNewWilayaNameAr] = useState("");
   const [newWilayaFee, setNewWilayaFee] = useState("");
+  const [newWilayaFeeBureau, setNewWilayaFeeBureau] = useState("");
   const [wilayaAddSuccess, setWilayaAddSuccess] = useState(false);
 
   // --- TAB 6: MARKETING BANNER STATES ---
@@ -694,10 +695,12 @@ export const AdminDashboard: React.FC = () => {
 
   const handleSaveWilayaFee = (id: string) => {
     const feeVal = parseFloat(wilayaEditFee);
+    const feeBureauVal = parseFloat(wilayaEditFeeBureau);
     if (!isNaN(feeVal)) {
-      updateWilayaFee(id, feeVal);
+      updateWilayaFee(id, feeVal, !isNaN(feeBureauVal) ? feeBureauVal : undefined);
       setWilayaEditId(null);
       setWilayaEditFee("");
+      setWilayaEditFeeBureau("");
     }
   };
 
@@ -2474,7 +2477,7 @@ export const AdminDashboard: React.FC = () => {
                   <Plus size={14} />
                   Add New Wilaya
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
                   <div>
                     <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">ID / Code *</label>
                     <input
@@ -2491,7 +2494,7 @@ export const AdminDashboard: React.FC = () => {
                       type="text"
                       value={newWilayaNameFr}
                       onChange={(e) => setNewWilayaNameFr(e.target.value)}
-                      placeholder="Ex: 70 - France"
+                      placeholder="Ex: 70 - Nom"
                       className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all font-outfit"
                     />
                   </div>
@@ -2502,18 +2505,28 @@ export const AdminDashboard: React.FC = () => {
                       dir="rtl"
                       value={newWilayaNameAr}
                       onChange={(e) => setNewWilayaNameAr(e.target.value)}
-                      placeholder="مثال: 70 - فرنسا"
+                      placeholder="مثال: 70 - الاسم"
                       className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all font-cairo text-right"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">Fee (DA) *</label>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">🏠 Domicile (DA) *</label>
                     <input
                       type="number"
                       value={newWilayaFee}
                       onChange={(e) => setNewWilayaFee(e.target.value)}
                       placeholder="600"
                       className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-lime/60 transition-all font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-outfit">🏢 Bureau (DA) *</label>
+                    <input
+                      type="number"
+                      value={newWilayaFeeBureau}
+                      onChange={(e) => setNewWilayaFeeBureau(e.target.value)}
+                      placeholder="400"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neon-orange/60 transition-all font-mono"
                     />
                   </div>
                 </div>
@@ -2527,13 +2540,14 @@ export const AdminDashboard: React.FC = () => {
 
                 <button
                   onClick={() => {
-                    if (!newWilayaId.trim() || !newWilayaNameFr.trim() || !newWilayaNameAr.trim() || !newWilayaFee.trim()) {
+                    if (!newWilayaId.trim() || !newWilayaNameFr.trim() || !newWilayaNameAr.trim() || !newWilayaFee.trim() || !newWilayaFeeBureau.trim()) {
                       alert("Please fill all fields");
                       return;
                     }
                     const feeVal = parseFloat(newWilayaFee);
-                    if (isNaN(feeVal) || feeVal < 0) {
-                      alert("Please enter a valid fee");
+                    const feeBureauVal = parseFloat(newWilayaFeeBureau);
+                    if (isNaN(feeVal) || feeVal < 0 || isNaN(feeBureauVal) || feeBureauVal < 0) {
+                      alert("Please enter valid fees");
                       return;
                     }
                     addWilaya({
@@ -2541,11 +2555,14 @@ export const AdminDashboard: React.FC = () => {
                       nameFr: newWilayaNameFr.trim(),
                       nameAr: newWilayaNameAr.trim(),
                       fee: feeVal,
+                      feeDomicile: feeVal,
+                      feeBureau: feeBureauVal,
                     });
                     setNewWilayaId("");
                     setNewWilayaNameFr("");
                     setNewWilayaNameAr("");
                     setNewWilayaFee("");
+                    setNewWilayaFeeBureau("");
                     setWilayaAddSuccess(true);
                     setTimeout(() => setWilayaAddSuccess(false), 3000);
                   }}
@@ -2572,7 +2589,8 @@ export const AdminDashboard: React.FC = () => {
                 <thead className="sticky top-0 bg-asphalt/95 backdrop-blur-md z-10">
                   <tr className="border-b border-neutral-900 text-[10px] font-black text-neutral-500 uppercase tracking-widest">
                     <th className="py-3 px-4 font-outfit">Wilaya / Province</th>
-                    <th className="py-3 px-4 font-outfit">Delivery Fee</th>
+                    <th className="py-3 px-4 font-outfit">🏠 Domicile</th>
+                    <th className="py-3 px-4 font-outfit">🏢 Bureau</th>
                     <th className="py-3 px-4 text-center font-outfit">Actions</th>
                   </tr>
                 </thead>
@@ -2591,16 +2609,30 @@ export const AdminDashboard: React.FC = () => {
                           <div className="text-white">{w.nameFr}</div>
                           <div className="text-[10px] text-neutral-500 font-cairo text-right rtl:text-left mt-0.5">{w.nameAr}</div>
                         </td>
-                        <td className="py-4 px-4 font-mono font-bold text-neon-orange text-sm">
+                        <td className="py-4 px-4 font-mono font-bold text-neon-lime text-sm">
                           {editing ? (
                             <input
                               type="number"
                               value={wilayaEditFee}
                               onChange={(e) => setWilayaEditFee(e.target.value)}
-                              className="w-24 bg-neutral-950 border border-neutral-800 focus:border-neon-orange/60 rounded px-2 py-1 text-white text-xs"
+                              placeholder="Domicile"
+                              className="w-20 bg-neutral-950 border border-neon-lime/40 focus:border-neon-lime/60 rounded px-2 py-1 text-white text-xs"
                             />
                           ) : (
-                            <span>{formatPrice(w.fee)}</span>
+                            <span>{formatPrice(w.feeDomicile)}</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-4 font-mono font-bold text-neon-orange text-sm">
+                          {editing ? (
+                            <input
+                              type="number"
+                              value={wilayaEditFeeBureau}
+                              onChange={(e) => setWilayaEditFeeBureau(e.target.value)}
+                              placeholder="Bureau"
+                              className="w-20 bg-neutral-950 border border-neon-orange/40 focus:border-neon-orange/60 rounded px-2 py-1 text-white text-xs"
+                            />
+                          ) : (
+                            <span>{formatPrice(w.feeBureau)}</span>
                           )}
                         </td>
                         <td className="py-4 px-4 text-center">
@@ -2614,7 +2646,7 @@ export const AdminDashboard: React.FC = () => {
                                   SAVE
                                 </button>
                                 <button
-                                  onClick={() => setWilayaEditId(null)}
+                                  onClick={() => { setWilayaEditId(null); setWilayaEditFeeBureau(""); }}
                                   className="p-1.5 bg-neutral-800 text-neutral-400 hover:text-white rounded-lg text-[10px] font-bold cursor-pointer"
                                 >
                                   CANCEL
@@ -2625,11 +2657,12 @@ export const AdminDashboard: React.FC = () => {
                                 <button
                                   onClick={() => {
                                     setWilayaEditId(w.id);
-                                    setWilayaEditFee(w.fee.toString());
+                                    setWilayaEditFee(w.feeDomicile.toString());
+                                    setWilayaEditFeeBureau(w.feeBureau.toString());
                                   }}
                                   className="px-2.5 py-1.5 bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white rounded-lg text-[10px] font-bold cursor-pointer transition-colors"
                                 >
-                                  Edit Fee
+                                  Edit Fees
                                 </button>
                                 <button
                                   onClick={() => {

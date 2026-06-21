@@ -20,6 +20,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
   const [phoneNumber, setPhoneNumber] = useState("");
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderError, setOrderError] = useState("");
+  const [deliveryType, setDeliveryType] = useState<"domicile" | "bureau">("domicile");
 
   const isAr = language === "ar";
 
@@ -33,7 +34,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
   );
 
   const selectedWilaya = wilayaFees.find(w => w.id === selectedWilayaId) || wilayaFees[0];
-  const deliveryFee = selectedWilaya ? selectedWilaya.fee : 0;
+  const deliveryFee = selectedWilaya ? (deliveryType === "bureau" ? selectedWilaya.feeBureau : selectedWilaya.feeDomicile) : 0;
   
   const getSneakerDetails = (sneakerId: string) => {
     return sneakers.find((s) => s.id === sneakerId);
@@ -213,6 +214,35 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
           <label className={`block text-xs font-bold text-neutral-400 mb-2 uppercase tracking-wider ${isAr ? 'font-cairo' : 'font-outfit'}`}>
             {isAr ? "ولاية التوصيل:" : "DELIVERY DESTINATION:"}
           </label>
+
+          {/* Delivery Type Toggle */}
+          <div className="flex rounded-xl border border-neutral-800 overflow-hidden mb-3">
+            <button
+              type="button"
+              onClick={() => setDeliveryType("domicile")}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold transition-all cursor-pointer ${
+                deliveryType === "domicile"
+                  ? "bg-neon-lime/15 text-neon-lime border-r border-neon-lime/30"
+                  : "bg-neutral-950/80 text-neutral-500 border-r border-neutral-800 hover:text-white"
+              } ${isAr ? "font-cairo" : "font-outfit uppercase tracking-wider"}`}
+            >
+              🏠
+              <span>{isAr ? "إلى المنزل" : "À Domicile"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeliveryType("bureau")}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold transition-all cursor-pointer ${
+                deliveryType === "bureau"
+                  ? "bg-neon-orange/15 text-neon-orange"
+                  : "bg-neutral-950/80 text-neutral-500 hover:text-white"
+              } ${isAr ? "font-cairo" : "font-outfit uppercase tracking-wider"}`}
+            >
+              🏢
+              <span>{isAr ? "إلى المكتب" : "Au Bureau"}</span>
+            </button>
+          </div>
+
           <div className="relative group">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -251,7 +281,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
                       className={`w-full text-left px-4 py-2.5 text-sm hover:bg-neutral-800 transition-colors flex items-center justify-between ${selectedWilayaId === w.id ? 'bg-neon-lime/10 text-neon-lime' : 'text-white'}`}
                     >
                       <span className={isAr ? 'font-cairo' : 'font-outfit'}>{isAr ? w.nameAr : w.nameFr}</span>
-                      <span className="text-neutral-500 text-xs font-mono">+{formatPrice(w.fee)}</span>
+                      <span className="text-neutral-500 text-xs font-mono">+{formatPrice(deliveryType === "bureau" ? w.feeBureau : w.feeDomicile)}</span>
                     </button>
                   ))}
                   {filteredWilayas.length === 0 && (
