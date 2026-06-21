@@ -110,11 +110,7 @@ export const AdminDashboard: React.FC = () => {
   const allSizesList = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46];
   const [shoeSizes, setShoeSizes] = useState<number[]>([39, 40, 41, 42, 43, 44, 45]);
   
-  // Colorways states
-  const presetColors = ["Black", "White", "Neon Lime", "Electric Orange", "Red", "Grey", "Blue", "Gold", "Terracotta", "Multi"];
-  const [selectedColors, setSelectedColors] = useState<string[]>(["Black"]);
-  const [customColor, setCustomColor] = useState("");
-  
+
   // NEW Variants
   const [shoeVariantColors, setShoeVariantColors] = useState<SneakerColor[]>([]);
   const [showVariantGallery, setShowVariantGallery] = useState(false);
@@ -145,8 +141,6 @@ export const AdminDashboard: React.FC = () => {
   const [editHotDrop, setEditHotDrop] = useState(false);
   const [editNewArrival, setEditNewArrival] = useState(false);
   const [editSizes, setEditSizes] = useState<number[]>([]);
-  const [editColors, setEditColors] = useState<string[]>([]);
-  const [editCustomColor, setEditCustomColor] = useState("");
   const [editShoeVariantColors, setEditShoeVariantColors] = useState<SneakerColor[]>([]);
   const [editVariantNameFr, setEditVariantNameFr] = useState("");
   const [editVariantNameAr, setEditVariantNameAr] = useState("");
@@ -356,30 +350,6 @@ export const AdminDashboard: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  // Colorways
-  const toggleColorway = (color: string, isEdit = false) => {
-    const list = isEdit ? editColors : selectedColors;
-    const setter = isEdit ? setEditColors : setSelectedColors;
-    if (list.includes(color)) {
-      setter(list.filter(c => c !== color));
-    } else {
-      setter([...list, color]);
-    }
-  };
-
-  const addCustomColor = (isEdit = false) => {
-    const val = isEdit ? editCustomColor : customColor;
-    const list = isEdit ? editColors : selectedColors;
-    const setter = isEdit ? setEditColors : setSelectedColors;
-    const inputSetter = isEdit ? setEditCustomColor : setCustomColor;
-
-    if (val.trim()) {
-      if (!list.includes(val.trim())) {
-        setter([...list, val.trim()]);
-      }
-      inputSetter("");
-    }
-  };
 
   // Keyboard stock cell navigation
   const handleGridKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, shoeIndex: number, size: number) => {
@@ -475,7 +445,7 @@ export const AdminDashboard: React.FC = () => {
       image: shoeImage,
       sizes: shoeSizes,
       sizesStock: initialStock,
-      colorways: selectedColors.length > 0 ? selectedColors : ["Default"],
+      colorways: [],
       colors: shoeVariantColors,
       descFr: shoeDescFr,
       descAr: shoeDescAr,
@@ -494,7 +464,6 @@ export const AdminDashboard: React.FC = () => {
     setShoeHotDrop(false);
     setShoeNewArrival(false);
     setShoeSizes([39, 40, 41, 42, 43, 44, 45]);
-    setSelectedColors(["Black"]);
     setShoeVariantColors([]);
     setShoeImageError(false);
     setShoeFormSuccess(true);
@@ -515,7 +484,6 @@ export const AdminDashboard: React.FC = () => {
     setEditHotDrop(!!shoe.isHotDrop);
     setEditNewArrival(!!shoe.isNewArrival);
     setEditSizes(Array.isArray(shoe.sizes) ? shoe.sizes : [39, 40, 41, 42, 43, 44, 45]);
-    setEditColors(Array.isArray(shoe.colorways) ? shoe.colorways : ["Default"]);
     setEditShoeVariantColors(shoe.colors || []);
     setEditImageError(false);
     setEditShowGallery(false);
@@ -559,7 +527,7 @@ export const AdminDashboard: React.FC = () => {
       image: editImage,
       sizes: editSizes,
       sizesStock: updatedStock,
-      colorways: editColors.length > 0 ? editColors : ["Default"],
+      colorways: [],
       colors: editShoeVariantColors,
       descFr: editDescFr,
       descAr: editDescAr,
@@ -1310,45 +1278,6 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Colorways */}
-                <div>
-                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">Couleurs disponibles</label>
-                  <div className="flex flex-wrap gap-1.5 mb-2.5">
-                    {presetColors.map((color) => {
-                      const selected = selectedColors.includes(color);
-                      return (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => toggleColorway(color, false)}
-                          className={`px-3 py-1.5 text-[10px] font-bold rounded-lg border transition-all cursor-pointer font-outfit ${
-                            selected
-                              ? "bg-neon-lime/10 text-neon-lime border-neon-lime/40"
-                              : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:border-neutral-700 hover:text-white"
-                          }`}
-                        >
-                          {color}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={customColor}
-                      onChange={(e) => setCustomColor(e.target.value)}
-                      placeholder="Type custom color..."
-                      className="flex-1 bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-neon-lime/50 font-outfit"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => addCustomColor(false)}
-                      className="px-3.5 py-1.5 bg-neutral-800 text-white rounded-lg text-xs font-bold font-outfit border border-neutral-700 hover:bg-neutral-700 cursor-pointer"
-                    >
-                      ADD
-                    </button>
-                  </div>
-                </div>
 
                 {/* ══════ COLOR VARIANTS (Image per Color) ══════ */}
                 <div>
@@ -3061,45 +2990,6 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Colorways */}
-              <div>
-                <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 font-outfit">{isAr ? "خيارات الألوان" : "Couleurs disponibles"}</label>
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {presetColors.map((color) => {
-                    const selected = editColors.includes(color);
-                    return (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => toggleColorway(color, true)}
-                        className={`px-3 py-1.5 text-[10px] font-bold rounded-lg border transition-all cursor-pointer font-outfit ${
-                          selected
-                            ? "bg-neon-lime/10 text-neon-lime border-neon-lime/40"
-                            : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:border-neutral-700 hover:text-white"
-                        }`}
-                      >
-                        {color}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={editCustomColor}
-                    onChange={(e) => setEditCustomColor(e.target.value)}
-                    placeholder="Add custom color..."
-                    className="flex-1 bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-neon-lime/50 font-outfit"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => addCustomColor(true)}
-                    className="px-3.5 py-1.5 bg-neutral-800 text-white rounded-lg text-xs font-bold font-outfit border border-neutral-700 hover:bg-neutral-700 cursor-pointer"
-                  >
-                    ADD
-                  </button>
-                </div>
-              </div>
 
               {/* ══════ COLOR VARIANTS (Edit Modal) ══════ */}
               <div>
