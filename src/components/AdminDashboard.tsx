@@ -158,7 +158,6 @@ export const AdminDashboard: React.FC = () => {
   const [inventoryFilter, setInventoryFilter] = useState<"all" | "low" | "high">("all");
 
 
-  const [editShoeVariantColors, setEditShoeVariantColors] = useState<SneakerColor[]>([]);
   const [editVariantNameFr, setEditVariantNameFr] = useState("");
   const [editVariantNameAr, setEditVariantNameAr] = useState("");
   const [editVariantHex, setEditVariantHex] = useState("#FFFFFF");
