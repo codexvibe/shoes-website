@@ -101,12 +101,12 @@ export const Hero: React.FC = () => {
             {/* Visual Ring Backdrop */}
             <div className="absolute w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] rounded-full border border-neutral-800/40 flex items-center justify-center animate-[spin_20s_linear_infinite]">
               <div className="absolute w-[220px] h-[220px] sm:w-[320px] sm:h-[320px] rounded-full border border-dashed border-neutral-800/80"></div>
-              <div className="absolute w-4 h-4 rounded-full bg-neon-lime top-0"></div>
-              <div className="absolute w-4 h-4 rounded-full bg-neon-orange bottom-0"></div>
+              <div className="absolute w-4 h-4 rounded-full bg-blue-500 top-0 shadow-[0_0_15px_rgba(59,130,246,0.8)]"></div>
+              <div className="absolute w-4 h-4 rounded-full bg-white bottom-0 shadow-[0_0_15px_rgba(255,255,255,0.8)]"></div>
             </div>
 
             {/* Glowing Accent Hexagon Background */}
-            <div className="absolute w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-tr from-neon-lime/20 to-neon-orange/20 rounded-[40px] rotate-12 blur-2xl opacity-60"></div>
+            <div className="absolute w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-tr from-blue-500/30 to-white/20 rounded-[40px] rotate-12 blur-2xl opacity-60"></div>
 
             {/* Hero Shoes Image */}
             <div className="relative z-10 w-[300px] h-[300px] sm:w-[440px] sm:h-[440px] transition-all duration-500 hover:rotate-3 hover:scale-105 flex items-center justify-center">
@@ -114,7 +114,7 @@ export const Hero: React.FC = () => {
               <img
                 src={heroShoe || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=700"}
                 alt="Featured Sneakers"
-                className="object-contain max-w-full max-h-full drop-shadow-[0_25px_35px_rgba(132,204,22,0.35)] select-none pointer-events-none"
+                className="object-contain max-w-full max-h-full drop-shadow-[0_25px_35px_rgba(59,130,246,0.4)] select-none pointer-events-none"
               />
 
               {/* Float Floating Badges */}
