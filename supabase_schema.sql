@@ -2,6 +2,15 @@
 -- Supabase Database Schema for Sneakers Store
 -- HARD RESET VERSION (Drops old tables and recreates them)
 -- ==========================================
+-- SHOWCASE E-COMMERCE SUPABASE SCHEMA (V2)
+-- ==========================================
+-- NOTE FOR UPGRADES: If you already have data and just want to add the dual delivery fees (Domicile/Bureau), 
+-- do NOT run the DROP TABLE commands. Instead, run only these 4 lines:
+--   ALTER TABLE wilaya_fees ADD COLUMN IF NOT EXISTS fee_domicile INTEGER NOT NULL DEFAULT 0;
+--   ALTER TABLE wilaya_fees ADD COLUMN IF NOT EXISTS fee_bureau INTEGER NOT NULL DEFAULT 0;
+--   UPDATE wilaya_fees SET fee_domicile = fee, fee_bureau = GREATEST(fee - 200, 200) WHERE fee_domicile = 0;
+--   NOTIFY pgrst, 'reload schema';
+-- ==========================================
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
